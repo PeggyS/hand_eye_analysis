@@ -2586,10 +2586,8 @@ end
 % axes limits
 
 % video scrub line
-if isa(handles.video_reader,'VideoReader')
+if isfield(handles, 'scrub_line_eye')
 	state.scrub_line_eye.XData = handles.scrub_line_eye.XData;
-else
-	state.scrub_line_eye.XData = [];
 end
 
 % saccades
@@ -2670,6 +2668,17 @@ if isfield(handles, 'target_pos')
 	state.target_pos = handles.target_pos;
 end
 
+% mouse click data
+if isfield(handles, 'click_data_tbl')
+	state.click_data_tbl = handles.click_data_tbl;
+end
+if isfield(handles, 'click_filename')
+	state.click_filename = handles.click_filename;
+end
+if isfield(handles, 'im_data')
+	state.im_data = handles.im_data;
+end
+
 save(fullfile(pathname,filename), 'state')
 return
 
@@ -2738,8 +2747,9 @@ handles.eye_data = state.eye_data;
 if isfield(state, 'apdm_data')
 	handles.apdm_data = state.apdm_data;
 end
-
-handles.restore_data.scrub_line_eye.XData = state.scrub_line_eye.XData;
+if isfield(state, 'scrub_line_eye')
+	handles.restore_data.scrub_line_eye.XData = state.scrub_line_eye.XData;
+end
 handles.restore_data.sacc_disabled = state.sacc_disabled;
 handles.restore_data.sacc_labels = state.sacc_labels;
 handles.restore_data.blinks = state.blinks;
@@ -2755,6 +2765,15 @@ if isfield(state, 'target_pos')
 	handles.restore_data.target_pos = state.target_pos;
 end
 
+if isfield(state, 'click_data_tbl')
+	handles.restore_data.click_data_tbl = state.click_data_tbl;
+end
+if isfield(state, 'click_filename')
+	handles.restore_data.click_filename = state.click_filename;
+end
+if isfield(state, 'im_data')
+	handles.restore_data.im_data = state.im_data;
+end
 return
 
 function handles = restore_graphic_handles(handles)
@@ -2863,6 +2882,29 @@ if isfield(handles.restore_data, 'target_data')
 	if ~handles.tbTargetV.Value
 		set(handles.line_target_y, 'Visible', 'off')
 	end
+end
+
+% click data
+if isfield(handles.restore_data, 'click_data_tbl')
+	handles.click_filename = handles.restore_data.click_filename;
+	handles.click_data_tbl = handles.restore_data.click_data_tbl;
+	handles.im_data = handles.restore_data.im_data;
+	
+	imshow(handles.im_data, 'Parent', handles.axes_video, 'XData', [0 1024], 'YData', [0 768] )
+
+	% eye position overlay on pciture
+	handles.axes_video_overlay.Color = 'none';
+	handles.axes_video_overlay.Visible = 'off';
+	xmin_max = handles.eye_data.h_pix_z / 30;
+	ymin_max = handles.eye_data.v_pix_z / 30;
+	handles.axes_video_overlay.XLim = [-xmin_max xmin_max];
+	handles.axes_video_overlay.YLim = [-ymin_max ymin_max];
+	display_eye_pos_overlay(handles, 1/handles.eye_data.samp_freq)
+	% scrub line
+	handles = add_scrub_lines(handles, handles.restore_data.scrub_line_eye.XData(1));
+
+	% mouse clicks
+	handles = display_mouse_clicks(handles);
 end
 return
 
