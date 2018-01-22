@@ -22,7 +22,7 @@ function varargout = saccade_gui(varargin)
 
 % Edit the above text to modify the response to help saccade_gui
 
-% Last Modified by GUIDE v2.5 22-Jun-2017 20:17:04
+% Last Modified by GUIDE v2.5 21-Jan-2018 18:42:51
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 0;
@@ -317,3 +317,141 @@ else
    hideSaccades(handles, 'left','vertical', 'findsacc');
 end
 return
+
+
+
+function edAccelThresh_Callback(hObject, eventdata, handles)
+% hObject    handle to edAccelThresh (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edAccelThresh as text
+%        str2double(get(hObject,'String')) returns contents of edAccelThresh as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edAccelThresh_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edAccelThresh (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function edVelThresh_Callback(hObject, eventdata, handles)
+% hObject    handle to edVelThresh (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edVelThresh as text
+%        str2double(get(hObject,'String')) returns contents of edVelThresh as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edVelThresh_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edVelThresh (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function edAccelStop_Callback(hObject, eventdata, handles)
+% hObject    handle to edAccelStop (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edAccelStop as text
+%        str2double(get(hObject,'String')) returns contents of edAccelStop as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edAccelStop_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edAccelStop (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function edVelStop_Callback(hObject, eventdata, handles)
+% hObject    handle to edVelStop (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edVelStop as text
+%        str2double(get(hObject,'String')) returns contents of edVelStop as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edVelStop_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edVelStop (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function edGapFP_Callback(hObject, eventdata, handles)
+% hObject    handle to edGapFP (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edGapFP as text
+%        str2double(get(hObject,'String')) returns contents of edGapFP as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edGapFP_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edGapFP (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function edGapSP_Callback(hObject, eventdata, handles)
+% hObject    handle to edGapSP (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edGapSP as text
+%        str2double(get(hObject,'String')) returns contents of edGapSP as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edGapSP_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edGapSP (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
