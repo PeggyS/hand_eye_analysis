@@ -138,16 +138,17 @@ switch sacc_source
 	case 'findsacc'
         % get parameter values
         thresh_a = str2double(h.edAccelThresh.String);
-        acc_stop = 100;
-        thresh_v = 20;
-        vel_stop = 10;
-        gap_fp = 10;
-        gap_sp = 10;
-        vel_or_acc = 1;
-        extend = 5;
+        acc_stop = str2double(h.edAccelStop.String);
+        thresh_v = str2double(h.edVelThresh.String);
+        vel_stop = str2double(h.edVelStop.String);
+        gap_fp = str2double(h.edGapFP.String);
+        gap_sp = str2double(h.edGapSP.String);
+        vel_or_acc = h.popmenuAccelVel.Value; % 1=Accel, 2=Vel, 3=Both
+        extend = str2double(h.edExtend.String);
         dataName = 'unknown';
         strict_strip = 1;
-        [ptlist, pvlist] = findsaccs(h.eye_data.(eye_str).data, thresh_a, thresh_v, acc_stop, vel_stop, gap_fp, gap_sp, vel_or_acc, extend, dataName, strict_strip);
+        [ptlist, pvlist] = findsaccs(h.eye_data.(eye_str).data, thresh_a, thresh_v, acc_stop, ...
+			vel_stop, gap_fp, gap_sp, vel_or_acc, extend, dataName, strict_strip);
         saccstart = evalin('base','saccstart');
         saccstop = evalin('base','saccstop');
         sacc_data.sacclist.start = saccstart; % index values into data
@@ -523,6 +524,6 @@ end
 % reset togglebuttons
 handles.tbSaccadesRightHorizFindSacc.Value = 0;
 handles.tbSaccadesRightVertFindSacc.Value = 0;
-handles.tbSaccadesLefttHorizFindSacc.Value = 0;
+handles.tbSaccadesLeftHorizFindSacc.Value = 0;
 handles.tbSaccadesLeftVertFindSacc.Value = 0;
 return
