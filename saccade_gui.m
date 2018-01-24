@@ -22,7 +22,7 @@ function varargout = saccade_gui(varargin)
 
 % Edit the above text to modify the response to help saccade_gui
 
-% Last Modified by GUIDE v2.5 22-Jan-2018 19:39:42
+% Last Modified by GUIDE v2.5 23-Jan-2018 19:08:42
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 0;
@@ -151,20 +151,24 @@ switch sacc_source
 			vel_stop, gap_fp, gap_sp, vel_or_acc, extend, dataName, strict_strip);
         saccstart = evalin('base','saccstart');
         saccstop = evalin('base','saccstop');
-        sacc_data.sacclist.start = saccstart; % index values into data
-        sacc_data.sacclist.end = saccstop;
+        h.findsacc_data.(eye_str).start = saccstart; % index values into data
+        h.findsacc_data.(eye_str).end = saccstop;
         
+		% save new figure handles
+		guidata(h.figure1, h)
+		
         start_ms = 0;
         % convert index values to time in ms
-        sacc_data.sacclist.start = (saccstart-1) / samp_freq * 1000;
-        sacc_data.sacclist.end = (saccstop-1) / samp_freq * 1000;
+        sacclist.start = (saccstart-1) / samp_freq * 1000;
+        sacclist.end = (saccstop-1) / samp_freq * 1000;
 		
 		sacc_marker = '*';
+		
 end
 		
-for sacc_num = 1:length(sacc_data.sacclist.start)
+for sacc_num = 1:length(sacclist.start)
    % saccade begin
-   time1 = (sacc_data.sacclist.start(sacc_num) - start_ms)/1000; %in seconds
+   time1 = (sacclist.start(sacc_num) - start_ms)/1000; %in seconds
    y = h.eye_data.(eye_str).data(round(time1*samp_freq));
    h_beg_line = line( time1, y, 'Tag', ['saccade_' eye_str '_' sacc_source '_#' num2str(sacc_num) '_begin'], ...
       'Color', beg_line_color, 'Marker', sacc_marker, 'MarkerSize', 10);
@@ -174,7 +178,7 @@ for sacc_num = 1:length(sacc_data.sacclist.start)
       'Tag', ['menu_saccade_' eye_str '_' sacc_source '_#' num2str(sacc_num) '_begin']);
    
    % saccade end
-   time2 = (sacc_data.sacclist.end(sacc_num) - start_ms)/1000;
+   time2 = (sacclist.end(sacc_num) - start_ms)/1000;
    y = h.eye_data.(eye_str).data(round(time2*samp_freq));
    line( time2, y, 'Tag', ['saccade_' eye_str '_' sacc_source '_#' num2str(sacc_num) '_end'], ...
       'Color', end_line_color, 'Marker', sacc_marker, 'MarkerSize', 10);
@@ -526,4 +530,29 @@ handles.tbSaccadesRightHorizFindSacc.Value = 0;
 handles.tbSaccadesRightVertFindSacc.Value = 0;
 handles.tbSaccadesLeftHorizFindSacc.Value = 0;
 handles.tbSaccadesLeftVertFindSacc.Value = 0;
+
+% remove data saved in handles
+if isfield(handles, 'findsacc_data')
+	handles = rmfield(handles, 'findsacc_data');
+	guidata(handles.figure1, handles)
+end
+
+return
+
+
+% --- Executes on button press in pbSaveFindSaccs.
+function pbSaveFindSaccs_Callback(hObject, eventdata, handles)
+% hObject    handle to pbSaveFindSaccs (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+fname = strrep(handles.bin_filename, '.bin', '_findsaccs.mat');
+[filename, pathname] = uiputfile(fname, 'Save saccade data file');
+if isequal(filename,0) || isequal(pathname,0)
+	disp('User pressed cancel')
+else
+	disp(['Saving ', fullfile(pathname, filename)])
+	findsacc_data = handles.findsacc_data;
+	save(fullfile(pathname, filename), 'findsacc_data')
+end
 return
