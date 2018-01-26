@@ -22,7 +22,7 @@ function varargout = saccade_gui(varargin)
 
 % Edit the above text to modify the response to help saccade_gui
 
-% Last Modified by GUIDE v2.5 23-Jan-2018 19:08:42
+% Last Modified by GUIDE v2.5 26-Jan-2018 18:32:58
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 0;
@@ -553,6 +553,33 @@ if isequal(filename,0) || isequal(pathname,0)
 else
 	disp(['Saving ', fullfile(pathname, filename)])
 	findsacc_data = handles.findsacc_data;
-	save(fullfile(pathname, filename), 'findsacc_data')
+	findsacc_params.accelThresh = handles.edAccelThresh.String;
+	findsacc_params.velThresh = handles.edVelThresh.String;
+	findsacc_params.accelStop = handles.edAccelStop.String;
+	findsacc_params.velStop = handles.edVelStop.String;
+	findsacc_params.gapFP = handles.edGapFP.String;
+	findsacc_params.gapSP = handles.edGapSP.String;
+	findsacc_params.accelVel = handles.popmenuAccelVel.Value;
+	findsacc_params.extend = handles.edExtend.String;
+	save(fullfile(pathname, filename), 'findsacc_data', 'findsacc_params')
 end
+return
+
+
+% --- Executes on button press in pbDefaultParams.
+function pbDefaultParams_Callback(hObject, eventdata, handles)
+% hObject    handle to pbDefaultParams (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+handles.edAccelThresh.String = '800';
+handles.edVelThresh.String = '20';
+handles.edAccelStop.String = '100';
+handles.edVelStop.String = '10';
+handles.edGapFP.String = '10';
+handles.edGapSP.String = '10';
+handles.popmenuAccelVel.Value = 1;
+handles.edExtend.String = '5';
+
+% Update handles structure
+guidata(handles.figure1, handles);
 return
