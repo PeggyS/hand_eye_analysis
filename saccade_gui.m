@@ -52,7 +52,7 @@ function saccade_gui_OpeningFcn(hObject, eventdata, handles, varargin)
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to saccade_gui (see VARARGIN)
 
-% Choose default command line output for hand_eye_gui
+% Choose default command line output for saccade_gui
 handles.output = hObject;
 
 % read in data filesdisp('Choose eye data *.bin file')
