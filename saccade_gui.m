@@ -22,7 +22,7 @@ function varargout = saccade_gui(varargin)
 
 % Edit the above text to modify the response to help saccade_gui
 
-% Last Modified by GUIDE v2.5 26-Jan-2018 18:32:58
+% Last Modified by GUIDE v2.5 27-Jan-2018 18:17:43
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 0;
@@ -68,7 +68,7 @@ end
 	handles.bin_filename = fullfile(pnSave, fnSave); %'/Users/peggy/Desktop/pegtas2/pegtas2_1.bin'; % must be full path for rd_cli to work
 	handles.eye_data = rd(handles.bin_filename);
 
-handles.txtFilename.String = handles.bin_filename;
+handles.txtFileName.String = handles.bin_filename;
 
 samp_freq = handles.eye_data.samp_freq;
 numsamps = handles.eye_data.numsamps;
@@ -133,7 +133,7 @@ samp_freq = h.eye_data.samp_freq;
 
 switch sacc_source
 	case 'eyelink'
-		sacc_data = h.eye_data.(eye_str).saccades; % eyelink data
+		sacclist = h.eye_data.(eye_str).saccades.sacclist; % eyelink data
 		sacc_marker = 'o';
 	case 'findsacc'
         % get parameter values
@@ -151,19 +151,56 @@ switch sacc_source
 			vel_stop, gap_fp, gap_sp, vel_or_acc, extend, dataName, strict_strip);
         saccstart = evalin('base','saccstart');
         saccstop = evalin('base','saccstop');
-        h.findsacc_data.(eye_str).start = saccstart; % index values into data
-        h.findsacc_data.(eye_str).end = saccstop;
-        
+             
+		
+        start_ms = 1/samp_freq;
+        % convert index values to time in ms
+        sacclist.start = saccstart / samp_freq * 1000;
+        sacclist.end = saccstop / samp_freq * 1000;
+		
+		h.findsacc_data.(eye_str).start_time = start_ms;
+		h.findsacc_data.(eye_str).start = sacclist.start;
+        h.findsacc_data.(eye_str).end = sacclist.end;
 		% save new figure handles
 		guidata(h.figure1, h)
 		
-        start_ms = 0;
-        % convert index values to time in ms
-        sacclist.start = (saccstart-1) / samp_freq * 1000;
-        sacclist.end = (saccstop-1) / samp_freq * 1000;
-		
 		sacc_marker = '*';
 		
+	case 'engbert'
+		% get parameters
+		vel_factor = str2double(h.edVelFactor.String);
+		min_num_samples = str2double(h.edMinSamples.String);
+		
+		h_str = strrep(eye_str, 'v', 'h');
+		v_str = strrep(eye_str, 'h', 'v');
+		% eye data converted to angular minutes of arc (from degrees)
+		x = [h.eye_data.(h_str).data h.eye_data.(v_str).data] * 60;
+		
+		% velocity using function from Asef
+		v = vecvel(x, samp_freq, 2);
+		
+		% compute saccades using function from Engbert
+		sac = microsacc(x, v, vel_factor, min_num_samples);
+		%   sac(1:num,1)   onset of saccade
+		%   sac(1:num,2)   end of saccade
+		%   sac(1:num,3)   peak velocity of saccade
+		%   sac(1:num,4)   saccade amplitude
+		%   sac(1:num,5)   angular orientation 
+		%   sac(1:num,6)   horizontal component (delta x)
+		%   sac(1:num,7)   vertical component (delta y)
+		
+		% save saccades in handles
+		start_ms = 1/samp_freq;
+		sacclist.start = sac(:,1) / samp_freq * 1000; % time in ms
+        sacclist.end = sac(:,2) / samp_freq * 1000;
+		
+		h.engbertsacc_data.(eye_str).start_time = start_ms;
+		h.engbertsacc_data.(eye_str).start = sacclist.start;
+        h.engbertsacc_data.(eye_str).end = sacclist.end;
+		% save new figure handles
+		guidata(h.figure1, h)
+		
+		sacc_marker = 'd';
 end
 		
 for sacc_num = 1:length(sacclist.start)
@@ -225,6 +262,7 @@ function tbSaccadesRightHoriz_Callback(hObject, eventdata, handles)
 
 if get(hObject,'Value') % returns toggle state of tbSaccades
    showSaccades(handles, 'right','horizontal', 'eyelink');
+   hObject.UserData = 'eyelink';
 else
    hideSaccades(handles, 'right','horizontal', 'eyelink');
 end
@@ -238,6 +276,7 @@ function tbSaccadesRightVert_Callback(hObject, eventdata, handles)
 
 if get(hObject,'Value') % returns toggle state of tbFixations
    showSaccades(handles, 'right','vertical', 'eyelink');
+   hObject.UserData = 'eyelink';
 else
    hideSaccades(handles, 'right','vertical', 'eyelink');
 end
@@ -252,6 +291,7 @@ function tbSaccadesLeftHoriz_Callback(hObject, eventdata, handles)
 
 if get(hObject,'Value') % returns toggle state of tbFixations
    showSaccades(handles, 'left', 'horizontal', 'eyelink');
+   hObject.UserData = 'eyelink';
 else
    hideSaccades(handles, 'left', 'horizontal', 'eyelink');
 end
@@ -265,6 +305,7 @@ function tbSaccadesLeftVert_Callback(hObject, eventdata, handles)
 
 if get(hObject,'Value') % returns toggle state of tbFixations
    showSaccades(handles, 'left', 'vertical', 'eyelink');
+   hObject.UserData = 'eyelink';
 else
    hideSaccades(handles, 'left', 'vertical', 'eyelink');
 end
@@ -276,8 +317,9 @@ function tbSaccadesRightHorizFindSacc_Callback(hObject, eventdata, handles)
 % hObject    handle to tbSaccadesRightHorizFindSacc (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-if get(hObject,'Value') % returns toggle state of tbFixations
+if get(hObject,'Value') 
    showSaccades(handles, 'right','horizontal', 'findsacc');
+   hObject.UserData = 'findsacc';
 else
    hideSaccades(handles, 'right','horizontal', 'findsacc');
 end
@@ -292,6 +334,7 @@ function tbSaccadesLeftHorizFindSacc_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 if get(hObject,'Value') % returns toggle state of tbFixations
    showSaccades(handles, 'left','horizontal', 'findsacc');
+   hObject.UserData = 'findsacc';
 else
    hideSaccades(handles, 'left','horizontal', 'findsacc');
 end
@@ -305,6 +348,7 @@ function tbSaccadesRightVertFindSacc_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 if get(hObject,'Value') % returns toggle state of tbFixations
    showSaccades(handles, 'right','vertical', 'findsacc');
+   hObject.UserData = 'findsacc';
 else
    hideSaccades(handles, 'right','vertical', 'findsacc');
 end
@@ -318,6 +362,7 @@ function tbSaccadesLeftVertFindSacc_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 if get(hObject,'Value') % returns toggle state of tbFixations
    showSaccades(handles, 'left','vertical', 'findsacc');
+   hObject.UserData = 'findsacc';
 else
    hideSaccades(handles, 'left','vertical', 'findsacc');
 end
@@ -530,6 +575,11 @@ handles.tbSaccadesRightHorizFindSacc.Value = 0;
 handles.tbSaccadesRightVertFindSacc.Value = 0;
 handles.tbSaccadesLeftHorizFindSacc.Value = 0;
 handles.tbSaccadesLeftVertFindSacc.Value = 0;
+% reset userdata
+handles.tbSaccadesRightHorizFindSacc.UserData = [];
+handles.tbSaccadesRightVertFindSacc.UserData = [];
+handles.tbSaccadesLeftHorizFindSacc.UserData = [];
+handles.tbSaccadesLeftVertFindSacc.UserData = [];
 
 % remove data saved in handles
 if isfield(handles, 'findsacc_data')
@@ -582,4 +632,289 @@ handles.edExtend.String = '5';
 
 % Update handles structure
 guidata(handles.figure1, handles);
+return
+
+
+% --- Executes on button press in tbSaccadesRightHorizEngbert.
+function tbSaccadesRightHorizEngbert_Callback(hObject, eventdata, handles)
+% hObject    handle to tbSaccadesRightHorizEngbert (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+if get(hObject,'Value') 
+   showSaccades(handles, 'right','horizontal', 'engbert');
+   hObject.UserData = 'engbert';
+else
+   hideSaccades(handles, 'right','horizontal', 'engbert');
+end
+return
+
+% --- Executes on button press in tbSaccadesLeftHorizEngbert.
+function tbSaccadesLeftHorizEngbert_Callback(hObject, eventdata, handles)
+% hObject    handle to tbSaccadesLeftHorizEngbert (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+if get(hObject,'Value') 
+   showSaccades(handles, 'left','horizontal', 'engbert');
+   hObject.UserData = 'engbert';
+else
+   hideSaccades(handles, 'left','horizontal', 'engbert');
+end
+return
+
+% --- Executes on button press in tbSaccadesRightVertEngbert.
+function tbSaccadesRightVertEngbert_Callback(hObject, eventdata, handles)
+% hObject    handle to tbSaccadesRightVertEngbert (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+if get(hObject,'Value') 
+   showSaccades(handles, 'right','vertical', 'engbert');
+   hObject.UserData = 'engbert';
+else
+   hideSaccades(handles, 'right','vertical', 'engbert');
+end
+return
+
+% --- Executes on button press in tbSaccadesLeftVertEngbert.
+function tbSaccadesLeftVertEngbert_Callback(hObject, eventdata, handles)
+% hObject    handle to tbSaccadesLeftVertEngbert (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+if get(hObject,'Value') 
+   showSaccades(handles, 'left','vertical', 'engbert');
+   hObject.UserData = 'engbert';
+else
+   hideSaccades(handles, 'left','vertical', 'engbert');
+end
+return
+
+% --- Executes on button press in pbClearSaccsEngbert.
+function pbClearSaccsEngbert_Callback(hObject, eventdata, handles)
+% hObject    handle to pbClearSaccsEngbert (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+% clear the saccades generated by findsaccs
+eye_str_list = {'rh', 'lh', 'rv', 'lv'};
+for e_cnt = 1:length(eye_str_list)
+	eye_str = eye_str_list{e_cnt};
+	tag_search_str = ['^saccade_' eye_str '_engbert.*'];
+	line_list = findobj(handles.figure1,'-regexp', 'Tag', tag_search_str);
+	if ~isempty(line_list)
+		delete(line_list)
+	end
+end
+
+% reset togglebuttons
+handles.tbSaccadesRightHorizEngbert.Value = 0;
+handles.tbSaccadesRightVertEngbert.Value = 0;
+handles.tbSaccadesLeftHorizEngbert.Value = 0;
+handles.tbSaccadesLeftVertEngbert.Value = 0;
+% and user data
+handles.tbSaccadesRightHorizEngbert.UserData = [];
+handles.tbSaccadesRightVertEngbert.UserData = [];
+handles.tbSaccadesLeftHorizEngbert.UserData = [];
+handles.tbSaccadesLeftVertEngbert.UserData = [];
+
+% remove data saved in handles
+if isfield(handles, 'engbertsacc_data')
+	handles = rmfield(handles, 'engbertsacc_data');
+	guidata(handles.figure1, handles)
+end
+
+return
+
+
+
+% --- Executes on button press in pbDefaultParamsEngbert.
+function pbDefaultParamsEngbert_Callback(hObject, eventdata, handles)
+% hObject    handle to pbDefaultParamsEngbert (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+handles.edVelFactor.String = '6';
+handles.edMinSamples.String = '3';
+% Update handles structure
+guidata(handles.figure1, handles);
+return
+
+function edVelFactor_Callback(hObject, eventdata, handles)
+% hObject    handle to edVelFactor (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edVelFactor as text
+%        str2double(get(hObject,'String')) returns contents of edVelFactor as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edVelFactor_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edVelFactor (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function edMinSamples_Callback(hObject, eventdata, handles)
+% hObject    handle to edMinSamples (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edMinSamples as text
+%        str2double(get(hObject,'String')) returns contents of edMinSamples as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edMinSamples_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edMinSamples (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in pbSaveEngbert.
+function pbSaveEngbert_Callback(hObject, eventdata, handles)
+% hObject    handle to pbSaveEngbert (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+fname = strrep(handles.bin_filename, '.bin', '_engbert.mat');
+[filename, pathname] = uiputfile(fname, 'Save Engbert saccade data file');
+if isequal(filename,0) || isequal(pathname,0)
+	disp('User pressed cancel')
+else
+	disp(['Saving ', fullfile(pathname, filename)])
+	engbert_data = handles.engbertsacc_data;
+	engbert_params.velFactor = handles.edVelFactor.String;
+	engbert_params.minSamples = handles.edMinSamples.String;
+	
+	save(fullfile(pathname, filename), 'engbert_data', 'engbert_params')
+end
+return
+
+
+% --- Executes on button press in tbDataRightHoriz.
+function tbDataRightHoriz_Callback(hObject, eventdata, handles)
+% hObject    handle to tbDataRightHoriz (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+% data & saccade lines
+line_list = findobj(handles.figure1,'-regexp', 'Tag', '^.*rh.*');
+tb_list = findobj(handles.figure1, '-regexp', 'Tag', 'tb.*RightHoriz.*');
+
+visible = get(hObject,'Value');
+if visible
+	for tb_cnt = 1:length(tb_list)
+		data_line = findobj(line_list, '-regexp', 'Tag', 'line_.*');
+		set(data_line, 'Visible', 'on')
+		% if the togglebutton indicates that there is saccade lines to
+		% display - userData contains the saccade type (eyelink, findsacc,
+		% engbert)
+		if ~isempty(tb_list(tb_cnt).UserData)
+			set(tb_list(tb_cnt), 'Value', 1)
+			tb_sacc_type_line_list = findobj(line_list,'-regexp', 'Tag', ['^.*' tb_list(tb_cnt).UserData '.*']);
+			set(tb_sacc_type_line_list, 'Visible', 'on')
+		end
+	end
+else
+	set(line_list, 'Visible', 'off')
+	set(tb_list, 'Value', 0)
+end
+
+return
+
+
+% --- Executes on button press in tbDataLeftHoriz.
+function tbDataLeftHoriz_Callback(hObject, eventdata, handles)
+% hObject    handle to tbDataLeftHoriz (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+% data & saccade lines
+line_list = findobj(handles.figure1,'-regexp', 'Tag', '^.*lh.*');
+tb_list = findobj(handles.figure1, '-regexp', 'Tag', 'tb.*LeftHoriz.*');
+
+visible = get(hObject,'Value');
+if visible
+	for tb_cnt = 1:length(tb_list)
+		data_line = findobj(line_list, '-regexp', 'Tag', 'line_.*');
+		set(data_line, 'Visible', 'on')
+		% if the togglebutton indicates that there is saccade lines to
+		% display - userData contains the saccade type (eyelink, findsacc,
+		% engbert)
+		if ~isempty(tb_list(tb_cnt).UserData)
+			set(tb_list(tb_cnt), 'Value', 1)
+			tb_sacc_type_line_list = findobj(line_list,'-regexp', 'Tag', ['^.*' tb_list(tb_cnt).UserData '.*']);
+			set(tb_sacc_type_line_list, 'Visible', 'on')
+		end
+	end
+else
+	set(line_list, 'Visible', 'off')
+	set(tb_list, 'Value', 0)
+end
+
+return
+% --- Executes on button press in tbDataRightVert.
+function tbDataRightVert_Callback(hObject, eventdata, handles)
+% hObject    handle to tbDataRightVert (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+% data & saccade lines
+line_list = findobj(handles.figure1,'-regexp', 'Tag', '^.*rv.*');
+tb_list = findobj(handles.figure1, '-regexp', 'Tag', 'tb.*RightVert.*');
+
+visible = get(hObject,'Value');
+if visible
+	for tb_cnt = 1:length(tb_list)
+		data_line = findobj(line_list, '-regexp', 'Tag', 'line_.*');
+		set(data_line, 'Visible', 'on')
+		% if the togglebutton indicates that there is saccade lines to
+		% display - userData contains the saccade type (eyelink, findsacc,
+		% engbert)
+		if ~isempty(tb_list(tb_cnt).UserData)
+			set(tb_list(tb_cnt), 'Value', 1)
+			tb_sacc_type_line_list = findobj(line_list,'-regexp', 'Tag', ['^.*' tb_list(tb_cnt).UserData '.*']);
+			set(tb_sacc_type_line_list, 'Visible', 'on')
+		end
+	end
+else
+	set(line_list, 'Visible', 'off')
+	set(tb_list, 'Value', 0)
+end
+
+return
+% --- Executes on button press in tbDataLeftVert.
+function tbDataLeftVert_Callback(hObject, eventdata, handles)
+% hObject    handle to tbDataLeftVert (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+% data & saccade lines
+line_list = findobj(handles.figure1,'-regexp', 'Tag', '^.*lv.*');
+tb_list = findobj(handles.figure1, '-regexp', 'Tag', 'tb.*LeftVert.*');
+
+visible = get(hObject,'Value');
+if visible
+	for tb_cnt = 1:length(tb_list)
+		data_line = findobj(line_list, '-regexp', 'Tag', 'line_.*');
+		set(data_line, 'Visible', 'on')
+		% if the togglebutton indicates that there is saccade lines to
+		% display - userData contains the saccade type (eyelink, findsacc,
+		% engbert)
+		if ~isempty(tb_list(tb_cnt).UserData)
+			set(tb_list(tb_cnt), 'Value', 1)
+			tb_sacc_type_line_list = findobj(line_list,'-regexp', 'Tag', ['^.*' tb_list(tb_cnt).UserData '.*']);
+			set(tb_sacc_type_line_list, 'Visible', 'on')
+		end
+	end
+else
+	set(line_list, 'Visible', 'off')
+	set(tb_list, 'Value', 0)
+end
+
 return

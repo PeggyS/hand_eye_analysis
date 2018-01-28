@@ -264,6 +264,8 @@ switch choice_num
 		% remove video axes
 		delete(handles.axes_video_overlay)
 		delete(handles.axes_video)
+		% make eye data axes bigger
+		set(handles.axes_eye,'pos', [0.0670    0.2400    0.9000    0.6280])
 		% show toggle buttons 
 		set(handles.txtSaccadeTargets, 'Visible', 'on')
 		set(handles.tbTargetH, 'Visible', 'on')
