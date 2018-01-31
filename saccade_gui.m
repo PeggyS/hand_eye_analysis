@@ -62,11 +62,9 @@ if isequal(fnSave,0) || isequal(pnSave,0)
    disp('no  file chosen ... ')
    return
 end
-% if mat file was specified, restore gui state
-[~, ~, ext] = fileparts(fnSave);
 
-	handles.bin_filename = fullfile(pnSave, fnSave); %'/Users/peggy/Desktop/pegtas2/pegtas2_1.bin'; % must be full path for rd_cli to work
-	handles.eye_data = rd(handles.bin_filename);
+handles.bin_filename = fullfile(pnSave, fnSave); %'/Users/peggy/Desktop/pegtas2/pegtas2_1.bin'; % must be full path for rd_cli to work
+handles.eye_data = rd(handles.bin_filename);
 
 handles.txtFileName.String = handles.bin_filename;
 

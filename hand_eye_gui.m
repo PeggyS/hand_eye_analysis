@@ -22,7 +22,7 @@ function varargout = hand_eye_gui(varargin)
 
 % Edit the above text to modify the response to help hand_eye_gui
 
-% Last Modified by GUIDE v2.5 19-Dec-2017 18:30:45
+% Last Modified by GUIDE v2.5 31-Jan-2018 17:45:18
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 0;
@@ -264,6 +264,9 @@ switch choice_num
 		% remove video axes
 		delete(handles.axes_video_overlay)
 		delete(handles.axes_video)
+		% make extraneous objects invisible
+		obj_list = [handles.tbPlayPause, handles.text29, handles.text2, handles.edTime, handles.text2];
+		set(obj_list, 'Visible', 'off')
 		% make eye data axes bigger
 		set(handles.axes_eye,'pos', [0.0670    0.2400    0.9000    0.6280])
 		% show toggle buttons 
@@ -1181,42 +1184,45 @@ out_tbl.Properties.VariableNames = {'t_eye', 'rh', 'lh', 'rv', 'lv', 'rh_vel', '
 
 % saccades
 sacc_type_list = {'lh' 'lv' 'rh' 'rv'};
-for st_cnt = 1:length(sacc_type_list)
-   sacc_type = sacc_type_list{st_cnt};
-   sacc_beg_lines = findobj(handles.axes_eye, '-regexp', 'Tag', ['saccade_' sacc_type '.*_begin$']);
-   if ~isempty(sacc_beg_lines)
-      % add column in table for this type of saccade
-      out_tbl.([sacc_type '_saccades']) = cell(height(out_tbl), 1);
-	  out_tbl.([sacc_type '_saccades_labels']) = cell(height(out_tbl), 1);
-      for sac_num = 1:length(sacc_beg_lines)
-         if strcmp(sacc_beg_lines(sac_num).Marker, 'o') % it's enabled 'o', not disabled 'x'
-            beg_t = sacc_beg_lines(sac_num).XData;
-            beg_line_tag = sacc_beg_lines(sac_num).Tag;
-            end_line_tag = strrep(beg_line_tag, 'begin', 'end');
-            end_line = findobj(handles.axes_eye, 'Tag', end_line_tag);
-            end_t = end_line.XData;
-            % put the line tag into the table
-            beg_row = find(out_tbl.t_eye >= beg_t, 1, 'first');
-            out_tbl.([sacc_type '_saccades']){beg_row} = beg_line_tag;
-            
-			end_row = find(out_tbl.t_eye >= end_t, 1, 'first');
-            out_tbl.([sacc_type '_saccades']){end_row} = end_line_tag;
-			
-			% find the label menus for this beg_saccade & add a the label if checked
-			h_menus = findobj(handles.axes_eye.Parent, 'Tag',  strrep(sacc_beg_lines(sac_num).Tag, 'saccade', 'menu_saccade'));
-			for m_cnt = 1:length(h_menus)
-				if strcmp(h_menus(m_cnt).Checked, 'on')
-					out_tbl.([sacc_type '_saccades_labels']){beg_row} = h_menus(m_cnt).Label;
-					out_tbl.([sacc_type '_saccades_labels']){end_row} = h_menus(m_cnt).Label;
+sacc_source_list = {'eyelink', 'findsaccs', 'engbert'};
+for ss_cnt = 1:length(sacc_source_list)
+	for st_cnt = 1:length(sacc_type_list)
+		sacc_type = [sacc_source_list{ss_cnt} '_' sacc_type_list{st_cnt}];
+		sacc_beg_lines = findobj(handles.axes_eye, '-regexp', 'Tag', ['saccade_' sacc_type '.*_begin$']);
+		if ~isempty(sacc_beg_lines)
+			% add column in table for this type of saccade
+			out_tbl.([sacc_type '_saccades']) = cell(height(out_tbl), 1);
+			out_tbl.([sacc_type '_saccades_labels']) = cell(height(out_tbl), 1);
+			for sac_num = 1:length(sacc_beg_lines)
+				if strcmp(sacc_beg_lines(sac_num).Marker, 'o') % it's enabled 'o', not disabled 'x'
+					beg_t = sacc_beg_lines(sac_num).XData;
+					beg_line_tag = sacc_beg_lines(sac_num).Tag;
+					end_line_tag = strrep(beg_line_tag, 'begin', 'end');
+					end_line = findobj(handles.axes_eye, 'Tag', end_line_tag);
+					end_t = end_line.XData;
+					% put the line tag into the table
+					beg_row = find(out_tbl.t_eye >= beg_t, 1, 'first');
+					out_tbl.([sacc_type '_saccades']){beg_row} = beg_line_tag;
+					
+					end_row = find(out_tbl.t_eye >= end_t, 1, 'first');
+					out_tbl.([sacc_type '_saccades']){end_row} = end_line_tag;
+					
+					% find the label menus for this beg_saccade & add a the label if checked
+					h_menus = findobj(handles.axes_eye.Parent, 'Tag',  strrep(sacc_beg_lines(sac_num).Tag, 'saccade', 'menu_saccade'));
+					for m_cnt = 1:length(h_menus)
+						if strcmp(h_menus(m_cnt).Checked, 'on')
+							out_tbl.([sacc_type '_saccades_labels']){beg_row} = h_menus(m_cnt).Label;
+							out_tbl.([sacc_type '_saccades_labels']){end_row} = h_menus(m_cnt).Label;
+						end
+					end
+					
+					
+					
 				end
-			end
-			
-			
-			
-         end
-      end
-   end
-end
+			end % loop through each sacc_beg_line
+		end % if beg lines is not empty
+	end % st_cnt
+end % ss_cnt
 % fixations
 fix_type_list = {'lh' 'lv' 'rh' 'rv'};
 for fix_cnt = 1:length(fix_type_list)
@@ -1644,34 +1650,36 @@ end
 return
 
 function createSaccLines(h, r_or_l, h_or_v)
+sacc_source = lower(h.popmenuSaccType.String{h.popmenuSaccType.Value});
+
 axes(h.axes_eye)
 eye_str = [r_or_l(1) h_or_v(1)];
 start_ms = h.eye_data.start_times;
-beg_line_color = getLineColor(h, ['saccade_' eye_str '_begin']);
-end_line_color = getLineColor(h, ['saccade_' eye_str '_end']);
+beg_line_color = getLineColor(h, ['saccade_' sacc_source '_' eye_str '_begin']);
+end_line_color = getLineColor(h, ['saccade_' sacc_source '_' eye_str '_end']);
 samp_freq = h.eye_data.samp_freq;
 
 for sacc_num = 1:length(h.eye_data.(eye_str).saccades.sacclist.start)
    % saccade begin
    time1 = (h.eye_data.(eye_str).saccades.sacclist.start(sacc_num) - start_ms)/1000; %in seconds
    y = h.eye_data.(eye_str).data(round(time1*samp_freq));
-   h_beg_line = line( time1, y, 'Tag', ['saccade_' eye_str '_#' num2str(sacc_num) '_begin'], ...
+   h_beg_line = line( time1, y, 'Tag', ['saccade_' sacc_source '_' eye_str '_#' num2str(sacc_num) '_begin'], ...
       'Color', beg_line_color, 'Marker', 'o', 'MarkerSize', 15);
    eye_m = uicontextmenu;
    h_beg_line.UIContextMenu = eye_m;
    uimenu(eye_m, 'Label', 'Disable Saccade', 'Callback', @disableSaccade, ...
-      'Tag', ['menu_saccade_' eye_str '_#' num2str(sacc_num) '_begin']);
+      'Tag', ['menu_saccade_' sacc_source '_' eye_str '_#' num2str(sacc_num) '_begin']);
    uimenu(eye_m, 'Label', 'Pre-Task', 'Callback',  {@labelSaccade, 'PreTask'}, ...
-      'Tag', ['menu_saccade_' eye_str '_#' num2str(sacc_num) '_begin']);
+      'Tag', ['menu_saccade_' sacc_source '_' eye_str '_#' num2str(sacc_num) '_begin']);
    uimenu(eye_m, 'Label', 'Task', 'Callback', {@labelSaccade, 'Task'}, ...
-      'Tag', ['menu_saccade_' eye_str '_#' num2str(sacc_num) '_begin']);
+      'Tag', ['menu_saccade_' sacc_source '_' eye_str '_#' num2str(sacc_num) '_begin']);
    uimenu(eye_m, 'Label', 'Post-Task', 'Callback',  {@labelSaccade, 'PostTask'}, ...
-      'Tag', ['menu_saccade_' eye_str '_#' num2str(sacc_num) '_begin']);
+      'Tag', ['menu_saccade_' sacc_source '_' eye_str '_#' num2str(sacc_num) '_begin']);
    
    % saccade end
    time2 = (h.eye_data.(eye_str).saccades.sacclist.end(sacc_num) - start_ms)/1000;
    y = h.eye_data.(eye_str).data(round(time2*samp_freq));
-   line( time2, y, 'Tag', ['saccade_' eye_str '_#' num2str(sacc_num) '_end'], ...
+   line( time2, y, 'Tag', ['saccade_' sacc_source '_' eye_str '_#' num2str(sacc_num) '_end'], ...
       'Color', end_line_color, 'Marker', 'o', 'MarkerSize', 15);
    
    % saccade segment
@@ -1680,7 +1688,7 @@ for sacc_num = 1:length(h.eye_data.(eye_str).saccades.sacclist.start)
    tempdata = h.eye_data.(eye_str).data;
    segment = tempdata(sac_start_ind:sac_stop_ind);
    time3 = maket(segment)+time1 - 1/samp_freq;
-   line(time3, segment,'Tag', ['saccade_' eye_str '_#' num2str(sacc_num) ], 'Color','b' , ...
+   line(time3, segment,'Tag', ['saccade_' sacc_source '_' eye_str '_#' num2str(sacc_num) ], 'Color','b' , ...
       'Linewidth', 1.5)
 end
 return
@@ -1781,8 +1789,10 @@ blinks.start = [];
 blinks.end = [];
 for elcnt = 1:length(eye_list)
 	if isfield(h.eye_data.(eye_list{elcnt}), 'blink')
-	   blinks.start = [blinks.start h.eye_data.(eye_list{elcnt}).blink.blinklist.start(:)'];
-	   blinks.end = [blinks.end h.eye_data.(eye_list{elcnt}).blink.blinklist.end(:)'];
+		if isfield(h.eye_data.(eye_list{1}).blink.blinklist, 'start')
+			blinks.start = [blinks.start h.eye_data.(eye_list{elcnt}).blink.blinklist.start(:)'];
+			blinks.end = [blinks.end h.eye_data.(eye_list{elcnt}).blink.blinklist.end(:)'];
+		end
 	end
 end
 
@@ -2952,3 +2962,26 @@ else
    set(handles.line_target_x, 'Visible', 'off')
 end
 return
+
+
+% --- Executes on selection change in popmenuSaccType.
+function popmenuSaccType_Callback(hObject, eventdata, handles)
+% hObject    handle to popmenuSaccType (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns popmenuSaccType contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from popmenuSaccType
+
+
+% --- Executes during object creation, after setting all properties.
+function popmenuSaccType_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to popmenuSaccType (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
