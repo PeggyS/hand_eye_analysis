@@ -265,7 +265,9 @@ switch choice_num
 		delete(handles.axes_video_overlay)
 		delete(handles.axes_video)
 		% make extraneous objects invisible
-		obj_list = [handles.tbPlayPause, handles.text29, handles.text2, handles.edTime, handles.text2];
+		obj_list = [handles.tbPlayPause, handles.text29, handles.text2, handles.edTime, handles.text2, handles.text23, ...
+					handles.edPlaybackSpeed, handles.ahead1samp, handles.back1samp, handles.samp_tweak, ...
+					handles.text21, handles.text20, handles.pbBack, handles.pbForward];
 		set(obj_list, 'Visible', 'off')
 		% make eye data axes bigger
 		set(handles.axes_eye,'pos', [0.0670    0.2400    0.9000    0.6280])
@@ -2970,8 +2972,20 @@ function popmenuSaccType_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: contents = cellstr(get(hObject,'String')) returns popmenuSaccType contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from popmenuSaccType
+sacc_type = lower(hObject.String{hObject.Value});
+
+if strcmp(sacc_type, 'eyelink')
+	sacc_type_str = 'EDF_PARSER';
+else
+	sacc_type_str = sacc_type;
+end
+for s_cnt = 1:length(handles.eye_data.rh.saccades)
+	if strcmp(handles.eye_data.rh.saccades(s_cnt).paramtype, sacc_type_str)
+		keyboard
+	end
+end
+return
+
 
 
 % --- Executes during object creation, after setting all properties.
