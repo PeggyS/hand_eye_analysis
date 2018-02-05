@@ -1,6 +1,14 @@
-function handles = parse_msg_file_for_targets(handles)
+function handles = parse_msg_file_for_targets(handles, target_type)
 % read in the msgs.asc file. Look for MSG lines with TARGET_POS TARG1
 % the following numbers in () is the target pos in screen pixels
+%
+% target_type is either 'sacc' or 'smoothp' 
+% 'sacc' targets use 'Blank_display' to determine when the target is turned
+% off. 'Sacc' targets are held at a fixed value (the x y pos) specified
+% until the 'blank_display' msg.
+% 'smoothp' targets are for smooth pursuit. The positions, if they don't
+% cooincide with the eye data time samples, are interpolated (or spline
+% fit) to be a sinusoid. Target end with the msg 'blank_screen'
 
 % the msg file name
 msg_fname = strrep(handles.bin_filename, '.bin', '_msgs.asc');
@@ -62,12 +70,8 @@ for line_cnt = 1:length(msgs)
 		end
 	end
 end
-% draw the target lines
-axes(handles.axes_eye)
-handles.line_target_x = line(handles.target_data.t, handles.target_data.x, 'Tag', 'line_target_x', 'Color', 'b');
-handles.line_target_y = line(handles.target_data.t, handles.target_data.y, 'Tag', 'line_target_y', 'Color', 'c');
 
-% set toggle buttons to show both lines
-set(handles.tbTargetH, 'Value', 1)
-set(handles.tbTargetV, 'Value', 1)
+
+
+
 return

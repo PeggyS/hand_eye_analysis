@@ -59,6 +59,7 @@ guidata(hObject, handles);
 % request what type of data/analysis
 str = {'Scenecam task with Opal', 'Scenecam task without Opal', ...
     'Saccades with Opal', 'Saccades without Opal', ...
+	'Smooth Pursuit with Opal', 'Smooth Pursuit without Opal', ...
     'Picture Difference with Opal', 'Picture Difference without Opal', ...
     'Restore Previous Analysis'};
 [choice_num, ok] = listdlg('PromptString', 'Select the type of experiment', ...
@@ -68,7 +69,7 @@ if ~ok
     return
 end
 
-if choice_num == 7 % restore data 
+if choice_num == 9 % restore data 
     [fnSave, pnSave] = uigetfile({'*.mat'}, 'Choose *.mat file ...');
     if isequal(fnSave,0) || isequal(pnSave,0)
         disp('no  file chosen ... ')
@@ -76,7 +77,7 @@ if choice_num == 7 % restore data
     end
     handles = read_restore_state(handles, fullfile(pnSave, fnSave));
 else % all other choices, read in *.bin file for eye data
-    [fnSave, pnSave] = uigetfile({'*.bin'}, 'Choose eye data *.bin file ...');
+    [fnSave, pnSave] = uigetfile({'*.bin';'*.edf'}, 'Choose eye data *.bin file ...');
     if isequal(fnSave,0) || isequal(pnSave,0)
         disp('no  file chosen ... ')
         return
@@ -108,7 +109,7 @@ else
 end
 
 
-if choice_num==1 || choice_num==3 || choice_num==5 % there is opal/apdm data to read in
+if choice_num==1 || choice_num==3 || choice_num==5 || choice_num==7 % there is opal/apdm data to read in
 % if ~isfield(handles, 'restore_data')
     % apdm sensor data - we can handle up to 2 sensors
     disp('Choose APDM data *.h5 file')
@@ -142,10 +143,20 @@ switch choice_num
     case {1 2} % scenecam: read in video data
         handles = request_vid_reader(handles);
     case {3 4} % saccades: read in target data
-		handles = parse_msg_file_for_targets(handles);
-    case {5 6} % picture diff: read in picture and mouse click data
+		handles = parse_msg_file_for_targets(handles, 'sacc');
+		% draw the target lines
+		axes(handles.axes_eye)
+		handles.line_target_x = line(handles.target_data.t, handles.target_data.x, 'Tag', 'line_target_x', 'Color', 'b');
+		handles.line_target_y = line(handles.target_data.t, handles.target_data.y, 'Tag', 'line_target_y', 'Color', 'c');
+		
+		% set toggle buttons to show both lines
+		set(handles.tbTargetH, 'Value', 1)
+		set(handles.tbTargetV, 'Value', 1)
+	case {5 6} % smooth pursuit
+		handles = parse_msg_file_for_targets(handles, 'smoothp');
+    case {7 8} % picture diff: read in picture and mouse click data
 		handles = get_image_and_clicks(handles);
-	case 7 % restoring data from *_gui.mat
+	case 9 % restoring data from *_gui.mat
 		% change th choice_num corresponding to the saved .mat
 		if isfield(handles, 'vid_filename')
 			choice_num = 1;
@@ -163,7 +174,7 @@ switch choice_num
 		elseif isfield(handles, 'target_data')
 			choice_num = 3;
 		elseif isfield(handles, 'click_data_tbl')
-			choice_num = 5;
+			choice_num = 7;
 		end
 		
 end
@@ -269,13 +280,30 @@ switch choice_num
 					handles.edPlaybackSpeed, handles.ahead1samp, handles.back1samp, handles.samp_tweak, ...
 					handles.text21, handles.text20, handles.pbBack, handles.pbForward];
 		set(obj_list, 'Visible', 'off')
-		% make eye data axes bigger
-		set(handles.axes_eye,'pos', [0.0670    0.2400    0.9000    0.6280])
+		% make eye data axes wider
+		ax_pos = get(handles.axes_eye,'pos');
+		ax_pos(3) = 0.9;
+		set(handles.axes_eye,'pos', ax_pos)
+		% if there is apdm data - resize those axes too - FIXME
 		% show toggle buttons 
 		set(handles.txtSaccadeTargets, 'Visible', 'on')
 		set(handles.tbTargetH, 'Visible', 'on')
 		set(handles.tbTargetV, 'Visible', 'on')
-	case {5 6} % picture diff
+	case {5 6}
+		% remove video axes
+		delete(handles.axes_video_overlay)
+		delete(handles.axes_video)
+		% make extraneous objects invisible
+		obj_list = [handles.tbPlayPause, handles.text29, handles.text2, handles.edTime, handles.text2, handles.text23, ...
+					handles.edPlaybackSpeed, handles.ahead1samp, handles.back1samp, handles.samp_tweak, ...
+					handles.text21, handles.text20, handles.pbBack, handles.pbForward];
+		set(obj_list, 'Visible', 'off')
+		% make eye data axes wider
+		ax_pos = get(handles.axes_eye,'pos');
+		ax_pos(3) = 0.9;
+		set(handles.axes_eye,'pos', ax_pos)
+		% if there is apdm data - resize those axes too - FIXME
+	case {7 8} % picture diff
 		imshow(handles.im_data, 'Parent', handles.axes_video, 'XData', [0 1024], 'YData', [0 768] )
 		
 		% eye position overlay on pciture
