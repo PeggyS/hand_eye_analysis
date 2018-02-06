@@ -13,6 +13,26 @@ function handles = parse_msg_file_for_targets(handles, target_type)
 % the msg file name
 msg_fname = strrep(handles.bin_filename, '.bin', '_msgs.asc');
 
+% if smoothp
+if strcmp(target_type, 'smoothp')
+	% , remove '_#_' from the msg.asc filename
+	rem_str = regexpi(msg_fname, '_\d', 'match');
+	msg_fname = strrep(msg_fname, rem_str{1}, '');
+	% set the index of the 'TARGET_POS' msg 
+	target_pos_ind = 5;
+	blank_msg_ind = 4;
+	blank_msg = 'blank_screen';
+	x_pos_ind = 7;
+	y_pos_ind = 8;
+else
+	% set the index of the 'TARGET_POS' msg 
+	target_pos_ind = 4;
+	blank_msg_ind = 4;
+	blank_msg = 'Blank_display';
+	x_pos_ind = 5;
+	y_pos_ind = 6;
+end
+
 if ~exist(msg_fname, 'file')
 	disp('Choose _msg.asc file ...')
 	[fnSave, pnSave] = uigetfile({'*.asc'}, 'Choose  _msg.asc file ...');
@@ -36,42 +56,63 @@ msgs = importdata(msg_fname, char(13)); % each line is read in as a cell
 
 target_cnt = 0;
 for line_cnt = 1:length(msgs)
+% 	if line_cnt > 1914 
+% 		keyboard
+% 	end
 	word_list = split(msgs{line_cnt,:});
-	if length(word_list) >= 4 && (strcmpi(word_list{4}, 'TARGET_POS') || strcmpi(word_list{4}, 'Blank_display'))
-		% for each target presentation, there should be a TARGET_POS MSG
+	% for each target presentation, there should be a TARGET_POS MSG
 		% followed by a Blank_display MSG
-		if length(word_list) >= 6 && strcmpi(word_list{4}, 'TARGET_POS')
+	if length(word_list) >= target_pos_ind && strcmpi(word_list{target_pos_ind}, 'TARGET_POS')
+		
+		if length(word_list) >= y_pos_ind && strcmpi(word_list{target_pos_ind}, 'TARGET_POS')
 			target_cnt = target_cnt + 1;
 			t_str = regexp(word_list{2}, '\d*', 'match'); % the millisecond number after 'MSG'
 			t2_str = regexp(word_list{3}, '\d*', 'match'); % the additional milliseconds to add to the first number to get the actual time of the event
 			t_event = str2double(t_str{1}) + str2double(t2_str{1});
-			handles.target_pos(target_cnt).t_start = (t_event - handles.eye_data.start_times)/1000; % relative to the data collection start time (in sec)
-			x_str = regexp(word_list{5}, '\d*', 'match');
-			handles.target_pos(target_cnt).x_pos = str2double(x_str{1});
-			y_str = regexp(word_list{6}, '\d*', 'match');
-			handles.target_pos(target_cnt).y_pos = str2double(y_str{1});
+			handles.target_pos.t_start_abs_ms(target_cnt) = t_event;
+			handles.target_pos.t_start(target_cnt) = (t_event - handles.eye_data.start_times)/1000; % relative to the data collection start time (in sec)
+			x_str = regexp(word_list{x_pos_ind}, '\d*', 'match');
+			handles.target_pos.x_pos(target_cnt) = str2double(x_str{1});
+			y_str = regexp(word_list{y_pos_ind}, '\d*', 'match');
+			handles.target_pos.y_pos(target_cnt) = str2double(y_str{1});
 			
 			% convert pos to degrees
-			handles.target_pos(target_cnt).x_deg =  (handles.target_pos(target_cnt).x_pos-handles.eye_data.h_pix_z ) ...
+			handles.target_pos.x_deg(target_cnt) =  (handles.target_pos.x_pos(target_cnt)-handles.eye_data.h_pix_z ) ...
 				/30; % 30 pix per deg as defined on the screen
-			handles.target_pos(target_cnt).y_deg =  -(handles.target_pos(target_cnt).y_pos-handles.eye_data.v_pix_z ) ...
+			handles.target_pos.y_deg(target_cnt) =  -(handles.target_pos.y_pos(target_cnt)-handles.eye_data.v_pix_z ) ...
 				/30;
-			
-		elseif strcmpi(word_list{4}, 'Blank_display')
-			t_str = regexp(word_list{2}, '\d*', 'match'); % the millisecond number after 'MSG'
-			t2_str = regexp(word_list{3}, '\d*', 'match'); % the additional milliseconds to add to the first number to get the actual time of the event
-			t_event = str2double(t_str{1}) + str2double(t2_str{1});
-			handles.target_pos(target_cnt).t_end = (t_event- handles.eye_data.start_times)/1000; % relative to the data collection start time (in sec)
-			% update target vector
-			handles.target_data.x(handles.target_data.t>=handles.target_pos(target_cnt).t_start ...
-				& handles.target_data.t<handles.target_pos(target_cnt).t_end) = handles.target_pos(target_cnt).x_deg;
-			handles.target_data.y(handles.target_data.t>=handles.target_pos(target_cnt).t_start ...
-				& handles.target_data.t<handles.target_pos(target_cnt).t_end) = handles.target_pos(target_cnt).y_deg;
+		end
+	elseif length(word_list) >= blank_msg_ind &&  strcmpi(word_list{blank_msg_ind}, blank_msg)
+		t_str = regexp(word_list{2}, '\d*', 'match'); % the millisecond number after 'MSG'
+		t2_str = regexp(word_list{3}, '\d*', 'match'); % the additional milliseconds to add to the first number to get the actual time of the event
+		t_event = str2double(t_str{1}) + str2double(t2_str{1});
+		handles.target_pos.t_end(target_cnt) = (t_event- handles.eye_data.start_times)/1000; % relative to the data collection start time (in sec)
+		t_blank_time_abs_ms = t_event;
+		% update target vector
+		if strcmp(target_type, 'sacc')
+			% saccades: target is at a constant value between handles.target_pos.t_start and target_pos.t_end
+			handles.target_data.x(handles.target_data.t>=handles.target_pos.t_start(target_cnt) ...
+				& handles.target_data.t<handles.target_pos.t_end(target_cnt)) = handles.target_pos.x_deg(target_cnt);
+			handles.target_data.y(handles.target_data.t>=handles.target_pos.t_start(target_cnt) ...
+				& handles.target_data.t<handles.target_pos.t_end(target_cnt)) = handles.target_pos.y_deg(target_cnt);
+		else
+
+			% if the blank_screen msg is in this eyedata time segment
+			if t_blank_time_abs_ms > handles.eye_data.start_times && ...
+					t_blank_time_abs_ms <= handles.eye_data.start_times + handles.target_data.t(end)*1000
+				keyboard
+				abs_targ_beg_ind = find(handles.target_pos.t_start_abs_ms>=handles.eye_data.start_times,1,'first');
+				abs_targ_end_ind = find(handles.target_pos.t_start_abs_ms>=handles.eye_data.start_times,1,'first');
+				
+				abs_ms_target_begin = handles.target_pos.t_start_abs_ms(abs_targ_beg_ind);
+				rel_targ_beg = (abs_ms_target_begin-handles.eye_data.start_times)/1000;
+				rel_targ_end = (t_blank_time_abs_ms-handles.eye_data.start_times)/1000;
+				beg_ind = find(handles.target_data.t >= rel_targ_beg, 1, 'first');
+				end_ind = find(handles.target_data.t <= rel_targ_end, 1, 'last');
+				handles.target_data.x(beg_ind:end_ind) = resample(handles.target_pos.x_deg(, 
+			end
 		end
 	end
 end
-
-
-
 
 return
