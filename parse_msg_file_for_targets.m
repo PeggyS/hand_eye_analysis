@@ -100,19 +100,32 @@ for line_cnt = 1:length(msgs)
 			% if the blank_screen msg is in this eyedata time segment
 			if t_blank_time_abs_ms > handles.eye_data.start_times && ...
 					t_blank_time_abs_ms <= handles.eye_data.start_times + handles.target_data.t(end)*1000
-				keyboard
+% 				keyboard
 				abs_targ_beg_ind = find(handles.target_pos.t_start_abs_ms>=handles.eye_data.start_times,1,'first');
-				abs_targ_end_ind = find(handles.target_pos.t_start_abs_ms>=handles.eye_data.start_times,1,'first');
+				abs_targ_end_ind = find(handles.target_pos.t_start_abs_ms<=t_blank_time_abs_ms,1,'last');
 				
-				abs_ms_target_begin = handles.target_pos.t_start_abs_ms(abs_targ_beg_ind);
-				rel_targ_beg = (abs_ms_target_begin-handles.eye_data.start_times)/1000;
-				rel_targ_end = (t_blank_time_abs_ms-handles.eye_data.start_times)/1000;
-				beg_ind = find(handles.target_data.t >= rel_targ_beg, 1, 'first');
-				end_ind = find(handles.target_data.t <= rel_targ_end, 1, 'last');
-				handles.target_data.x(beg_ind:end_ind) = resample(handles.target_pos.x_deg(, 
+				targ_t=handles.target_pos.t_start(abs_targ_beg_ind:abs_targ_end_ind);
+				targ_x=handles.target_pos.x_deg(abs_targ_beg_ind:abs_targ_end_ind);
+				targ_y=handles.target_pos.y_deg(abs_targ_beg_ind:abs_targ_end_ind);
+				
+% 				abs_ms_target_begin = handles.target_pos.t_start_abs_ms(abs_targ_beg_ind);
+% 				rel_targ_beg = (abs_ms_target_begin-handles.eye_data.start_times)/1000;
+% 				rel_targ_end = (t_blank_time_abs_ms-handles.eye_data.start_times)/1000;
+				beg_ind = find(handles.target_data.t >= targ_t(1), 1, 'first');
+				end_ind = find(handles.target_data.t <= targ_t(end), 1, 'last');
+
+				handles.target_data.x(beg_ind:end_ind) = spline(targ_t, targ_x, handles.target_data.t(beg_ind:end_ind));
+				handles.target_data.y(beg_ind:end_ind) = spline(targ_t, targ_y, handles.target_data.t(beg_ind:end_ind));
 			end
 		end
 	end
 end
-
+		% draw the target lines
+		axes(handles.axes_eye)
+		handles.line_target_x = line(handles.target_data.t, handles.target_data.x, 'Tag', 'line_target_x', 'Color', 'b');
+		handles.line_target_y = line(handles.target_data.t, handles.target_data.y, 'Tag', 'line_target_y', 'Color', 'm');
+		
+		% set toggle buttons to show both lines
+		set(handles.tbTargetH, 'Value', 1, 'Visible', 'on')
+		set(handles.tbTargetV, 'Value', 1, 'Visible', 'on')
 return

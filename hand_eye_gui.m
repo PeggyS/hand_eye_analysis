@@ -144,16 +144,10 @@ switch choice_num
         handles = request_vid_reader(handles);
     case {3 4} % saccades: read in target data
 		handles = parse_msg_file_for_targets(handles, 'sacc');
-		% draw the target lines
-		axes(handles.axes_eye)
-		handles.line_target_x = line(handles.target_data.t, handles.target_data.x, 'Tag', 'line_target_x', 'Color', 'b');
-		handles.line_target_y = line(handles.target_data.t, handles.target_data.y, 'Tag', 'line_target_y', 'Color', 'c');
-		
-		% set toggle buttons to show both lines
-		set(handles.tbTargetH, 'Value', 1)
-		set(handles.tbTargetV, 'Value', 1)
+
 	case {5 6} % smooth pursuit
 		handles = parse_msg_file_for_targets(handles, 'smoothp');
+		
     case {7 8} % picture diff: read in picture and mouse click data
 		handles = get_image_and_clicks(handles);
 	case 9 % restoring data from *_gui.mat
@@ -1672,7 +1666,7 @@ return
 
 function hideSaccades(h, r_or_l, h_or_v)
 eye_str = [r_or_l(1) h_or_v(1)];
-tag_search_str = ['^saccade_' eye_str '.*'];
+tag_search_str = ['^saccade_.*' eye_str '.*'];
 line_list = findobj(h.figure1,'-regexp', 'Tag', tag_search_str);
 if ~isempty(line_list)
    set(line_list, 'Visible', 'off');
