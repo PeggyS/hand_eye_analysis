@@ -61,6 +61,7 @@ str = {'Scenecam task with Opal', 'Scenecam task without Opal', ...
     'Saccades with Opal', 'Saccades without Opal', ...
 	'Smooth Pursuit with Opal', 'Smooth Pursuit without Opal', ...
     'Picture Difference with Opal', 'Picture Difference without Opal', ...
+	'Reading Text with Opal', 'Reading Text without Opal', ...
     'Restore Previous Analysis'};
 [choice_num, ok] = listdlg('PromptString', 'Select the type of experiment', ...
     'SelectionMode','single','ListString',str);
@@ -150,7 +151,9 @@ switch choice_num
 		
     case {7 8} % picture diff: read in picture and mouse click data
 		handles = get_image_and_clicks(handles);
-	case 9 % restoring data from *_gui.mat
+	case {9 10} % reading text: read in text page image
+		handles = get_page_text_image(handles);
+	case 11 % restoring data from *_gui.mat
 		% change th choice_num corresponding to the saved .mat
 		if isfield(handles, 'vid_filename')
 			choice_num = 1;
@@ -283,7 +286,7 @@ switch choice_num
 		set(handles.txtSaccadeTargets, 'Visible', 'on')
 		set(handles.tbTargetH, 'Visible', 'on')
 		set(handles.tbTargetV, 'Visible', 'on')
-	case {7 8} % picture diff
+	case {7 8 9 10} % picture diff & read text
 		imshow(handles.im_data, 'Parent', handles.axes_video, 'XData', [0 1024], 'YData', [0 768] )
 		
 		% eye position overlay on pciture
@@ -300,8 +303,10 @@ switch choice_num
 		else
 			handles = add_scrub_lines(handles, 1/handles.eye_data.samp_freq);
 		end
-		% mouse clicks
-		handles = display_mouse_clicks(handles);
+		if choice_num==7 || choice_num==8
+			% mouse clicks
+			handles = display_mouse_clicks(handles);
+		end
 end
 
 	
