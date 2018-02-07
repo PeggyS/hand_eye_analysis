@@ -24,9 +24,8 @@ zero head angle (calibration):
 view and select data
 	- run hand_eye_gui
 		>> hand_eye_gui
-		- select the .bin file
-		- select the .h5 file
-		- select the overlay0.avi
+		- a window will open with a list of types of analyses. Select the type of analysis and click OK.
+		- in the next open dialog box(es), select the required files for the analysis 
 	- if there is an error about the adjust bias file, edit the adjust bias file removing '_1' from the .bin file near the top
 	- right-click = control-click 
 	- right-click on lines and axes to view menus of options
