@@ -265,7 +265,7 @@ switch choice_num
 				handles = add_scrub_lines(handles, 1/handles.eye_data.samp_freq);
 			end
 		end
-	case {3 4} % saccade targets
+	case {3 4 5 6} % saccade or smooth pursuit targets
 		% remove video axes
 		delete(handles.axes_video_overlay)
 		delete(handles.axes_video)
@@ -283,20 +283,6 @@ switch choice_num
 		set(handles.txtSaccadeTargets, 'Visible', 'on')
 		set(handles.tbTargetH, 'Visible', 'on')
 		set(handles.tbTargetV, 'Visible', 'on')
-	case {5 6}
-		% remove video axes
-		delete(handles.axes_video_overlay)
-		delete(handles.axes_video)
-		% make extraneous objects invisible
-		obj_list = [handles.tbPlayPause, handles.text29, handles.text2, handles.edTime, handles.text2, handles.text23, ...
-					handles.edPlaybackSpeed, handles.ahead1samp, handles.back1samp, handles.samp_tweak, ...
-					handles.text21, handles.text20, handles.pbBack, handles.pbForward];
-		set(obj_list, 'Visible', 'off')
-		% make eye data axes wider
-		ax_pos = get(handles.axes_eye,'pos');
-		ax_pos(3) = 0.9;
-		set(handles.axes_eye,'pos', ax_pos)
-		% if there is apdm data - resize those axes too - FIXME
 	case {7 8} % picture diff
 		imshow(handles.im_data, 'Parent', handles.axes_video, 'XData', [0 1024], 'YData', [0 768] )
 		
