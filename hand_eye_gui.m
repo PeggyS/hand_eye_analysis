@@ -745,6 +745,8 @@ end
 
 ylims = get(handles.axes_eye, 'YLim');
 for click_cnt = 1:height(handles.click_data_tbl)
+	% FIXME - use the abs click time and eye_data start time to display the
+	% click time
 	click_time = handles.click_data_tbl.CLICK_TIME(click_cnt)/1000;
 	click_coords = parse_click_coords(handles.click_data_tbl.CLICK_COORDINATES(click_cnt));
 	% line in the eye data axes
