@@ -745,9 +745,8 @@ end
 
 ylims = get(handles.axes_eye, 'YLim');
 for click_cnt = 1:height(handles.click_data_tbl)
-	% FIXME - use the abs click time and eye_data start time to display the
-	% click time
-	click_time = handles.click_data_tbl.CLICK_TIME(click_cnt)/1000;
+	% use the abs click time and eye_data start time to display the click time
+	click_time = (handles.click_data_tbl.abs_click_time(click_cnt) - handles.eye_data.start_times )/1000;
 	click_coords = parse_click_coords(handles.click_data_tbl.CLICK_COORDINATES(click_cnt));
 	% line in the eye data axes
 	axes(handles.axes_eye)
@@ -972,6 +971,9 @@ end
 
 % -------------------------------------------------------------
 function show_video_frame(handles, time)
+if ~isfield(handles, 'video_reader')
+	return
+end
 % axes(handles.axes.video)
 samp_freq = handles.eye_data.samp_freq;
 min_time = 1/samp_freq;
