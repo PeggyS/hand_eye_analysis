@@ -1490,30 +1490,49 @@ end
 
 % saccade target info
 if isfield(handles, 'target_pos')
-	out_tbl.target = cell(height(out_tbl),1);
-	for t_cnt = 1:length(handles.target_pos)
-		row = find(out_tbl.t_eye >= handles.target_pos(t_cnt).t_start, 1, 'first');
-		out_tbl.target{row} = ['target on; pixel_pos = ' num2str(handles.target_pos(t_cnt).x_pos) ', ' ...
-			num2str(handles.target_pos(t_cnt).y_pos) '; deg = ' num2str(handles.target_pos(t_cnt).x_deg) ', ' ...
-			num2str(handles.target_pos(t_cnt).y_deg)];
+	out_tbl.target_on_off = cell(height(out_tbl),1);
+	out_tbl.target_x_pos = cell(height(out_tbl),1);
+	out_tbl.target_y_pos = cell(height(out_tbl),1);
+	out_tbl.target_x_deg = cell(height(out_tbl),1);
+	out_tbl.target_y_deg = cell(height(out_tbl),1);
+	for t_cnt = 1:length(handles.target_pos.t_start)
+		row = find(out_tbl.t_eye >= handles.target_pos.t_start(t_cnt), 1, 'first');
+		out_tbl.target_on_off{row} = 'on';
+		out_tbl.target_x_pos{row} = handles.target_pos.x_pos(t_cnt);
+		out_tbl.target_y_pos{row} = handles.target_pos.y_pos(t_cnt);
+		out_tbl.target_x_deg{row} = handles.target_pos.x_deg(t_cnt);
+		out_tbl.target_y_deg{row} = handles.target_pos.y_deg(t_cnt);
+% 		
+% 		out_tbl.target{row} = ['target on; pixel_pos = ' num2str(handles.target_pos(t_cnt).x_pos) ', ' ...
+% 			num2str(handles.target_pos(t_cnt).y_pos) '; deg = ' num2str(handles.target_pos(t_cnt).x_deg) ', ' ...
+% 			num2str(handles.target_pos(t_cnt).y_deg)];
 		if isfield(handles.target_pos, 't_end')
-			row = find(out_tbl.t_eye >= handles.target_pos(t_cnt).t_end, 1, 'first');
-			out_tbl.target{row} = 'target off';
+			row = find(out_tbl.t_eye >= handles.target_pos.t_end(t_cnt), 1, 'first');
+			out_tbl.target_on_off{row} = 'off';
 		end % there is a target end time
 	end % length of target_pos struct
 end % target_pos
 
 % mouse click info
 if isfield(handles, 'click_data_tbl')
-	out_tbl.mouse_click = cell(height(out_tbl),1);
+	out_tbl.mouse_click_x_pix = cell(height(out_tbl),1);
+	out_tbl.mouse_click_y_pix = cell(height(out_tbl),1);
+	out_tbl.mouse_click_x_deg = cell(height(out_tbl),1);
+	out_tbl.mouse_click_y_deg = cell(height(out_tbl),1);
 	for click_cnt = 1:height(handles.click_data_tbl)
-		click_time = handles.click_data_tbl.CLICK_TIME(click_cnt)/1000;
+% 		click_time = handles.click_data_tbl.CLICK_TIME(click_cnt)/1000;
+		click_time = (handles.click_data_tbl.abs_click_time(click_cnt) - handles.eye_data.start_times )/1000;
 		click_coords = parse_click_coords(handles.click_data_tbl.CLICK_COORDINATES(click_cnt));
 		row = find(out_tbl.t_eye >= click_time, 1, 'first');
-		out_tbl.mouse_click{row} = ['mouse click: pixel_pos = ' ...
-			num2str(click_coords.x) ', ' num2str(click_coords.y) ...
-			'; deg = ' num2str((click_coords.x-handles.eye_data.h_pix_z) / 30) ', ' ...
-			num2str(-(click_coords.y-handles.eye_data.v_pix_z) / 30)];
+		out_tbl.mouse_click_x_pix{row} = click_coords.x;
+		out_tbl.mouse_click_y_pix{row} = click_coords.y;
+		out_tbl.mouse_click_x_deg{row} = (click_coords.x-handles.eye_data.h_pix_z) / 30;
+		out_tbl.mouse_click_y_deg{row} = -(click_coords.y-handles.eye_data.v_pix_z) / 30;
+		
+% 		['mouse click: pixel_pos = ' ...
+% 			num2str(click_coords.x) ', ' num2str(click_coords.y) ...
+% 			'; deg = ' num2str((click_coords.x-handles.eye_data.h_pix_z) / 30) ', ' ...
+% 			num2str(-(click_coords.y-handles.eye_data.v_pix_z) / 30)];
 	end
 end % click data
 
