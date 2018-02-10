@@ -13,6 +13,7 @@ function handles = parse_msg_file_for_targets(handles, target_type)
 % the msg file name
 msg_fname = strrep(handles.bin_filename, '.bin', '_msgs.asc');
 
+handles.target_pos.type = target_type;
 % if smoothp
 if strcmp(target_type, 'smoothp')
 	% , remove '_#_' from the msg.asc filename
@@ -53,6 +54,7 @@ handles.target_data.y = nan(size(handles.target_data.t));
 % read in
 msgs = importdata(msg_fname, char(13)); % each line is read in as a cell
 
+handles.target_pos.type = target_type;
 
 target_cnt = 0;
 for line_cnt = 1:length(msgs)

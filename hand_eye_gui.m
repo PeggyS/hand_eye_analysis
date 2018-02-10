@@ -1489,7 +1489,7 @@ end
 %end
 
 % saccade target info
-if isfield(handles, 'target_pos')
+if isfield(handles, 'target_pos') && strcmp(handles.target_pos.type, 'sacc')
 	out_tbl.target_on_off = cell(height(out_tbl),1);
 	out_tbl.target_x_pos = cell(height(out_tbl),1);
 	out_tbl.target_y_pos = cell(height(out_tbl),1);
@@ -1502,16 +1502,31 @@ if isfield(handles, 'target_pos')
 		out_tbl.target_y_pos{row} = handles.target_pos.y_pos(t_cnt);
 		out_tbl.target_x_deg{row} = handles.target_pos.x_deg(t_cnt);
 		out_tbl.target_y_deg{row} = handles.target_pos.y_deg(t_cnt);
-% 		
-% 		out_tbl.target{row} = ['target on; pixel_pos = ' num2str(handles.target_pos(t_cnt).x_pos) ', ' ...
-% 			num2str(handles.target_pos(t_cnt).y_pos) '; deg = ' num2str(handles.target_pos(t_cnt).x_deg) ', ' ...
-% 			num2str(handles.target_pos(t_cnt).y_deg)];
+
 		if isfield(handles.target_pos, 't_end')
 			row = find(out_tbl.t_eye >= handles.target_pos.t_end(t_cnt), 1, 'first');
 			out_tbl.target_on_off{row} = 'off';
 		end % there is a target end time
+		
 	end % length of target_pos struct
-end % target_pos
+end % target_pos sacc
+
+% smooth pursuit info
+if isfield(handles, 'target_pos') && strcmp(handles.target_pos.type, 'smoothp')
+
+	out_tbl.target_t = handles.target_data.t';
+	out_tbl.target_x_deg = handles.target_data.x';
+	out_tbl.target_y_deg = handles.target_data.y';
+	delta_t = [NaN diff(handles.target_data.t)];
+	delta_x = [NaN diff(handles.target_data.x)];
+	delta_y = [NaN diff(handles.target_data.y)];
+	x_vel = delta_x' ./ delta_t';
+	y_vel = delta_y' ./ delta_t';
+	% smooth velocity - lp filter at 1Hz
+	out_tbl.target_xvel_deg_s = lpf(x_vel, 4, 1, handles.eye_data.samp_freq); 
+	out_tbl.target_yvel_deg_s = lpf(y_vel, 4, 1, handles.eye_data.samp_freq);
+	
+end % target_pos smoothp
 
 % mouse click info
 if isfield(handles, 'click_data_tbl')
@@ -1535,6 +1550,8 @@ if isfield(handles, 'click_data_tbl')
 % 			num2str(-(click_coords.y-handles.eye_data.v_pix_z) / 30)];
 	end
 end % click data
+
+
 
 waitbar(0.5, h_wait, 'Excluding data');
 
