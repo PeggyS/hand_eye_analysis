@@ -1681,7 +1681,8 @@ return
 % -------------------------------
 function showSaccades(h, r_or_l, h_or_v)
 eye_str = [r_or_l(1) h_or_v(1)];
-tag_search_str = ['^saccade_' eye_str '.*'];
+sacc_source = lower(h.popmenuSaccType.String{h.popmenuSaccType.Value});
+tag_search_str = ['^saccade_' sacc_source '_' eye_str '.*'];
 line_list = findobj(h.figure1,'-regexp', 'Tag', tag_search_str);
 if isempty(line_list)
    createSaccLines(h, r_or_l, h_or_v);
@@ -1695,9 +1696,12 @@ end
 % h.(txt_end_str).Visible = 'on';
 return
 
-function hideSaccades(h, r_or_l, h_or_v)
+function hideSaccades(h, r_or_l, h_or_v, sacc_source)
 eye_str = [r_or_l(1) h_or_v(1)];
-tag_search_str = ['^saccade_.*' eye_str '.*'];
+if nargin < 4
+	sacc_source = lower(h.popmenuSaccType.String{h.popmenuSaccType.Value});
+end
+tag_search_str = ['^saccade_' sacc_source '_' eye_str '.*'];
 line_list = findobj(h.figure1,'-regexp', 'Tag', tag_search_str);
 if ~isempty(line_list)
    set(line_list, 'Visible', 'off');
@@ -1705,18 +1709,37 @@ end
 return
 
 function createSaccLines(h, r_or_l, h_or_v)
+eye_str = [r_or_l(1) h_or_v(1)];
 sacc_source = lower(h.popmenuSaccType.String{h.popmenuSaccType.Value});
+if strcmp(sacc_source, 'eyelink')
+	sacc_type_str = 'EDF_PARSER';
+else
+	sacc_type_str = sacc_source;
+end
+% get sacc type number
+found_sacc_type = false;
+for s_cnt = 1:length(h.eye_data.(eye_str).saccades)
+	if strcmp(h.eye_data.(eye_str).saccades(s_cnt).paramtype, sacc_type_str)
+		% have saccades of this type
+		sacc_type_num = s_cnt;
+		found_sacc_type = true;
+	end
+end
+if ~found_sacc_type % there are no saccades of this type to display
+	return
+end
 
 axes(h.axes_eye)
-eye_str = [r_or_l(1) h_or_v(1)];
+
 start_ms = h.eye_data.start_times;
 beg_line_color = getLineColor(h, ['saccade_' sacc_source '_' eye_str '_begin']);
 end_line_color = getLineColor(h, ['saccade_' sacc_source '_' eye_str '_end']);
 samp_freq = h.eye_data.samp_freq;
 
-for sacc_num = 1:length(h.eye_data.(eye_str).saccades.sacclist.start)
+
+for sacc_num = 1:length(h.eye_data.(eye_str).saccades(sacc_type_num).sacclist.start)
    % saccade begin
-   time1 = (h.eye_data.(eye_str).saccades.sacclist.start(sacc_num) - start_ms)/1000; %in seconds
+   time1 = (h.eye_data.(eye_str).saccades(sacc_type_num).sacclist.start(sacc_num) - start_ms)/1000; %in seconds
    y = h.eye_data.(eye_str).data(round(time1*samp_freq));
    h_beg_line = line( time1, y, 'Tag', ['saccade_' sacc_source '_' eye_str '_#' num2str(sacc_num) '_begin'], ...
       'Color', beg_line_color, 'Marker', 'o', 'MarkerSize', 15);
@@ -1732,7 +1755,7 @@ for sacc_num = 1:length(h.eye_data.(eye_str).saccades.sacclist.start)
       'Tag', ['menu_saccade_' sacc_source '_' eye_str '_#' num2str(sacc_num) '_begin']);
    
    % saccade end
-   time2 = (h.eye_data.(eye_str).saccades.sacclist.end(sacc_num) - start_ms)/1000;
+   time2 = (h.eye_data.(eye_str).saccades(sacc_type_num).sacclist.end(sacc_num) - start_ms)/1000;
    y = h.eye_data.(eye_str).data(round(time2*samp_freq));
    line( time2, y, 'Tag', ['saccade_' sacc_source '_' eye_str '_#' num2str(sacc_num) '_end'], ...
       'Color', end_line_color, 'Marker', 'o', 'MarkerSize', 15);
@@ -3032,11 +3055,39 @@ if strcmp(sacc_type, 'eyelink')
 else
 	sacc_type_str = sacc_type;
 end
+% check the eye data for existing sacccades of the type chosen
+have_this_type = false;
 for s_cnt = 1:length(handles.eye_data.rh.saccades)
 	if strcmp(handles.eye_data.rh.saccades(s_cnt).paramtype, sacc_type_str)
-		keyboard
+		% have saccades of this type
+		have_this_type = true;
 	end
 end
+
+if ~have_this_type % don't have this type
+	% read them in 
+	handles = get_saccades(handles, sacc_type_str);
+	guidata(handles.figure1, handles)
+end
+% if any saccades are showing, hide & reshow them so they are updated with
+% the new type
+if handles.tbSaccadesLeftHoriz.Value
+	hideSaccades(handles, 'l', 'h', hObject.UserData.prev_choice)
+	showSaccades(handles, 'l', 'h')
+end
+if handles.tbSaccadesLeftVert.Value
+	hideSaccades(handles, 'l', 'v', hObject.UserData.prev_choice)
+	showSaccades(handles, 'l', 'v')
+end
+if handles.tbSaccadesRightHoriz.Value
+	hideSaccades(handles, 'r', 'h', hObject.UserData.prev_choice)
+	showSaccades(handles, 'r', 'h')
+end
+if handles.tbSaccadesRightVert.Value
+	hideSaccades(handles, 'r', 'v', hObject.UserData.prev_choice)
+	showSaccades(handles, 'r', 'v')
+end
+hObject.UserData.prev_choice = sacc_type;
 return
 
 
@@ -3052,3 +3103,5 @@ function popmenuSaccType_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+hObject.UserData.prev_choice = lower(hObject.String{hObject.Value});
+return

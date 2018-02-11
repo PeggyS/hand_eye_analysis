@@ -124,7 +124,7 @@ return
 function createSaccLines(h, r_or_l, h_or_v, sacc_source)
 axes(h.axes_eye)
 eye_str = [r_or_l(1) h_or_v(1)];
-start_ms = h.eye_data.start_times;
+% start_ms = h.eye_data.start_times;
 beg_line_color = getLineColor(h, ['saccade_' eye_str '_' sacc_source '_begin']);
 end_line_color = getLineColor(h, ['saccade_' eye_str '_' sacc_source '_end']);
 samp_freq = h.eye_data.samp_freq;
@@ -156,9 +156,9 @@ switch sacc_source
         sacclist.start = saccstart / samp_freq * 1000;
         sacclist.end = saccstop / samp_freq * 1000;
 		
-		h.findsacc_data.(eye_str).start_time = start_ms;
-		h.findsacc_data.(eye_str).start = sacclist.start;
-        h.findsacc_data.(eye_str).end = sacclist.end;
+% 		h.findsacc_data.(eye_str).start_time = start_ms;
+		h.findsacc_data.(eye_str).start = sacclist.start + h.eye_data.start_times;
+        h.findsacc_data.(eye_str).end = sacclist.end + h.eye_data.start_times;
 		% save new figure handles
 		guidata(h.figure1, h)
 		
@@ -189,12 +189,12 @@ switch sacc_source
 		
 		% save saccades in handles
 		start_ms = 1/samp_freq;
-		sacclist.start = sac(:,1) / samp_freq * 1000; % time in ms
-        sacclist.end = sac(:,2) / samp_freq * 1000;
+		sacclist.start = sac(:,1)' / samp_freq * 1000; % time in ms
+        sacclist.end = sac(:,2)' / samp_freq * 1000;
 		
-		h.engbertsacc_data.(eye_str).start_time = start_ms;
-		h.engbertsacc_data.(eye_str).start = sacclist.start;
-        h.engbertsacc_data.(eye_str).end = sacclist.end;
+% 		h.engbertsacc_data.(eye_str).start_time = start_ms;
+		h.engbertsacc_data.(eye_str).start = sacclist.start + h.eye_data.start_times;
+        h.engbertsacc_data.(eye_str).end = sacclist.end + h.eye_data.start_times;
 		% save new figure handles
 		guidata(h.figure1, h)
 		
@@ -600,16 +600,16 @@ if isequal(filename,0) || isequal(pathname,0)
 	disp('User pressed cancel')
 else
 	disp(['Saving ', fullfile(pathname, filename)])
-	findsacc_data = handles.findsacc_data;
-	findsacc_params.accelThresh = handles.edAccelThresh.String;
-	findsacc_params.velThresh = handles.edVelThresh.String;
-	findsacc_params.accelStop = handles.edAccelStop.String;
-	findsacc_params.velStop = handles.edVelStop.String;
-	findsacc_params.gapFP = handles.edGapFP.String;
-	findsacc_params.gapSP = handles.edGapSP.String;
-	findsacc_params.accelVel = handles.popmenuAccelVel.Value;
-	findsacc_params.extend = handles.edExtend.String;
-	save(fullfile(pathname, filename), 'findsacc_data', 'findsacc_params')
+	data = handles.findsacc_data;
+	params.accelThresh = handles.edAccelThresh.String;
+	params.velThresh = handles.edVelThresh.String;
+	params.accelStop = handles.edAccelStop.String;
+	params.velStop = handles.edVelStop.String;
+	params.gapFP = handles.edGapFP.String;
+	params.gapSP = handles.edGapSP.String;
+	params.accelVel = handles.popmenuAccelVel.Value;
+	params.extend = handles.edExtend.String;
+	save(fullfile(pathname, filename), 'data', 'params')
 end
 return
 
@@ -789,11 +789,11 @@ if isequal(filename,0) || isequal(pathname,0)
 	disp('User pressed cancel')
 else
 	disp(['Saving ', fullfile(pathname, filename)])
-	engbert_data = handles.engbertsacc_data;
-	engbert_params.velFactor = handles.edVelFactor.String;
-	engbert_params.minSamples = handles.edMinSamples.String;
+	data = handles.engbertsacc_data;
+	params.velFactor = handles.edVelFactor.String;
+	params.minSamples = handles.edMinSamples.String;
 	
-	save(fullfile(pathname, filename), 'engbert_data', 'engbert_params')
+	save(fullfile(pathname, filename), 'data', 'params')
 end
 return
 
