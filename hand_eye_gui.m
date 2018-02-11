@@ -1530,6 +1530,10 @@ end % target_pos smoothp
 
 % mouse click info
 if isfield(handles, 'click_data_tbl')
+	out_tbl.mouse_click_display_begin = cell(height(out_tbl),1);
+	disp_time = (handles.click_data_tbl.time_display_begin(1) - handles.eye_data.start_times )/1000;
+	row = find(out_tbl.t_eye >= disp_time, 1, 'first');
+	out_tbl.mouse_click_display_begin{row} = [handles.click_data_tbl.image{1} ' displayed'];
 	out_tbl.mouse_click_x_pix = cell(height(out_tbl),1);
 	out_tbl.mouse_click_y_pix = cell(height(out_tbl),1);
 	out_tbl.mouse_click_x_deg = cell(height(out_tbl),1);

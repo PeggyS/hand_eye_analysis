@@ -77,6 +77,9 @@ for line_cnt = 1:length(msgs)
 	end % found synctime	
 end
 assert(exist('t_disp_begin', 'var')==1, 'did not find SYNCTIME MSG indicating the beginning time of the image display' )
+% save the time the image appears in the 1st row of the table
+handles.click_data_tbl.time_display_begin(1) = t_disp_begin;
+
 
 line_ind = line_cnt;
 % continue reading from the found synctime
