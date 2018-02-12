@@ -124,7 +124,7 @@ return
 function createSaccLines(h, r_or_l, h_or_v, sacc_source)
 axes(h.axes_eye)
 eye_str = [r_or_l(1) h_or_v(1)];
-% start_ms = h.eye_data.start_times;
+start_ms = h.eye_data.start_times;
 beg_line_color = getLineColor(h, ['saccade_' eye_str '_' sacc_source '_begin']);
 end_line_color = getLineColor(h, ['saccade_' eye_str '_' sacc_source '_end']);
 samp_freq = h.eye_data.samp_freq;
