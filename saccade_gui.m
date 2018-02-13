@@ -602,6 +602,7 @@ if isequal(filename,0) || isequal(pathname,0)
 else
 	disp(['Saving ', fullfile(pathname, filename)])
 	data = handles.findsacc_data;
+	% remove disabled saccades -- FIXME
 	params.accelThresh = handles.edAccelThresh.String;
 	params.velThresh = handles.edVelThresh.String;
 	params.accelStop = handles.edAccelStop.String;
@@ -791,6 +792,7 @@ if isequal(filename,0) || isequal(pathname,0)
 else
 	disp(['Saving ', fullfile(pathname, filename)])
 	data = handles.engbertsacc_data;
+	% remove disabled saccades -- FIXME
 	params.velFactor = handles.edVelFactor.String;
 	params.minSamples = handles.edMinSamples.String;
 	
