@@ -22,7 +22,7 @@ function varargout = saccade_gui(varargin)
 
 % Edit the above text to modify the response to help saccade_gui
 
-% Last Modified by GUIDE v2.5 27-Jan-2018 18:17:43
+% Last Modified by GUIDE v2.5 15-Feb-2018 18:44:09
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 0;
@@ -163,7 +163,7 @@ switch sacc_source
 		% save new figure handles
 		guidata(h.figure1, h)
 		
-		sacc_marker = '*';
+		sacc_marker = 's';
 		
 	case 'engbert'
 		% get parameters
@@ -602,7 +602,8 @@ if isequal(filename,0) || isequal(pathname,0)
 else
 	disp(['Saving ', fullfile(pathname, filename)])
 	data = handles.findsacc_data;
-	% remove disabled saccades -- FIXME
+	% remove disabled saccades
+	data = remove_disabled_saccades(handles, data, 'findsacc');
 	params.accelThresh = handles.edAccelThresh.String;
 	params.velThresh = handles.edVelThresh.String;
 	params.accelStop = handles.edAccelStop.String;
@@ -613,6 +614,27 @@ else
 	params.extend = handles.edExtend.String;
 	save(fullfile(pathname, filename), 'data', 'params')
 end
+return
+
+function data = remove_disabled_saccades(handles, data, sacc_type)
+eye_str_list = {'rh', 'lh', 'rv', 'lv'};
+for e_cnt = 1:length(eye_str_list)
+	eye_str = eye_str_list{e_cnt};
+	tag_search_str = ['^saccade_' eye_str '_' sacc_type '.*_begin$'];
+	sacc_beg_lines = findobj(handles.figure1,'-regexp', 'Tag', tag_search_str);
+	disabled_lines = findobj(sacc_beg_lines, 'Marker', 'x');
+	if ~isempty(disabled_lines)
+		for sac_num = 1:length(disabled_lines)
+			sacc_time_ms = round(disabled_lines(sac_num).XData*1000 + handles.eye_data.start_times);
+			sac_ind = find(data.(eye_str).start == sacc_time_ms, 1);
+			assert(~isempty(sac_ind), 'error finding saccade at %d\n', sacc_time_ms)
+			data.(eye_str).start(sac_ind) = [];
+			data.(eye_str).end(sac_ind) = [];
+		end
+	end
+	
+end
+
 return
 
 
@@ -792,6 +814,7 @@ if isequal(filename,0) || isequal(pathname,0)
 else
 	disp(['Saving ', fullfile(pathname, filename)])
 	data = handles.engbertsacc_data;
+	data = remove_disabled_saccades(handles, data, 'engbert');
 	% remove disabled saccades -- FIXME
 	params.velFactor = handles.edVelFactor.String;
 	params.minSamples = handles.edMinSamples.String;
@@ -919,3 +942,6 @@ else
 end
 
 return
+
+
+
