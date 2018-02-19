@@ -30,9 +30,4 @@ else
 	end
 end
 
-%
-
-
-
-
 return % get_page_text_image
