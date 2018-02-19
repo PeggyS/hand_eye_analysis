@@ -24,8 +24,8 @@ function sac = microsacc(x,vel,VFAC,MINDUR)
 %---------------------------------------------------------------------
 
 % 1. Computing thresholds
-msdx = sqrt( median(vel(:,1).^2) - (median(vel(:,1)))^2 );
-msdy = sqrt( median(vel(:,2).^2) - (median(vel(:,2)))^2 );
+msdx = sqrt( nanmedian(vel(:,1).^2) - (nanmedian(vel(:,1)))^2 ); % changed to nanmedian - ps
+msdy = sqrt( nanmedian(vel(:,2).^2) - (nanmedian(vel(:,2)))^2 ); % changed to nanmedian - ps
 radiusx = VFAC*msdx;
 radiusy = VFAC*msdy;
 
