@@ -293,7 +293,7 @@ switch choice_num
 		handles.axes_video_overlay.Color = 'none';
 		handles.axes_video_overlay.Visible = 'off';
  		xmin_max = handles.eye_data.h_pix_z / 30;
- 		xmin_max = handles.eye_data.v_pix_z / 30;
+ 		ymin_max = handles.eye_data.v_pix_z / 30;
 % xmin_max = 640 /30;
 % ymin_max = 480 /30;
 		handles.axes_video_overlay.XLim = [-xmin_max xmin_max];
