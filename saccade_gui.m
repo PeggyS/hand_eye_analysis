@@ -22,7 +22,7 @@ function varargout = saccade_gui(varargin)
 
 % Edit the above text to modify the response to help saccade_gui
 
-% Last Modified by GUIDE v2.5 15-Feb-2018 18:44:09
+% Last Modified by GUIDE v2.5 20-Feb-2018 19:55:11
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 0;
@@ -944,4 +944,39 @@ end
 return
 
 
+% --- Executes on button press in pbLoadSaccTarget.
+function pbLoadSaccTarget_Callback(hObject, eventdata, handles)
+% hObject    handle to pbLoadSaccTarget (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+handles = parse_msg_file_for_targets(handles, 'sacc');
+guidata(handles.figure1, handles)
+return
 
+
+% --- Executes on button press in pbLoadSmoothTarget.
+function pbLoadSmoothTarget_Callback(hObject, eventdata, handles)
+% hObject    handle to pbLoadSmoothTarget (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+handles = parse_msg_file_for_targets(handles, 'smoothp');
+guidata(handles.figure1, handles)
+return
+
+
+% --- Executes on button press in tbTargetV.
+function tbTargetV_Callback(hObject, eventdata, handles)
+% hObject    handle to tbTargetV (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of tbTargetV
+
+
+% --- Executes on button press in tbTargetH.
+function tbTargetH_Callback(hObject, eventdata, handles)
+% hObject    handle to tbTargetH (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of tbTargetH
