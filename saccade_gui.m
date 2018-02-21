@@ -22,7 +22,7 @@ function varargout = saccade_gui(varargin)
 
 % Edit the above text to modify the response to help saccade_gui
 
-% Last Modified by GUIDE v2.5 20-Feb-2018 19:55:11
+% Last Modified by GUIDE v2.5 21-Feb-2018 16:15:16
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 0;
@@ -192,6 +192,16 @@ switch sacc_source
 		start_ms = 1/samp_freq;
 		sacclist.start = sac(:,1)' / samp_freq * 1000; % time in ms
         sacclist.end = sac(:,2)' / samp_freq * 1000;
+		
+		% impose minimum intersaccade interval
+		isi = str2double(h.edInterSaccInterval.String);
+		if length(sacclist.start) > 1 && isi > 0
+			% if intersacc interval < isi, delete the 2nd saccade
+			sacc_intervals = sacclist.start(2:end)-sacclist.end(1:end-1);
+			inds = find(sacc_intervals<isi);
+			sacclist.start(inds+1) = [];
+			sacclist.end(inds+1) = [];
+		end
 		
 % 		h.engbertsacc_data.(eye_str).start_time = start_ms;
 		h.engbertsacc_data.(eye_str).start = sacclist.start + h.eye_data.start_times;
@@ -753,6 +763,9 @@ function pbDefaultParamsEngbert_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 handles.edVelFactor.String = '6';
 handles.edMinSamples.String = '3';
+handles.edInterSaccInterval.String = '20';
+handles.chbxBinocular.Value = 0; 
+
 % Update handles structure
 guidata(handles.figure1, handles);
 return
@@ -969,14 +982,52 @@ function tbTargetV_Callback(hObject, eventdata, handles)
 % hObject    handle to tbTargetV (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of tbTargetV
-
+if get(hObject,'Value') % returns toggle state 
+   set(handles.line_target_y, 'Visible', 'on')
+else
+   set(handles.line_target_y, 'Visible', 'off')
+end
+return
 
 % --- Executes on button press in tbTargetH.
 function tbTargetH_Callback(hObject, eventdata, handles)
 % hObject    handle to tbTargetH (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+if get(hObject,'Value') % returns toggle state 
+   set(handles.line_target_x, 'Visible', 'on')
+else
+   set(handles.line_target_x, 'Visible', 'off')
+end
+return
 
-% Hint: get(hObject,'Value') returns toggle state of tbTargetH
+
+function edInterSaccInterval_Callback(hObject, eventdata, handles)
+% hObject    handle to edInterSaccInterval (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edInterSaccInterval as text
+%        str2double(get(hObject,'String')) returns contents of edInterSaccInterval as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edInterSaccInterval_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edInterSaccInterval (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in chbxBinocular.
+function chbxBinocular_Callback(hObject, eventdata, handles)
+% hObject    handle to chbxBinocular (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of chbxBinocular
