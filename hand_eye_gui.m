@@ -277,11 +277,8 @@ switch choice_num
 					handles.edPlaybackSpeed, handles.ahead1samp, handles.back1samp, handles.samp_tweak, ...
 					handles.text21, handles.text20, handles.pbBack, handles.pbForward];
 		set(obj_list, 'Visible', 'off')
-		% make eye data axes wider
-		ax_pos = get(handles.axes_eye,'pos');
-		ax_pos(3) = 0.9;
-		set(handles.axes_eye,'pos', ax_pos)
-		% if there is apdm data - resize those axes too - FIXME
+ 		% make eye data axes wider
+		handles = widen_axes(handles);
 		% show toggle buttons 
 		set(handles.txtSaccadeTargets, 'Visible', 'on')
 		set(handles.tbTargetH, 'Visible', 'on')
@@ -352,6 +349,14 @@ end
 % Update handles structure
 guidata(hObject, handles);
 return
+
+
+% --------------
+function handles = widen_axes(handles)
+ax_list = {'axes_eye', 'axes_hand', 'axes_head', 'axes_sensor3'};
+for ax = ax_list
+	handles.(ax{1}).Position(3) = 0.9;
+end
 
 % ---------------------
 function handles = add_scrub_lines(handles, init_pos)
