@@ -85,6 +85,7 @@ for line_cnt = 1:length(msgs)
 				/30;
 		end
 	elseif length(word_list) >= blank_msg_ind &&  strcmpi(word_list{blank_msg_ind}, blank_msg)
+
 		t_str = regexp(word_list{2}, '\d*', 'match'); % the millisecond number after 'MSG'
 		t2_str = regexp(word_list{3}, '\d*', 'match'); % the additional milliseconds to add to the first number to get the actual time of the event
 		t_event = str2double(t_str{1}) + str2double(t2_str{1});
