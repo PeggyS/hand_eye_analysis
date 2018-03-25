@@ -70,7 +70,7 @@ if ~ok
     return
 end
 
-if choice_num == 9 % restore data 
+if choice_num == 11 % restore data 
     [fnSave, pnSave] = uigetfile({'*.mat'}, 'Choose *.mat file ...');
     if isequal(fnSave,0) || isequal(pnSave,0)
         disp('no  file chosen ... ')
@@ -110,7 +110,7 @@ else
 end
 
 
-if choice_num==1 || choice_num==3 || choice_num==5 || choice_num==7 % there is opal/apdm data to read in
+if choice_num==1 || choice_num==3 || choice_num==5 || choice_num==7  || choice_num==9 % there is opal/apdm data to read in
 % if ~isfield(handles, 'restore_data')
     % apdm sensor data - we can handle up to 2 sensors
     disp('Choose APDM data *.h5 file')
