@@ -62,6 +62,8 @@ str = {'Scenecam task with Opal', 'Scenecam task without Opal', ...
 	'Smooth Pursuit with Opal', 'Smooth Pursuit without Opal', ...
     'Picture Difference with Opal', 'Picture Difference without Opal', ...
 	'Reading Text with Opal', 'Reading Text without Opal', ...
+    'Gaze Holding with Opal', 'Gaze Holding without Opal', ...
+    'Vergence with Opal', 'Vergence without Opal', ...
     'Restore Previous Analysis'};
 [choice_num, ok] = listdlg('PromptString', 'Select the type of experiment', ...
     'SelectionMode','single','ListString',str);
@@ -70,7 +72,7 @@ if ~ok
     return
 end
 
-if choice_num == 11 % restore data 
+if choice_num == 15 % restore data 
     [fnSave, pnSave] = uigetfile({'*.mat'}, 'Choose *.mat file ...');
     if isequal(fnSave,0) || isequal(pnSave,0)
         disp('no  file chosen ... ')
@@ -102,7 +104,8 @@ samp_freq = handles.eye_data.samp_freq;
 numsamps = handles.eye_data.numsamps;
 t = (1:numsamps)/samp_freq;
 if isfield(handles, 'restore_data')
-	if ~isempty(handles.restore_data.scrub_line_eye.XData)
+	if isfield(handles.restore_data, 'scrub_line_eye' ) && ...
+			~isempty(handles.restore_data.scrub_line_eye.XData)
 		updateEdTime(handles, handles.restore_data.scrub_line_eye.XData(1));
 	end
 else
@@ -153,8 +156,12 @@ switch choice_num
 		handles = get_image_and_clicks(handles);
 	case {9 10} % reading text: read in text page image
 		handles = get_page_text_image(handles);
-	case 11 % restoring data from *_gui.mat
-		% change th choice_num corresponding to the saved .mat
+    case {11 12} % gaze holding: 
+% 		handles = handles;
+	case {13 14} % vergence: get led data
+		handles = get_led_data(handles);
+	case 15 % restoring data from *_gui.mat
+		% change the choice_num corresponding to the saved .mat
 		if isfield(handles, 'vid_filename')
 			choice_num = 1;
 			 % try to reload the vid_file
@@ -172,6 +179,8 @@ switch choice_num
 			choice_num = 3;
 		elseif isfield(handles, 'click_data_tbl')
 			choice_num = 7;
+		elseif isfield(handles, 'led_data_tbl')
+			choice_num = 13;
 		end
 		
 end
@@ -306,6 +315,17 @@ switch choice_num
 			% mouse clicks
 			handles = display_mouse_clicks(handles);
 		end
+	case {13 14} % vergence
+		% remove video axes
+		delete(handles.axes_video_overlay)
+		delete(handles.axes_video)
+		% make extraneous objects invisible
+		obj_list = [handles.tbPlayPause, handles.text29, handles.text2, handles.edTime, handles.text2, handles.text23, ...
+					handles.edPlaybackSpeed, handles.ahead1samp, handles.back1samp, handles.samp_tweak, ...
+					handles.text21, handles.text20, handles.pbBack, handles.pbForward];
+		set(obj_list, 'Visible', 'off')
+ 		% make eye data axes wider
+		handles = widen_axes(handles);
 end
 
 	
