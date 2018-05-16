@@ -316,6 +316,19 @@ switch choice_num
 			% mouse clicks
 			handles = display_mouse_clicks(handles);
 		end
+		
+	case {11 12} % gaze holding
+		% remove video axes
+		delete(handles.axes_video_overlay)
+		delete(handles.axes_video)
+		% make extraneous objects invisible
+		obj_list = [handles.tbPlayPause, handles.text29, handles.text2, handles.edTime, handles.text2, handles.text23, ...
+					handles.edPlaybackSpeed, handles.ahead1samp, handles.back1samp, handles.samp_tweak, ...
+					handles.text21, handles.text20, handles.pbBack, handles.pbForward];
+		set(obj_list, 'Visible', 'off')
+ 		% make eye data axes wider
+		handles = widen_axes(handles);
+		
 	case {13 14} % vergence
 		% remove video axes
 		delete(handles.axes_video_overlay)
