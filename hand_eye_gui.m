@@ -209,10 +209,10 @@ handles = resizeAxes(handles);
 
 % initialize the data in the axes
 axes(handles.axes_eye)
-handles.line_rh = line(t, handles.eye_data.rh.data, 'Tag', 'line_rh', 'Color', 'g');
-handles.line_lh = line(t, handles.eye_data.lh.data, 'Tag', 'line_lh', 'Color', 'r');
-handles.line_rv = line(t, handles.eye_data.rv.data, 'Tag', 'line_rv', 'Color', 'g', 'LineStyle', '--');
-handles.line_lv = line(t, handles.eye_data.lv.data, 'Tag', 'line_lv', 'Color', 'r', 'LineStyle', '--');
+handles.line_rh = line(t, handles.eye_data.rh.pos, 'Tag', 'line_rh', 'Color', 'g');
+handles.line_lh = line(t, handles.eye_data.lh.pos, 'Tag', 'line_lh', 'Color', 'r');
+handles.line_rv = line(t, handles.eye_data.rv.pos, 'Tag', 'line_rv', 'Color', 'g', 'LineStyle', '--');
+handles.line_lv = line(t, handles.eye_data.lv.pos, 'Tag', 'line_lv', 'Color', 'r', 'LineStyle', '--');
 ylabel('Gaze Pos (\circ)')
 
 
@@ -440,7 +440,7 @@ return
 % -------------------------------------------------------------
 function handles = request_vid_reader(handles)
 disp('Choose a Scenelink video overlay file: ')
-filefilt={'*.m4v;*.mp4;*.mov;*.avi'};
+filefilt={'*.m4v;*.mp4;*.mov'};
 [fnSave, pnSave] = uigetfile(filefilt,'Choose a Scenelink video file.');
 if isequal(fnSave,0) || isequal(pnSave,0)
    disp('no file chosen ... ')
@@ -1091,32 +1091,32 @@ if ind == 0, ind = 1; end
 r_eye = findobj(handles.figure1, 'Tag', 'line_right_eye_overlay');
 % samp_tweak = 0;
 if isempty(r_eye)
-    line(handles.axes_video_overlay, handles.eye_data.rh.data(ind), ...
-       handles.eye_data.rv.data(ind+samp_tweak), ...
+    line(handles.axes_video_overlay, handles.eye_data.rh.pos(ind), ...
+       handles.eye_data.rv.pos(ind+samp_tweak), ...
        'Color', 'g', 'Marker', 'o', 'MarkerSize', 20, ... %'MarkerFaceColor', 'g', ...
        'Tag', 'line_right_eye_overlay', 'linewidth',3)
 else
-   r_eye.XData = handles.eye_data.rh.data(ind);
-   r_eye.YData = handles.eye_data.rv.data(ind);
+   r_eye.XData = handles.eye_data.rh.pos(ind);
+   r_eye.YData = handles.eye_data.rv.pos(ind);
 end
 
 % left
 l_eye = findobj(handles.figure1, 'Tag', 'line_left_eye_overlay');
 if isempty(l_eye)
-   line(handles.axes_video_overlay, handles.eye_data.lh.data(ind), ...
-      handles.eye_data.lv.data(ind+samp_tweak), ...
+   line(handles.axes_video_overlay, handles.eye_data.lh.pos(ind), ...
+      handles.eye_data.lv.pos(ind+samp_tweak), ...
       'Color', 'r', 'Marker', 'o', 'MarkerSize', 20, ... %'MarkerFaceColor', 'r', ...
         'Tag', 'line_left_eye_overlay', 'linewidth',3)
 else
-   l_eye.XData = handles.eye_data.lh.data(ind);
-   l_eye.YData = handles.eye_data.lv.data(ind);
+   l_eye.XData = handles.eye_data.lh.pos(ind);
+   l_eye.YData = handles.eye_data.lv.pos(ind);
 end
 return
 
 function moveVideoFrame(handles, frames)
 samp_freq = handles.eye_data.samp_freq;
 min_time = 1/samp_freq;
-max_time = min([ length(handles.eye_data.rh.data) / samp_freq, ...
+max_time = min([ length(handles.eye_data.rh.pos) / samp_freq, ...
    handles.video_reader.Duration+1/handles.video_reader.FrameRate]);
 
 old_time = str2double(handles.edTime.String);
@@ -1715,7 +1715,7 @@ for fix_num = 1:length(h.eye_data.(eye_str).fixation.fixlist.start)
    
    fix_start_ind = round(time1*samp_freq);
    fix_stop_ind  = round(time2*samp_freq);
-   tempdata = h.eye_data.(eye_str).data;
+   tempdata = h.eye_data.(eye_str).pos;
    segment = tempdata(fix_start_ind:fix_stop_ind);
    time3 = maket(segment)+time1;
    line(time3, segment,'Tag', ['fixation_' eye_str '_#' num2str(fix_num)], 'Color','b' , ...
@@ -1785,7 +1785,7 @@ samp_freq = h.eye_data.samp_freq;
 for sacc_num = 1:length(h.eye_data.(eye_str).saccades(sacc_type_num).sacclist.start)
    % saccade begin
    time1 = (h.eye_data.(eye_str).saccades(sacc_type_num).sacclist.start(sacc_num) - start_ms)/1000; %in seconds
-   y = h.eye_data.(eye_str).data(round(time1*samp_freq));
+   y = h.eye_data.(eye_str).pos(round(time1*samp_freq));
    h_beg_line = line( time1, y, 'Tag', ['saccade_' sacc_source '_' eye_str '_#' num2str(sacc_num) '_begin'], ...
       'Color', beg_line_color, 'Marker', 'o', 'MarkerSize', 15);
    eye_m = uicontextmenu;
@@ -1801,14 +1801,14 @@ for sacc_num = 1:length(h.eye_data.(eye_str).saccades(sacc_type_num).sacclist.st
    
    % saccade end
    time2 = (h.eye_data.(eye_str).saccades(sacc_type_num).sacclist.end(sacc_num) - start_ms)/1000;
-   y = h.eye_data.(eye_str).data(round(time2*samp_freq));
+   y = h.eye_data.(eye_str).pos(round(time2*samp_freq));
    line( time2, y, 'Tag', ['saccade_' sacc_source '_' eye_str '_#' num2str(sacc_num) '_end'], ...
       'Color', end_line_color, 'Marker', 'o', 'MarkerSize', 15);
    
    % saccade segment
    sac_start_ind = round(time1*samp_freq);
    sac_stop_ind  = round(time2*samp_freq);
-   tempdata = h.eye_data.(eye_str).data;
+   tempdata = h.eye_data.(eye_str).pos;
    segment = tempdata(sac_start_ind:sac_stop_ind);
    time3 = maket(segment)+time1 - 1/samp_freq;
    line(time3, segment,'Tag', ['saccade_' sacc_source '_' eye_str '_#' num2str(sacc_num) ], 'Color','b' , ...
