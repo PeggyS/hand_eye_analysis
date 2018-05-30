@@ -114,7 +114,7 @@ end
 
 
 if choice_num==1 || choice_num==3 || choice_num==5 || choice_num==7  || choice_num==9 ...
-		|| choice_num==13  % there is opal/apdm data to read in
+		|| choice_num==11 || choice_num==13  % there is opal/apdm data to read in
 % if ~isfield(handles, 'restore_data')
     % apdm sensor data - we can handle up to 2 sensors
     disp('Choose APDM data *.h5 file')
