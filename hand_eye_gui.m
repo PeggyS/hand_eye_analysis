@@ -690,32 +690,34 @@ h_patch.UserData.h_r_line = h_right_line;
 h_patch.UserData.h_l_line = h_left_line;
 
 % matching patch in other axes
-if ~isempty(handles.apdm_data.sensor)
-   axes(handles.axes_hand)
-   ylims = get(handles.axes_hand, 'YLim');
-   h_patch2 = patch([xlims(1) xlims(1) xlims(2) xlims(2)], ...
-      [ylims(1) ylims(2) ylims(2) ylims(1)], p_color);
-   set(h_patch2, 'FaceAlpha', 0.5, 'Tag', [tag_str '_id#' num2str(patch_id) '_patch'])
-   uistack(h_patch2, 'bottom')
-   handles.linkprop_list(end+1) = linkprop([h_patch, h_patch2], 'XData');
-end
-if length(handles.apdm_data.sensor) > 1
-   axes(handles.axes_head)
-   ylims = get(handles.axes_head, 'YLim');
-   h_patch2 = patch([xlims(1) xlims(1) xlims(2) xlims(2)], ...
-      [ylims(1) ylims(2) ylims(2) ylims(1)], p_color);
-   set(h_patch2, 'FaceAlpha', 0.5, 'Tag', [tag_str '_id#' num2str(patch_id) '_patch'])
-   uistack(h_patch2, 'bottom')
-   handles.linkprop_list(end+1) = linkprop([h_patch, h_patch2], 'XData');
-end
-if length(handles.apdm_data.sensor) > 2
-   axes(handles.axes_sensor3)
-   ylims = get(handles.axes_sensor3, 'YLim');
-   h_patch2 = patch([xlims(1) xlims(1) xlims(2) xlims(2)], ...
-      [ylims(1) ylims(2) ylims(2) ylims(1)], p_color);
-   set(h_patch2, 'FaceAlpha', 0.5, 'Tag', [tag_str '_id#' num2str(patch_id) '_patch'])
-   uistack(h_patch2, 'bottom')
-   handles.linkprop_list(end+1) = linkprop([h_patch, h_patch2], 'XData');
+if isfield(handles, 'apdm_data')
+	if ~isempty(handles.apdm_data.sensor)
+	   axes(handles.axes_hand)
+	   ylims = get(handles.axes_hand, 'YLim');
+	   h_patch2 = patch([xlims(1) xlims(1) xlims(2) xlims(2)], ...
+		  [ylims(1) ylims(2) ylims(2) ylims(1)], p_color);
+	   set(h_patch2, 'FaceAlpha', 0.5, 'Tag', [tag_str '_id#' num2str(patch_id) '_patch'])
+	   uistack(h_patch2, 'bottom')
+	   handles.linkprop_list(end+1) = linkprop([h_patch, h_patch2], 'XData');
+	end
+	if length(handles.apdm_data.sensor) > 1
+	   axes(handles.axes_head)
+	   ylims = get(handles.axes_head, 'YLim');
+	   h_patch2 = patch([xlims(1) xlims(1) xlims(2) xlims(2)], ...
+		  [ylims(1) ylims(2) ylims(2) ylims(1)], p_color);
+	   set(h_patch2, 'FaceAlpha', 0.5, 'Tag', [tag_str '_id#' num2str(patch_id) '_patch'])
+	   uistack(h_patch2, 'bottom')
+	   handles.linkprop_list(end+1) = linkprop([h_patch, h_patch2], 'XData');
+	end
+	if length(handles.apdm_data.sensor) > 2
+	   axes(handles.axes_sensor3)
+	   ylims = get(handles.axes_sensor3, 'YLim');
+	   h_patch2 = patch([xlims(1) xlims(1) xlims(2) xlims(2)], ...
+		  [ylims(1) ylims(2) ylims(2) ylims(1)], p_color);
+	   set(h_patch2, 'FaceAlpha', 0.5, 'Tag', [tag_str '_id#' num2str(patch_id) '_patch'])
+	   uistack(h_patch2, 'bottom')
+	   handles.linkprop_list(end+1) = linkprop([h_patch, h_patch2], 'XData');
+	end
 end
 
 % Update handles structure
@@ -1797,6 +1799,8 @@ for sacc_num = 1:length(h.eye_data.(eye_str).saccades(sacc_type_num).sacclist.st
    uimenu(eye_m, 'Label', 'Task', 'Callback', {@labelSaccade, 'Task'}, ...
       'Tag', ['menu_saccade_' sacc_source '_' eye_str '_#' num2str(sacc_num) '_begin']);
    uimenu(eye_m, 'Label', 'Post-Task', 'Callback',  {@labelSaccade, 'PostTask'}, ...
+      'Tag', ['menu_saccade_' sacc_source '_' eye_str '_#' num2str(sacc_num) '_begin']);
+  uimenu(eye_m, 'Label', 'Catch-Up', 'Callback',  {@labelSaccade, 'CathUp'}, ...
       'Tag', ['menu_saccade_' sacc_source '_' eye_str '_#' num2str(sacc_num) '_begin']);
    
    % saccade end
