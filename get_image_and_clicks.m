@@ -82,6 +82,9 @@ handles.click_data_tbl.time_display_begin(1) = t_disp_begin;
 
 
 line_ind = line_cnt;
+tbl_row = 0;  % if coordinates are not in the msg file after MOUSE_CLICK, then assume that they
+					% appear in cronological order. This is to accomodate
+					% older versions of data recording.
 % continue reading from the found synctime
 for line_cnt = line_ind:length(msgs)
 	word_list = split(msgs{line_cnt,:});
@@ -89,12 +92,19 @@ for line_cnt = line_ind:length(msgs)
 % 		if line_cnt > 182
 % 		keyboard
 % 	end
-	if strcmp(word_list{1}, 'MSG') && length(word_list)>5 && strcmp(word_list{4}, 'MOUSE_CLICK')
-		x_str = regexp(word_list{5}, '\d+', 'match');
-		y_str = regexp(word_list{6}, '\d+', 'match');
-		click_coord_str = ['['  x_str{:}  ', ' y_str{:}  ']']; 
-		tbl_row = strcmp(handles.click_data_tbl.CLICK_COORDINATES, click_coord_str);
-		handles.click_data_tbl.abs_click_time(tbl_row) = str2double(word_list{2});
+	
+	if strcmp(word_list{1}, 'MSG') && length(word_list)>3 && strcmp(word_list{4}, 'MOUSE_CLICK')
+		if length(word_list)>5
+			x_str = regexp(word_list{5}, '\d+', 'match');
+			y_str = regexp(word_list{6}, '\d+', 'match');
+			click_coord_str = ['['  x_str{:}  ', ' y_str{:}  ']']; 
+			tbl_row = strcmp(handles.click_data_tbl.CLICK_COORDINATES, click_coord_str);
+			handles.click_data_tbl.abs_click_time(tbl_row) = str2double(word_list{2});
+		else % assuming clicks are in order of saved in the click_data.txt file and in message file
+%  			keyboard
+			tbl_row = tbl_row+1;
+			handles.click_data_tbl.abs_click_time(tbl_row) = str2double(word_list{2});
+		end
 	end % found mouse_click
 end 
 
