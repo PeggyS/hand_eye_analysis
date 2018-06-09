@@ -821,9 +821,16 @@ for cnt = 1:length(y_line_vals)
 end
 
 % left pic vertical lines
-xright = -2;
+xright = -0.5;
 x_line_incr = (xright - handles.axes_video_overlay.XLim(1))/5;
 x_line_vals = handles.axes_video_overlay.XLim(1) : x_line_incr : xright;
+for cnt = 1:length(x_line_vals)
+	line([x_line_vals(cnt), x_line_vals(cnt)], handles.axes_video_overlay.YLim)
+end
+% right pic vertical lines
+xleft = 0.5;
+x_line_incr = (handles.axes_video_overlay.XLim(2)-xleft)/5;
+x_line_vals = xleft : x_line_incr :  handles.axes_video_overlay.XLim(2);
 for cnt = 1:length(x_line_vals)
 	line([x_line_vals(cnt), x_line_vals(cnt)], handles.axes_video_overlay.YLim)
 end
