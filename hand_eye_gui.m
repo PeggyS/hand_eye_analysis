@@ -815,9 +815,12 @@ axes(handles.axes_video_overlay)
 
 % horizontal lines
 y_line_incr = diff(handles.axes_video_overlay.YLim)/5;
-y_line_vals = handles.axes_video_overlay.YLim(1) : y_line_incr : handles.axes_video_overlay.YLim(2);
+y_line_vals = handles.axes_video_overlay.YLim(2) : -y_line_incr : handles.axes_video_overlay.YLim(1);
 for cnt = 1:length(y_line_vals)
-	line(handles.axes_video_overlay.XLim, [y_line_vals(cnt), y_line_vals(cnt)])
+	hl = line(handles.axes_video_overlay.XLim, [y_line_vals(cnt), y_line_vals(cnt)]);
+	if cnt > 1
+		hl.Tag = ['line_grid_bottom_row_' num2str(cnt-1)];
+	end
 end
 
 % left pic vertical lines
@@ -825,14 +828,20 @@ xright = -0.5;
 x_line_incr = (xright - handles.axes_video_overlay.XLim(1))/5;
 x_line_vals = handles.axes_video_overlay.XLim(1) : x_line_incr : xright;
 for cnt = 1:length(x_line_vals)
-	line([x_line_vals(cnt), x_line_vals(cnt)], handles.axes_video_overlay.YLim)
+	hl = line([x_line_vals(cnt), x_line_vals(cnt)], handles.axes_video_overlay.YLim);
+	if cnt > 1
+		hl.Tag = ['line_left_pic_grid_right_col_' num2str(cnt-1)];
+	end
 end
 % right pic vertical lines
 xleft = 0.5;
 x_line_incr = (handles.axes_video_overlay.XLim(2)-xleft)/5;
 x_line_vals = xleft : x_line_incr :  handles.axes_video_overlay.XLim(2);
 for cnt = 1:length(x_line_vals)
-	line([x_line_vals(cnt), x_line_vals(cnt)], handles.axes_video_overlay.YLim)
+	hl = line([x_line_vals(cnt), x_line_vals(cnt)], handles.axes_video_overlay.YLim);
+	if cnt > 1
+		hl.Tag = ['line_right_pic_grid_right_col_' num2str(cnt-1)];
+	end
 end
 return
 
@@ -1274,6 +1283,13 @@ lvv = d2pt(lv, 3, handles.eye_data.samp_freq);
 out_tbl = table(t_eye', rh', lh', rv', lv', rhv, lhv, rvv, lvv);
 out_tbl.Properties.VariableNames = {'t_eye', 'rh', 'lh', 'rv', 'lv', 'rh_vel', 'lh_vel', 'rv_vel', 'lv_vel'};
 
+% for pic diff & reading tasks, add cols for region of interest
+h_lines = findobj(handles.axes_video_overlay, '-regexp', 'Tag', 'line.*grid.*');
+grid_vals = [];
+if ~isempty(h_lines)
+	grid_vals = lines_to_grid(h_lines);
+	out_tbl.region_of_interest = cell(height(out_tbl), 1);
+end
 
 % saccades
 sacc_type_list = {'lh' 'lv' 'rh' 'rv'};
@@ -1286,8 +1302,9 @@ for ss_cnt = 1:length(sacc_source_list)
 			% add column in table for this type of saccade
 			out_tbl.([sacc_type '_saccades']) = cell(height(out_tbl), 1);
 			out_tbl.([sacc_type '_saccades_labels']) = cell(height(out_tbl), 1);
+			
 			for sac_num = 1:length(sacc_beg_lines)
-				if strcmp(sacc_beg_lines(sac_num).Marker, 'o') % it's enabled 'o', not disabled 'x'
+				if strcmp(sacc_beg_lines(sac_num).Marker, 'o') % it's enabled 'o', disabled 'x'
 					beg_t = sacc_beg_lines(sac_num).XData;
 					beg_line_tag = sacc_beg_lines(sac_num).Tag;
 					end_line_tag = strrep(beg_line_tag, 'begin', 'end');
@@ -1309,8 +1326,16 @@ for ss_cnt = 1:length(sacc_source_list)
 						end
 					end
 					
-					
-					
+					% if ROI grid
+					if ~isempty(grid_vals)
+						eye = sacc_type(end-1);
+						h_eye = [eye 'h'];
+						v_eye = [eye 'v'];
+						out_tbl.region_of_interest{beg_row} = find_roi(grid_vals, ...
+								out_tbl.(h_eye)(beg_row), out_tbl.(v_eye)(beg_row));
+						out_tbl.region_of_interest{end_row} = find_roi(grid_vals, ...
+								out_tbl.(h_eye)(end_row), out_tbl.(v_eye)(end_row));
+					end
 				end
 			end % loop through each sacc_beg_line
 		end % if beg lines is not empty
@@ -1696,6 +1721,47 @@ writetable(out_tbl, export_filename, 'delimiter', '\t');
 
 % close the waitbar
 close(h_wait)
+return
+
+% -------------------------------------
+function grid_vals = lines_to_grid(h_lines)
+y_lines = findobj(h_lines, '-regexp', 'Tag', '.*bottom.*');
+for cnt = 1:length(y_lines)
+	tmp_cell = regexp(y_lines(cnt).Tag, '\d+', 'match');
+	num = str2double(tmp_cell{1});
+	grid_vals.bottom_row(num) = y_lines(cnt).YData(1);
+end
+
+x_lines = findobj(h_lines, '-regexp', 'Tag', '.*left_pic.*');
+for cnt = 1:length(x_lines)
+	tmp_cell = regexp(x_lines(cnt).Tag, '\d+', 'match');
+	num = str2double(tmp_cell{1});
+	grid_vals.left_pic_right_col(num) = x_lines(cnt).XData(1);
+end
+
+x_lines = findobj(h_lines, '-regexp', 'Tag', '.*right_pic.*');
+for cnt = 1:length(x_lines)
+	tmp_cell = regexp(x_lines(cnt).Tag, '\d+', 'match');
+	num = str2double(tmp_cell{1});
+	grid_vals.right_pic_right_col(num) = x_lines(cnt).XData(1);
+end
+return
+
+% -------------------------------------
+function roi = find_roi(grid_vals, x_eye, y_eye)
+roi = [];
+
+grid_row = find(grid_vals.bottom_row <= y_eye, 1);
+
+if isfield(grid_vals, 'left_pic_right_col')
+	if x_eye < 0
+		left_grid_col = find(grid_vals.left_pic_right_col >= x_eye, 1);
+		roi = (grid_row-1) * 5 + 1 + left_grid_col; % top-left = 2, numbered left to right in each row
+	else
+		right_grid_col = find(grid_vals.right_pic_right_col >= x_eye, 1);
+		roi = (grid_row-1) * 5 + 25 + right_grid_col; % top-left = 26, numbered left to right in each row
+	end
+end
 return
 
 % --------------------------
