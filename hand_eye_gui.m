@@ -295,7 +295,7 @@ switch choice_num
 		set(handles.tbTargetV, 'Visible', 'on')
 	case {7 8 9 10} % picture diff & read text
 		imshow(handles.im_data, 'Parent', handles.axes_video, 'XData', [0 1024], 'YData', [0 768] )
-		
+% 		handles.axes_video.Visible = 'on';
 		% eye position overlay on pciture
 		handles.axes_video_overlay.Color = 'none';
 		handles.axes_video_overlay.Visible = 'off';
@@ -315,6 +315,8 @@ switch choice_num
 		if choice_num==7 || choice_num==8
 			% mouse clicks
 			handles = display_mouse_clicks(handles);
+			% region of interest grid
+			handles = add_pict_diff_roi_grid(handles);
 		end
 		
 	case {11 12} % gaze holding
@@ -781,6 +783,7 @@ if isfield(handles,'apdm_data') && isfield(handles.apdm_data, 'annot')
 end
 return
 
+% --------------------------------------------------------------
 function handles = display_mouse_clicks(handles)
 if ~isfield(handles, 'click_data_tbl')
 	return
@@ -806,6 +809,27 @@ for click_cnt = 1:height(handles.click_data_tbl)
 end
 return
 
+% ------------------------------------------------------------
+function handles = add_pict_diff_roi_grid(handles)
+axes(handles.axes_video_overlay)
+
+% horizontal lines
+y_line_incr = diff(handles.axes_video_overlay.YLim)/5;
+y_line_vals = handles.axes_video_overlay.YLim(1) : y_line_incr : handles.axes_video_overlay.YLim(2);
+for cnt = 1:length(y_line_vals)
+	line(handles.axes_video_overlay.XLim, [y_line_vals(cnt), y_line_vals(cnt)])
+end
+
+% left pic vertical lines
+xright = -2;
+x_line_incr = (xright - handles.axes_video_overlay.XLim(1))/5;
+x_line_vals = handles.axes_video_overlay.XLim(1) : x_line_incr : xright;
+for cnt = 1:length(x_line_vals)
+	line([x_line_vals(cnt), x_line_vals(cnt)], handles.axes_video_overlay.YLim)
+end
+return
+
+% ------------------------------------------------------------
 function [hcmenu, ud] = createClickLineMenu(h_line)
 hcmenu = uicontextmenu;
 ud.hMenuShowClick = uimenu(hcmenu, 'Label', 'Show Location', 'Tag', 'menuShowClick', ...
