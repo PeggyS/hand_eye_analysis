@@ -1304,6 +1304,7 @@ for ss_cnt = 1:length(sacc_source_list)
 			out_tbl.([sacc_type '_saccades_labels']) = cell(height(out_tbl), 1);
 			
 			for sac_num = 1:length(sacc_beg_lines)
+				waitbar(sac_num/length(sacc_beg_lines), h_wait, ['Getting ' strrep(sacc_type, '_', ' ') ' saccades'])
 				if strcmp(sacc_beg_lines(sac_num).Marker, 'o') % it's enabled 'o', disabled 'x'
 					beg_t = sacc_beg_lines(sac_num).XData;
 					beg_line_tag = sacc_beg_lines(sac_num).Tag;
@@ -1318,6 +1319,7 @@ for ss_cnt = 1:length(sacc_source_list)
 					out_tbl.([sacc_type '_saccades']){end_row} = end_line_tag;
 					
 					% find the label menus for this beg_saccade & add a the label if checked
+					% this line takes 69% of the time - try to FIX ME
 					h_menus = findobj(handles.axes_eye.Parent, 'Tag',  strrep(sacc_beg_lines(sac_num).Tag, 'saccade', 'menu_saccade'));
 					for m_cnt = 1:length(h_menus)
 						if strcmp(h_menus(m_cnt).Checked, 'on')

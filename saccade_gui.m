@@ -74,10 +74,10 @@ t = (1:numsamps)/samp_freq;
 
 % initialize the data in the axes
 axes(handles.axes_eye)
-handles.line_rh = line(t, handles.eye_data.rh.data, 'Tag', 'line_rh', 'Color', 'g');
-handles.line_lh = line(t, handles.eye_data.lh.data, 'Tag', 'line_lh', 'Color', 'r');
-handles.line_rv = line(t, handles.eye_data.rv.data, 'Tag', 'line_rv', 'Color', 'g', 'LineStyle', '--');
-handles.line_lv = line(t, handles.eye_data.lv.data, 'Tag', 'line_lv', 'Color', 'r', 'LineStyle', '--');
+handles.line_rh = line(t, handles.eye_data.rh.pos, 'Tag', 'line_rh', 'Color', 'g');
+handles.line_lh = line(t, handles.eye_data.lh.pos, 'Tag', 'line_lh', 'Color', 'r');
+handles.line_rv = line(t, handles.eye_data.rv.pos, 'Tag', 'line_rv', 'Color', 'g', 'LineStyle', '--');
+handles.line_lv = line(t, handles.eye_data.lv.pos, 'Tag', 'line_lv', 'Color', 'r', 'LineStyle', '--');
 ylabel('Gaze Pos (\circ)')
 xlabel('Time (s)')
 
@@ -146,7 +146,7 @@ switch sacc_source
         extend = str2double(h.edExtend.String);
         dataName = 'unknown';
         strict_strip = 1;
-        [ptlist, pvlist] = findsaccs(h.eye_data.(eye_str).data, thresh_a, thresh_v, acc_stop, ...
+        [ptlist, pvlist] = findsaccs(h.eye_data.(eye_str).pos, thresh_a, thresh_v, acc_stop, ...
 			vel_stop, gap_fp, gap_sp, vel_or_acc, extend, dataName, strict_strip);
         saccstart = evalin('base','saccstart');
         saccstop = evalin('base','saccstop');
@@ -173,7 +173,7 @@ switch sacc_source
 		h_str = strrep(eye_str, 'v', 'h');
 		v_str = strrep(eye_str, 'h', 'v');
 		% eye data converted to angular minutes of arc (from degrees)
-		x = [h.eye_data.(h_str).data h.eye_data.(v_str).data] * 60;
+		x = [h.eye_data.(h_str).pos h.eye_data.(v_str).pos] * 60;
 		
 		% velocity using function from Asef
 		v = vecvel(x, samp_freq, 2);
@@ -215,7 +215,7 @@ end
 for sacc_num = 1:length(sacclist.start)
    % saccade begin
    time1 = (sacclist.start(sacc_num) - start_ms)/1000; %in seconds
-   y = h.eye_data.(eye_str).data(round(time1*samp_freq));
+   y = h.eye_data.(eye_str).pos(round(time1*samp_freq));
    h_beg_line = line( time1, y, 'Tag', ['saccade_' eye_str '_' sacc_source '_#' num2str(sacc_num) '_begin'], ...
       'Color', beg_line_color, 'Marker', sacc_marker, 'MarkerSize', 10);
    eye_m = uicontextmenu;
@@ -225,7 +225,7 @@ for sacc_num = 1:length(sacclist.start)
    
    % saccade end
    time2 = (sacclist.end(sacc_num) - start_ms)/1000;
-   y = h.eye_data.(eye_str).data(round(time2*samp_freq));
+   y = h.eye_data.(eye_str).pos(round(time2*samp_freq));
    line( time2, y, 'Tag', ['saccade_' eye_str '_' sacc_source '_#' num2str(sacc_num) '_end'], ...
       'Color', end_line_color, 'Marker', sacc_marker, 'MarkerSize', 10);
    
@@ -233,7 +233,7 @@ for sacc_num = 1:length(sacclist.start)
    sac_start_ind = round(time1*samp_freq);
    sac_stop_ind  = round(time2*samp_freq);
    if sac_stop_ind-sac_start_ind > 2	% if start and stop are consecutive time points, then there is no segment
-	   tempdata = h.eye_data.(eye_str).data;
+	   tempdata = h.eye_data.(eye_str).pos;
 	   segment = tempdata(sac_start_ind:sac_stop_ind);
 	   time3 = maket(segment)+time1 - 1/samp_freq;
 	   line(time3, segment,'Tag', ['saccade_' eye_str '_' sacc_source '_#' num2str(sacc_num) ], 'Color','b' , ...
