@@ -188,10 +188,31 @@ switch sacc_source
 		%   sac(1:num,6)   horizontal component (delta x)
 		%   sac(1:num,7)   vertical component (delta y)
 		
+		% if binocular only saccades
+		if h.chbxBinocular.Value
+			% get the other eye's engbert saccades
+			if strcmp(h_str(1), 'l')
+				ho_str=['r' h_str(2)];
+				vo_str=['r' v_str(2)];
+			else
+				ho_str=['l' h_str(2)];
+				vo_str=['l' v_str(2)];
+			end
+			x_other = [h.eye_data.(ho_str).pos h.eye_data.(vo_str).pos] * 60;
+			v_other = vecvel(x_other, samp_freq, 2);
+			sac_other = microsacc(x_other, v_other, vel_factor, min_num_samples);
+			
+			sac = binsacc(sac, sac_other);
+		end
+		
 		% save saccades in handles
 		start_ms = 1/samp_freq;
 		sacclist.start = sac(:,1)' / samp_freq * 1000; % time in ms
         sacclist.end = sac(:,2)' / samp_freq * 1000;
+		sacclist.peak_vel = sac(:,3)';
+		sacclist.sacc_ampl = sac(:,4)';
+		sacclist.sacc_horiz_component = sac(:,6)';
+		sacclist.sacc_vert_component = sac(:,7)';
 		
 		% impose minimum intersaccade interval
 		isi = str2double(h.edInterSaccInterval.String);
@@ -201,11 +222,19 @@ switch sacc_source
 			inds = find(sacc_intervals<isi);
 			sacclist.start(inds+1) = [];
 			sacclist.end(inds+1) = [];
+			sacclist.peak_vel(inds+1) = [];
+			sacclist.sacc_ampl(inds+1) = [];
+			sacclist.sacc_horiz_component(inds+1) = [];
+			sacclist.sacc_vert_component(inds+1) = [];
 		end
 		
 % 		h.engbertsacc_data.(eye_str).start_time = start_ms;
 		h.engbertsacc_data.(eye_str).start = sacclist.start + h.eye_data.start_times;
         h.engbertsacc_data.(eye_str).end = sacclist.end + h.eye_data.start_times;
+		h.engbertsacc_data.(eye_str).peak_vel = sacclist.peak_vel;
+		h.engbertsacc_data.(eye_str).sacc_ampl = sacclist.sacc_ampl;
+		h.engbertsacc_data.(eye_str).sacc_horiz_component = sacclist.sacc_horiz_component;
+		h.engbertsacc_data.(eye_str).sacc_vert_component = sacclist.sacc_vert_component;
 		% save new figure handles
 		guidata(h.figure1, h)
 		
@@ -827,8 +856,9 @@ if isequal(filename,0) || isequal(pathname,0)
 else
 	disp(['Saving ', fullfile(pathname, filename)])
 	data = handles.engbertsacc_data;
+	% remove disabled saccades
 	data = remove_disabled_saccades(handles, data, 'engbert');
-	% remove disabled saccades -- FIXME
+	
 	params.velFactor = handles.edVelFactor.String;
 	params.minSamples = handles.edMinSamples.String;
 	
