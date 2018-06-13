@@ -1294,6 +1294,10 @@ end
 % saccades
 sacc_type_list = {'lh' 'lv' 'rh' 'rv'};
 sacc_source_list = {'eyelink', 'findsaccs', 'engbert'};
+
+%% handles.eye_data.lh.saccades(2).sacclist.enabled(1:5)
+%%
+
 for ss_cnt = 1:length(sacc_source_list)
 	for st_cnt = 1:length(sacc_type_list)
 		sacc_type = [sacc_source_list{ss_cnt} '_' sacc_type_list{st_cnt}];
@@ -1875,6 +1879,11 @@ if ~found_sacc_type % there are no saccades of this type to display
 	return
 end
 
+% set all the saccades to enabled
+num_saccs = length(h.eye_data.(eye_str).saccades(sacc_type_num).sacclist.start);
+h.eye_data.(eye_str).saccades(sacc_type_num).sacclist.enabled=ones(1,num_saccs);
+
+
 axes(h.axes_eye)
 
 start_ms = h.eye_data.start_times;
@@ -1883,7 +1892,7 @@ end_line_color = getLineColor(h, ['saccade_' sacc_source '_' eye_str '_end']);
 samp_freq = h.eye_data.samp_freq;
 
 
-for sacc_num = 1:length(h.eye_data.(eye_str).saccades(sacc_type_num).sacclist.start)
+for sacc_num = 1:num_saccs
    % saccade begin
    time1 = (h.eye_data.(eye_str).saccades(sacc_type_num).sacclist.start(sacc_num) - start_ms)/1000; %in seconds
    y = h.eye_data.(eye_str).pos(round(time1*samp_freq));
@@ -1917,6 +1926,7 @@ for sacc_num = 1:length(h.eye_data.(eye_str).saccades(sacc_type_num).sacclist.st
    line(time3, segment,'Tag', ['saccade_' sacc_source '_' eye_str '_#' num2str(sacc_num) ], 'Color','b' , ...
       'Linewidth', 1.5)
 end
+guidata(h.figure1, h)
 return
 
 % function disableSaccade(source, callbackdata)

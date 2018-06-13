@@ -20,4 +20,34 @@ set(saccade_line, 'LineStyle',':')
 % set the menu to enable
 set(source, 'Label', 'Enable Saccade', 'Callback', @enableSaccade)
 
+% save the disabled state in the handles.eye_data stuct
+srch_str = ['^' saccade_tag_no_beg_end '_(begin)$'];
+saccade_beg_line = findobj(handles.axes_eye, '-regexp', 'Tag', srch_str);
+
+% which channel of data
+tmp = regexp(saccade_tag, '(lh)|(rh)|(lv)|(lh)', 'match');
+eye_chan = tmp{1};
+% source of saccades
+tmp = regexp(saccade_tag, '(engbert)|(findsaccs)|(eyelink)', 'match');
+sacc_source = tmp{1};
+if strcmp(sacc_source, 'eyelink')
+	sacc_source = 'EDF_PARSER';
+end
+
+% index of the saccade source
+sacc_source_ind = 0;
+for cnt = 1:length(handles.eye_data.(eye_chan).saccades)
+	if strcmp(handles.eye_data.(eye_chan).saccades(cnt).paramtype, sacc_source)
+		sacc_source_ind = cnt;
+	end
+end
+
+sacc_starts = (handles.eye_data.lh.saccades(sacc_source_ind).sacclist.start-handles.eye_data.start_times)/1000;
+
+% index of matching saccade
+sacc_ind = find(abs(sacc_starts-saccade_beg_line.XData) < eps);
+
+handles.eye_data.lh.saccades(sacc_source_ind).sacclist.enabled(sacc_ind)=0;
+
+guidata(handles.figure1, handles)
 return
