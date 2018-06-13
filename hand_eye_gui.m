@@ -87,6 +87,7 @@ else % all other choices, read in *.bin file for eye data
     end
     handles.bin_filename = fullfile(pnSave, fnSave); %'/Users/peggy/Desktop/pegtas2/pegtas2_1.bin'; % must be full path for rd_cli to work
 	handles.eye_data = rd(handles.bin_filename);
+	handles.eye_data = enable_all_saccades(handles.eye_data);
 end
 
 
@@ -1295,42 +1296,60 @@ end
 sacc_type_list = {'lh' 'lv' 'rh' 'rv'};
 sacc_source_list = {'eyelink', 'findsaccs', 'engbert'};
 
-%% handles.eye_data.lh.saccades(2).sacclist.enabled(1:5)
-%%
+% handles.eye_data.lh.saccades(2).sacclist.enabled(1:5)
 
-for ss_cnt = 1:length(sacc_source_list)
+
+%for ss_cnt = 1:length(sacc_source_list)
 	for st_cnt = 1:length(sacc_type_list)
-		sacc_type = [sacc_source_list{ss_cnt} '_' sacc_type_list{st_cnt}];
-		sacc_beg_lines = findobj(handles.axes_eye, '-regexp', 'Tag', ['saccade_' sacc_type '.*_begin$']);
-		if ~isempty(sacc_beg_lines)
+		st = sacc_type_list{st_cnt};
+		for ss_cnt = 1:length(handles.eye_data.(st).saccades)
+			sacc_source = handles.eye_data.(st).saccades(ss_cnt).paramtype;
+			
+		%sacc_type = [sacc_source_list{ss_cnt} '_' sacc_type_list{st_cnt}];
+		sacc_type = [sacc_source '_' st];
+		
+		%sacc_beg_lines = findobj(handles.axes_eye, '-regexp', 'Tag', ['saccade_' sacc_type '.*_begin$']);
+		%if ~isempty(sacc_beg_lines)
+		sacclist = handles.eye_data.(st).saccades(ss_cnt).sacclist;
+		if ~isempty(sacclist.start)
+			
 			% add column in table for this type of saccade
 			out_tbl.([sacc_type '_saccades']) = cell(height(out_tbl), 1);
 			out_tbl.([sacc_type '_saccades_labels']) = cell(height(out_tbl), 1);
 			
-			for sac_num = 1:length(sacc_beg_lines)
-				waitbar(sac_num/length(sacc_beg_lines), h_wait, ['Getting ' strrep(sacc_type, '_', ' ') ' saccades'])
-				if strcmp(sacc_beg_lines(sac_num).Marker, 'o') % it's enabled 'o', disabled 'x'
-					beg_t = sacc_beg_lines(sac_num).XData;
-					beg_line_tag = sacc_beg_lines(sac_num).Tag;
-					end_line_tag = strrep(beg_line_tag, 'begin', 'end');
-					end_line = findobj(handles.axes_eye, 'Tag', end_line_tag);
-					end_t = end_line.XData;
+			
+			%for sac_num = 1:length(sacc_beg_lines)
+			for sac_num = 1:length(sacclist.start)
+				%waitbar(sac_num/length(sacc_beg_lines), h_wait, ['Getting ' strrep(sacc_type, '_', ' ') ' saccades'])
+				waitbar(sac_num/length(sacclist.start), h_wait, ['Getting ' strrep(sacc_type, '_', ' ') ' saccades'])
+				%if strcmp(sacc_beg_lines(sac_num).Marker, 'o') % it's enabled 'o', disabled 'x'
+				if sacclist.enabled(sac_num)
+					%beg_t = sacc_beg_lines(sac_num).XData;
+					beg_t = (sacclist.start(sac_num)-handles.eye_data.start_times)/1000;
+					%beg_line_tag = sacc_beg_lines(sac_num).Tag;
+					%end_line_tag = strrep(beg_line_tag, 'begin', 'end');
+					%end_line = findobj(handles.axes_eye, 'Tag', end_line_tag);
+					%end_t = end_line.XData;
+					end_t = (sacclist.end(sac_num)-handles.eye_data.start_times)/1000;
 					% put the line tag into the table
 					beg_row = find(out_tbl.t_eye >= beg_t, 1, 'first');
-					out_tbl.([sacc_type '_saccades']){beg_row} = beg_line_tag;
+					%out_tbl.([sacc_type '_saccades']){beg_row} = beg_line_tag;
+					out_tbl.([sacc_type '_saccades']){beg_row} = [sacc_type '_' num2str(sac_num) '_start'];
 					
 					end_row = find(out_tbl.t_eye >= end_t, 1, 'first');
-					out_tbl.([sacc_type '_saccades']){end_row} = end_line_tag;
+					%out_tbl.([sacc_type '_saccades']){end_row} = end_line_tag;
+					out_tbl.([sacc_type '_saccades']){end_row} = [sacc_type '_' num2str(sac_num) '_end'];
 					
 					% find the label menus for this beg_saccade & add a the label if checked
 					% this line takes 69% of the time - try to FIX ME
-					h_menus = findobj(handles.axes_eye.Parent, 'Tag',  strrep(sacc_beg_lines(sac_num).Tag, 'saccade', 'menu_saccade'));
-					for m_cnt = 1:length(h_menus)
-						if strcmp(h_menus(m_cnt).Checked, 'on')
-							out_tbl.([sacc_type '_saccades_labels']){beg_row} = h_menus(m_cnt).Label;
-							out_tbl.([sacc_type '_saccades_labels']){end_row} = h_menus(m_cnt).Label;
-						end
-					end
+					% by putting label in the eye_data saccade struct
+					%h_menus = findobj(handles.axes_eye.Parent, 'Tag',  strrep(sacc_beg_lines(sac_num).Tag, 'saccade', 'menu_saccade'));
+					%for m_cnt = 1:length(h_menus)
+						%if strcmp(h_menus(m_cnt).Checked, 'on')
+							%out_tbl.([sacc_type '_saccades_labels']){beg_row} = h_menus(m_cnt).Label;
+							%out_tbl.([sacc_type '_saccades_labels']){end_row} = h_menus(m_cnt).Label;
+						%end
+					%end
 					
 					% if ROI grid
 					if ~isempty(grid_vals)
@@ -1345,8 +1364,9 @@ for ss_cnt = 1:length(sacc_source_list)
 				end
 			end % loop through each sacc_beg_line
 		end % if beg lines is not empty
+		end % sacc source
 	end % st_cnt
-end % ss_cnt
+%end % ss_cnt
 % fixations
 fix_type_list = {'lh' 'lv' 'rh' 'rv'};
 for fix_cnt = 1:length(fix_type_list)
@@ -1881,7 +1901,7 @@ end
 
 % set all the saccades to enabled
 num_saccs = length(h.eye_data.(eye_str).saccades(sacc_type_num).sacclist.start);
-h.eye_data.(eye_str).saccades(sacc_type_num).sacclist.enabled=ones(1,num_saccs);
+%h.eye_data.(eye_str).saccades(sacc_type_num).sacclist.enabled=ones(1,num_saccs);
 
 
 axes(h.axes_eye)
@@ -3225,6 +3245,7 @@ end
 if ~have_this_type % don't have this type
 	% read them in 
 	handles = get_saccades(handles, sacc_type_str);
+	% FIX ME - enable all saccades
 	guidata(handles.figure1, handles)
 end
 % if any saccades are showing, hide & reshow them so they are updated with
