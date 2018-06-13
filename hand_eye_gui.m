@@ -1300,11 +1300,11 @@ sacc_source_list = {'eyelink', 'findsaccs', 'engbert'};
 
 
 %for ss_cnt = 1:length(sacc_source_list)
-	for st_cnt = 1:length(sacc_type_list)
-		st = sacc_type_list{st_cnt};
-		for ss_cnt = 1:length(handles.eye_data.(st).saccades)
-			sacc_source = handles.eye_data.(st).saccades(ss_cnt).paramtype;
-			
+for st_cnt = 1:length(sacc_type_list)
+	st = sacc_type_list{st_cnt};
+	for ss_cnt = 1:length(handles.eye_data.(st).saccades)
+		sacc_source = handles.eye_data.(st).saccades(ss_cnt).paramtype;
+		
 		%sacc_type = [sacc_source_list{ss_cnt} '_' sacc_type_list{st_cnt}];
 		sacc_type = [sacc_source '_' st];
 		
@@ -1345,10 +1345,10 @@ sacc_source_list = {'eyelink', 'findsaccs', 'engbert'};
 					% by putting label in the eye_data saccade struct
 					%h_menus = findobj(handles.axes_eye.Parent, 'Tag',  strrep(sacc_beg_lines(sac_num).Tag, 'saccade', 'menu_saccade'));
 					%for m_cnt = 1:length(h_menus)
-						%if strcmp(h_menus(m_cnt).Checked, 'on')
-							%out_tbl.([sacc_type '_saccades_labels']){beg_row} = h_menus(m_cnt).Label;
-							%out_tbl.([sacc_type '_saccades_labels']){end_row} = h_menus(m_cnt).Label;
-						%end
+					%if strcmp(h_menus(m_cnt).Checked, 'on')
+					%out_tbl.([sacc_type '_saccades_labels']){beg_row} = h_menus(m_cnt).Label;
+					%out_tbl.([sacc_type '_saccades_labels']){end_row} = h_menus(m_cnt).Label;
+					%end
 					%end
 					
 					% if ROI grid
@@ -1357,52 +1357,56 @@ sacc_source_list = {'eyelink', 'findsaccs', 'engbert'};
 						h_eye = [eye 'h'];
 						v_eye = [eye 'v'];
 						out_tbl.region_of_interest{beg_row} = find_roi(grid_vals, ...
-								out_tbl.(h_eye)(beg_row), out_tbl.(v_eye)(beg_row));
+							out_tbl.(h_eye)(beg_row), out_tbl.(v_eye)(beg_row));
 						out_tbl.region_of_interest{end_row} = find_roi(grid_vals, ...
-								out_tbl.(h_eye)(end_row), out_tbl.(v_eye)(end_row));
+							out_tbl.(h_eye)(end_row), out_tbl.(v_eye)(end_row));
 					end
+					
+					% if engbert saccades save engbert ampl & velocity info
+					% to a summary file
+					
 				end
 			end % loop through each sacc_beg_line
 		end % if beg lines is not empty
-		end % sacc source
-	end % st_cnt
+	end % sacc source
+end % st_cnt
 %end % ss_cnt
 % fixations
 fix_type_list = {'lh' 'lv' 'rh' 'rv'};
 for fix_cnt = 1:length(fix_type_list)
-   fix_type = fix_type_list{fix_cnt};
-   fix_lines = findobj(handles.axes_eye, '-regexp', 'Tag', ['fixation_' fix_type '.*']);
-   if ~isempty(fix_lines)
-      % add column in table for this type of fixation
-      out_tbl.([fix_type '_fixations']) = cell(height(out_tbl), 1);
-      for fix_num = 1:length(fix_lines)
-         beg_t = min(fix_lines(fix_num).XData);
-         beg_line_tag = [fix_lines(fix_num).Tag '_begin'];
-         end_t = max(fix_lines(fix_num).XData);
-         end_line_tag = strrep(beg_line_tag, 'begin', 'end');
-         % put the line tag into the table
-         row = find(out_tbl.t_eye >= beg_t, 1, 'first');
-         out_tbl.([fix_type '_fixations']){row} = beg_line_tag;
-         row = find(out_tbl.t_eye >= end_t, 1, 'first');
-         out_tbl.([fix_type '_fixations']){row} = end_line_tag;
-      end
-   end
+	fix_type = fix_type_list{fix_cnt};
+	fix_lines = findobj(handles.axes_eye, '-regexp', 'Tag', ['fixation_' fix_type '.*']);
+	if ~isempty(fix_lines)
+		% add column in table for this type of fixation
+		out_tbl.([fix_type '_fixations']) = cell(height(out_tbl), 1);
+		for fix_num = 1:length(fix_lines)
+			beg_t = min(fix_lines(fix_num).XData);
+			beg_line_tag = [fix_lines(fix_num).Tag '_begin'];
+			end_t = max(fix_lines(fix_num).XData);
+			end_line_tag = strrep(beg_line_tag, 'begin', 'end');
+			% put the line tag into the table
+			row = find(out_tbl.t_eye >= beg_t, 1, 'first');
+			out_tbl.([fix_type '_fixations']){row} = beg_line_tag;
+			row = find(out_tbl.t_eye >= end_t, 1, 'first');
+			out_tbl.([fix_type '_fixations']){row} = end_line_tag;
+		end
+	end
 end
 
 % blinks
 h_blinks = findobj(handles.axes_eye, '-regexp', 'Tag', 'blink_id#\d*_patch');
 if ~isempty(h_blinks)
-   out_tbl.blinks = cell(height(out_tbl), 1);
-   for blink_num = 1:length(h_blinks)
-      beg_t = min(h_blinks(blink_num).XData);
-      beg_txt = ['blink_#' num2str(blink_num) '_begin'];
-      end_t = max(h_blinks(blink_num).XData);
-      end_txt = ['blink_#' num2str(blink_num) '_end'];
-      % put the line tag into the table
-      row = find(out_tbl.t_eye >= beg_t, 1, 'first');
-      out_tbl.blinks{row} = beg_txt;
-      row = find(out_tbl.t_eye >= end_t, 1, 'first');
-      out_tbl.blinks{row} = end_txt;
+	out_tbl.blinks = cell(height(out_tbl), 1);
+	for blink_num = 1:length(h_blinks)
+		beg_t = min(h_blinks(blink_num).XData);
+		beg_txt = ['blink_#' num2str(blink_num) '_begin'];
+		end_t = max(h_blinks(blink_num).XData);
+		end_txt = ['blink_#' num2str(blink_num) '_end'];
+		% put the line tag into the table
+		row = find(out_tbl.t_eye >= beg_t, 1, 'first');
+		out_tbl.blinks{row} = beg_txt;
+		row = find(out_tbl.t_eye >= end_t, 1, 'first');
+		out_tbl.blinks{row} = end_txt;
    end
 end
 
@@ -1900,7 +1904,7 @@ if ~found_sacc_type % there are no saccades of this type to display
 end
 
 % set all the saccades to enabled
-num_saccs = length(h.eye_data.(eye_str).saccades(sacc_type_num).sacclist.start);
+%num_saccs = length(h.eye_data.(eye_str).saccades(sacc_type_num).sacclist.start);
 %h.eye_data.(eye_str).saccades(sacc_type_num).sacclist.enabled=ones(1,num_saccs);
 
 
@@ -3245,7 +3249,9 @@ end
 if ~have_this_type % don't have this type
 	% read them in 
 	handles = get_saccades(handles, sacc_type_str);
-	% FIX ME - enable all saccades
+	% enable all saccades
+	handles.eye_data = enable_all_saccades(handles.eye_data);
+	
 	guidata(handles.figure1, handles)
 end
 % if any saccades are showing, hide & reshow them so they are updated with
