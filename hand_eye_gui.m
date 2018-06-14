@@ -1317,6 +1317,12 @@ for st_cnt = 1:length(sacc_type_list)
 			out_tbl.([sacc_type '_saccades']) = cell(height(out_tbl), 1);
 			out_tbl.([sacc_type '_saccades_labels']) = cell(height(out_tbl), 1);
 			
+			% if engbert saccades save engbert ampl & velocity info
+			% to a summary file
+			if strcmp(sacc_source, 'engbert')
+				sacc_summary_tbl = table();
+				sacc_summary_cnt = 0;
+			end
 			
 			%for sac_num = 1:length(sacc_beg_lines)
 			for sac_num = 1:length(sacclist.start)
@@ -1364,12 +1370,16 @@ for st_cnt = 1:length(sacc_type_list)
 					
 					% if engbert saccades save engbert ampl & velocity info
 					% to a summary file
+					if strcmp(sacc_source, 'engbert')
+						sacc_summary_cnt = sacc_summary_cnt + 1;
+						sacc_summary_tbl.hAmpl(sacc_summary_cnt) = sacclist.sacc_horiz_component(sac_num);
+					end
 					
-				end
-			end % loop through each sacc_beg_line
-		end % if beg lines is not empty
+				end % if enabled
+			end % each saccade
+		end % if there are saccades of this type for this source
 	end % sacc source
-end % st_cnt
+end % st_cnt rh, lh, rv, lv
 %end % ss_cnt
 % fixations
 fix_type_list = {'lh' 'lv' 'rh' 'rv'};
