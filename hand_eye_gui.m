@@ -1317,12 +1317,11 @@ for st_cnt = 1:length(sacc_type_list)
 			out_tbl.([sacc_type '_saccades']) = cell(height(out_tbl), 1);
 			out_tbl.([sacc_type '_saccades_labels']) = cell(height(out_tbl), 1);
 			
-			% if engbert saccades save engbert ampl & velocity info
+			%  save  ampl & velocity info
 			% to a summary file
-			if strcmp(sacc_source, 'engbert')
-				sacc_summary_tbl = table();
-				sacc_summary_cnt = 0;
-			end
+			sacc_summary_tbl = table();
+			sacc_summary_cnt = 0;
+
 			
 			%for sac_num = 1:length(sacc_beg_lines)
 			for sac_num = 1:length(sacclist.start)
@@ -1371,12 +1370,31 @@ for st_cnt = 1:length(sacc_type_list)
 					% if engbert saccades save engbert ampl & velocity info
 					% to a summary file
 					if strcmp(sacc_source, 'engbert')
+						warning off
 						sacc_summary_cnt = sacc_summary_cnt + 1;
+						sacc_summary_tbl.startTime(sacc_summary_cnt) = beg_t;
 						sacc_summary_tbl.hAmpl(sacc_summary_cnt) = sacclist.sacc_horiz_component(sac_num);
+						sacc_summary_tbl.vAmpl(sacc_summary_cnt) = sacclist.sacc_vert_component(sac_num);
+						sacc_summary_tbl.Ampl(sacc_summary_cnt) = sacclist.sacc_ampl(sac_num);
+						sacc_summary_tbl.Vel(sacc_summary_cnt) = sacclist.peak_vel(sac_num);
+						if ~isempty(grid_vals)
+							if ~isempty(out_tbl.region_of_interest{beg_row})
+								sacc_summary_tbl.region_of_interest_start(sacc_summary_cnt) = out_tbl.region_of_interest{beg_row};
+							end
+							if ~isempty(out_tbl.region_of_interest{end_row})
+								sacc_summary_tbl.region_of_interest_end(sacc_summary_cnt) = out_tbl.region_of_interest{end_row};
+							end
+						end
+						warning on
 					end
 					
 				end % if enabled
 			end % each saccade
+			% save the summary table
+			if sacc_summary_cnt > 0
+				summ_filename = [export_filename '_' sacc_type '.txt'];
+				writetable(sacc_summary_tbl, summ_filename, 'delimiter', '\t');
+			end
 		end % if there are saccades of this type for this source
 	end % sacc source
 end % st_cnt rh, lh, rv, lv
@@ -1914,7 +1932,7 @@ if ~found_sacc_type % there are no saccades of this type to display
 end
 
 % set all the saccades to enabled
-%num_saccs = length(h.eye_data.(eye_str).saccades(sacc_type_num).sacclist.start);
+num_saccs = length(h.eye_data.(eye_str).saccades(sacc_type_num).sacclist.start);
 %h.eye_data.(eye_str).saccades(sacc_type_num).sacclist.enabled=ones(1,num_saccs);
 
 

@@ -22,7 +22,7 @@ function varargout = saccade_gui(varargin)
 
 % Edit the above text to modify the response to help saccade_gui
 
-% Last Modified by GUIDE v2.5 21-Feb-2018 16:15:16
+% Last Modified by GUIDE v2.5 15-Jun-2018 17:59:54
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 0;
@@ -168,7 +168,7 @@ switch sacc_source
 	case 'engbert'
 		% get parameters
 		vel_factor = str2double(h.edVelFactor.String);
-		min_num_samples = str2double(h.edMinSamples.String);
+		min_num_samples = round(str2double(h.edMinSaccDur.String)/1000 * samp_freq);
 		
 		h_str = strrep(eye_str, 'v', 'h');
 		v_str = strrep(eye_str, 'h', 'v');
@@ -209,10 +209,10 @@ switch sacc_source
 		start_ms = 1/samp_freq;
 		sacclist.start = sac(:,1)' / samp_freq * 1000; % time in ms
         sacclist.end = sac(:,2)' / samp_freq * 1000;
-		sacclist.peak_vel = sac(:,3)';
-		sacclist.sacc_ampl = sac(:,4)';
-		sacclist.sacc_horiz_component = sac(:,6)';
-		sacclist.sacc_vert_component = sac(:,7)';
+		sacclist.peak_vel = sac(:,3)'/60;	% converting from minutes to degrees
+		sacclist.sacc_ampl = sac(:,4)'/60;
+		sacclist.sacc_horiz_component = sac(:,6)'/60;
+		sacclist.sacc_vert_component = sac(:,7)'/60;
 		
 		% impose minimum intersaccade interval
 		isi = str2double(h.edInterSaccInterval.String);
@@ -791,7 +791,7 @@ function pbDefaultParamsEngbert_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 handles.edVelFactor.String = '6';
-handles.edMinSamples.String = '3';
+handles.edMinSaccDur.String = '3';
 handles.edInterSaccInterval.String = '20';
 handles.chbxBinocular.Value = 0; 
 
@@ -822,18 +822,18 @@ end
 
 
 
-function edMinSamples_Callback(hObject, eventdata, handles)
-% hObject    handle to edMinSamples (see GCBO)
+function edMinSaccDur_Callback(hObject, eventdata, handles)
+% hObject    handle to edMinSaccDur (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: get(hObject,'String') returns contents of edMinSamples as text
-%        str2double(get(hObject,'String')) returns contents of edMinSamples as a double
+% Hints: get(hObject,'String') returns contents of edMinSaccDur as text
+%        str2double(get(hObject,'String')) returns contents of edMinSaccDur as a double
 
 
 % --- Executes during object creation, after setting all properties.
-function edMinSamples_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edMinSamples (see GCBO)
+function edMinSaccDur_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edMinSaccDur (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
@@ -860,7 +860,7 @@ else
 	data = remove_disabled_saccades(handles, data, 'engbert');
 	
 	params.velFactor = handles.edVelFactor.String;
-	params.minSamples = handles.edMinSamples.String;
+	params.minSamples = handles.edMinSaccDur.String;
 	
 	save(fullfile(pathname, filename), 'data', 'params')
 end
