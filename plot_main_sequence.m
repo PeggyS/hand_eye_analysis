@@ -13,7 +13,7 @@ p.parse(varargin{:});
 inputs = p.Results;
 if isempty(inputs.file)		% no file specified
 	% request the data file
-	[fname, pathname] = uigetfile('*.txt', 'Pick an Engbert Saccade Summary xlsx');
+	[fname, pathname] = uigetfile('*.txt', 'Pick an Engbert Saccade Summary txt file');
 	if isequal(fname,0) || isequal(pathname,0)
 		disp('User canceled. Exitting')
 		return
