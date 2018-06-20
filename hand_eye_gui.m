@@ -1402,7 +1402,10 @@ for st_cnt = 1:length(sacc_type_list)
 			end % each saccade
 			% save the summary table
 			if sacc_summary_cnt > 0
-				summ_filename = [export_filename '_' sacc_type '.txt'];
+				% add 1 more column
+				sacc_summary_tbl.asPeakVelCombined = sqrt(sacc_summary_tbl.asPeakVelH .^2 + ...
+															sacc_summary_tbl.asPeakVelV .^2);
+				summ_filename = strrep(export_filename, '.txt', ['_' sacc_type '.txt']);
 				writetable(sacc_summary_tbl, summ_filename, 'delimiter', '\t');
 			end
 		end % if there are saccades of this type for this source
