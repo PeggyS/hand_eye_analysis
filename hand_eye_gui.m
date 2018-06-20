@@ -1376,7 +1376,17 @@ for st_cnt = 1:length(sacc_type_list)
 						sacc_summary_tbl.hAmpl(sacc_summary_cnt) = sacclist.sacc_horiz_component(sac_num);
 						sacc_summary_tbl.vAmpl(sacc_summary_cnt) = sacclist.sacc_vert_component(sac_num);
 						sacc_summary_tbl.Ampl(sacc_summary_cnt) = sacclist.sacc_ampl(sac_num);
-						sacc_summary_tbl.Vel(sacc_summary_cnt) = sacclist.peak_vel(sac_num);
+						sacc_summary_tbl.peakVel(sacc_summary_cnt) = sacclist.peak_vel(sac_num);
+						sacc_summary_tbl.hPeakVelComponent(sacc_summary_cnt) = sacclist.peak_vel_horiz_component(sac_num);
+						sacc_summary_tbl.vPeakVelComponent(sacc_summary_cnt) = sacclist.peak_vel_vert_component(sac_num);
+						
+						sacc_summary_tbl.asAmplH(sacc_summary_cnt) = sacclist.as_ampl_horiz(sac_num);
+						sacc_summary_tbl.asAmplV(sacc_summary_cnt) = sacclist.as_ampl_vert(sac_num);
+						sacc_summary_tbl.asPeakVelH(sacc_summary_cnt) = sacclist.as_peak_vel_horiz(sac_num);
+						sacc_summary_tbl.asPeakVelV(sacc_summary_cnt) = sacclist.as_peak_vel_vert(sac_num);
+						sacc_summary_tbl.asPeakVelHtime(sacc_summary_cnt) = (sacclist.as_peak_vel_horiz_time(sac_num)-handles.eye_data.start_times/1000);
+						sacc_summary_tbl.asPeakVelVtime(sacc_summary_cnt) = (sacclist.as_peak_vel_vert_time(sac_num)-handles.eye_data.start_times/1000);
+
 						if ~isempty(grid_vals)
 							if ~isempty(out_tbl.region_of_interest{beg_row})
 								sacc_summary_tbl.region_of_interest_start(sacc_summary_cnt) = out_tbl.region_of_interest{beg_row};

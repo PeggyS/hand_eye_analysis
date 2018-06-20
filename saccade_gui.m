@@ -179,7 +179,7 @@ switch sacc_source
 		v = vecvel(x, samp_freq, 2);
 		
 		% compute saccades using function from Engbert
-		sac = microsacc(x, v, vel_factor, min_num_samples);
+		sac = microsacc_ps(x, v, vel_factor, min_num_samples);
 		%   sac(1:num,1)   onset of saccade
 		%   sac(1:num,2)   end of saccade
 		%   sac(1:num,3)   peak velocity of saccade
@@ -187,6 +187,8 @@ switch sacc_source
 		%   sac(1:num,5)   angular orientation 
 		%   sac(1:num,6)   horizontal component (delta x)
 		%   sac(1:num,7)   vertical component (delta y)
+		%   sac(1:num,8)   peak velocity horizontal component 
+		%   sac(1:num,9)   peak velocity vertical component 
 		
 		% if binocular only saccades
 		if h.chbxBinocular.Value
@@ -200,19 +202,23 @@ switch sacc_source
 			end
 			x_other = [h.eye_data.(ho_str).pos h.eye_data.(vo_str).pos] * 60;
 			v_other = vecvel(x_other, samp_freq, 2);
-			sac_other = microsacc(x_other, v_other, vel_factor, min_num_samples);
+			sac_other = microsacc_ps(x_other, v_other, vel_factor, min_num_samples);
 			
 			sac = binsacc(sac, sac_other);
 		end
 		
 		% save saccades in handles
 		start_ms = 1/samp_freq;
+		sacclist.start_ind = sac(:,1)';
+		sacclist.end_ind = sac(:,2)';
 		sacclist.start = sac(:,1)' / samp_freq * 1000; % time in ms
         sacclist.end = sac(:,2)' / samp_freq * 1000;
 		sacclist.peak_vel = sac(:,3)'/60;	% converting from minutes to degrees
 		sacclist.sacc_ampl = sac(:,4)'/60;
 		sacclist.sacc_horiz_component = sac(:,6)'/60;
 		sacclist.sacc_vert_component = sac(:,7)'/60;
+		sacclist.peak_vel_horiz_component = sac(:,8)'/60;
+		sacclist.peak_vel_vert_component = sac(:,9)'/60;
 		
 		% impose minimum intersaccade interval
 		isi = str2double(h.edInterSaccInterval.String);
@@ -220,13 +226,18 @@ switch sacc_source
 			% if intersacc interval < isi, delete the 2nd saccade
 			sacc_intervals = sacclist.start(2:end)-sacclist.end(1:end-1);
 			inds = find(sacc_intervals<isi);
+			sacclist.start_ind(inds+1) = [];
+			sacclist.end_ind(inds+1) = [];
 			sacclist.start(inds+1) = [];
 			sacclist.end(inds+1) = [];
 			sacclist.peak_vel(inds+1) = [];
 			sacclist.sacc_ampl(inds+1) = [];
 			sacclist.sacc_horiz_component(inds+1) = [];
 			sacclist.sacc_vert_component(inds+1) = [];
+			sacclist.peak_vel_horiz_component(inds+1) = [];
+			sacclist.peak_vel_vert_component(inds+1) = [];
 		end
+		sacclist = compute_diff_vel_peaks(sacclist, h.eye_data.(h_str).pos, h.eye_data.(v_str).pos, samp_freq);
 		
 % 		h.engbertsacc_data.(eye_str).start_time = start_ms;
 		h.engbertsacc_data.(eye_str).start = sacclist.start + h.eye_data.start_times;
@@ -235,6 +246,14 @@ switch sacc_source
 		h.engbertsacc_data.(eye_str).sacc_ampl = sacclist.sacc_ampl;
 		h.engbertsacc_data.(eye_str).sacc_horiz_component = sacclist.sacc_horiz_component;
 		h.engbertsacc_data.(eye_str).sacc_vert_component = sacclist.sacc_vert_component;
+		h.engbertsacc_data.(eye_str).peak_vel_horiz_component = sacclist.peak_vel_horiz_component;
+		h.engbertsacc_data.(eye_str).peak_vel_vert_component = sacclist.peak_vel_vert_component;
+		h.engbertsacc_data.(eye_str).as_ampl_horiz = sacclist.as_ampl_horiz;
+		h.engbertsacc_data.(eye_str).as_ampl_vert = sacclist.as_ampl_vert;
+		h.engbertsacc_data.(eye_str).as_peak_vel_horiz = sacclist.as_peak_vel_horiz;
+		h.engbertsacc_data.(eye_str).as_peak_vel_vert = sacclist.as_peak_vel_vert;
+		h.engbertsacc_data.(eye_str).as_peak_vel_horiz_time = sacclist.as_peak_vel_horiz_ind/samp_freq + h.eye_data.start_times/1000;
+		h.engbertsacc_data.(eye_str).as_peak_vel_vert_time = sacclist.as_peak_vel_vert_ind/samp_freq + h.eye_data.start_times/1000;
 		% save new figure handles
 		guidata(h.figure1, h)
 		
