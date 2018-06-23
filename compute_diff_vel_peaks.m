@@ -1,6 +1,6 @@
 function new_sacclist = compute_diff_vel_peaks(sacclist, h_pos, v_pos, samp_freq)
 % compute the horizonal and vertical components of velocity using
-% h_vel = abs(diff(h_pos)). Compute horizontal and vertical velocities
+% h_vel = diff(h_pos). Compute horizontal and vertical velocities
 % separately. Look for max values during the saccades (h & v separately),
 % then compute a 'combined' velocity from those h & v peaks.
 
@@ -8,6 +8,12 @@ function new_sacclist = compute_diff_vel_peaks(sacclist, h_pos, v_pos, samp_freq
 % to it for this function's output.
 
 new_sacclist = sacclist;
+new_sacclist.as_ampl_horiz = nan(size(sacclist.start_ind));
+new_sacclist.as_ampl_vert = nan(size(sacclist.start_ind));
+new_sacclist.as_peak_vel_horiz = nan(size(sacclist.start_ind));
+new_sacclist.as_peak_vel_horiz_ind = nan(size(sacclist.start_ind));
+new_sacclist.as_peak_vel_vert = nan(size(sacclist.start_ind));
+new_sacclist.as_peak_vel_vert_ind = nan(size(sacclist.start_ind));
 
 h_vel = diff(h_pos)*samp_freq;
 v_vel = diff(v_pos)*samp_freq;

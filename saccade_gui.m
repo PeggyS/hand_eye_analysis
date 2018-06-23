@@ -238,6 +238,7 @@ switch sacc_source
 			sacclist.peak_vel_vert_component(inds+1) = [];
 		end
 		sacclist = compute_diff_vel_peaks(sacclist, h.eye_data.(h_str).pos, h.eye_data.(v_str).pos, samp_freq);
+		sacclist = compute_drift(sacclist, h.eye_data.(h_str).pos, h.eye_data.(v_str).pos, samp_freq);
 		
 % 		h.engbertsacc_data.(eye_str).start_time = start_ms;
 		h.engbertsacc_data.(eye_str).start = sacclist.start + h.eye_data.start_times;
@@ -254,6 +255,24 @@ switch sacc_source
 		h.engbertsacc_data.(eye_str).as_peak_vel_vert = sacclist.as_peak_vel_vert;
 		h.engbertsacc_data.(eye_str).as_peak_vel_horiz_time = sacclist.as_peak_vel_horiz_ind/samp_freq + h.eye_data.start_times/1000;
 		h.engbertsacc_data.(eye_str).as_peak_vel_vert_time = sacclist.as_peak_vel_vert_ind/samp_freq + h.eye_data.start_times/1000;
+
+		h.engbertsacc_data.(eye_str).as_drift_mean_time = sacclist.as_mean_ind/samp_freq + h.eye_data.start_times/1000;
+		h.engbertsacc_data.(eye_str).as_median_horiz	 = sacclist.as_median_horiz;
+		h.engbertsacc_data.(eye_str).as_mean_horiz	 = sacclist.as_mean_horiz;
+		h.engbertsacc_data.(eye_str).as_var_horiz	 = sacclist.as_var_horiz;
+		h.engbertsacc_data.(eye_str).as_std_horiz	 = sacclist.as_std_horiz;
+		h.engbertsacc_data.(eye_str).as_median_vert	 = sacclist.as_median_vert;
+		h.engbertsacc_data.(eye_str).as_mean_vert	 = sacclist.as_mean_vert;
+		h.engbertsacc_data.(eye_str).as_var_vert	 = sacclist.as_var_vert;
+		h.engbertsacc_data.(eye_str).as_std_vert	 = sacclist.as_std_vert;
+		h.engbertsacc_data.(eye_str).as_median_norm_vel	 = sacclist.as_median_norm_vel;
+		h.engbertsacc_data.(eye_str).as_mean_norm_vel	 = sacclist.as_mean_norm_vel;
+		h.engbertsacc_data.(eye_str).as_var_norm_vel	 = sacclist.as_var_norm_vel;
+		h.engbertsacc_data.(eye_str).as_std_norm_vel	 = sacclist.as_std_norm_vel;
+		h.engbertsacc_data.(eye_str).as_median_norm_pos	 = sacclist.as_median_norm_pos;
+		h.engbertsacc_data.(eye_str).as_mean_norm_pos	 = sacclist.as_mean_norm_pos;
+		h.engbertsacc_data.(eye_str).as_var_norm_pos	 = sacclist.as_var_norm_pos;
+		h.engbertsacc_data.(eye_str).as_std_norm_pos	 = sacclist.as_std_norm_pos;
 		% save new figure handles
 		guidata(h.figure1, h)
 		

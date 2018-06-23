@@ -1387,6 +1387,25 @@ for st_cnt = 1:length(sacc_type_list)
 						sacc_summary_tbl.asPeakVelHtime(sacc_summary_cnt) = (sacclist.as_peak_vel_horiz_time(sac_num)-handles.eye_data.start_times/1000);
 						sacc_summary_tbl.asPeakVelVtime(sacc_summary_cnt) = (sacclist.as_peak_vel_vert_time(sac_num)-handles.eye_data.start_times/1000);
 
+						sacc_summary_tbl.DriftMeanTime(sacc_summary_cnt) = (sacclist.as_drift_mean_time(sac_num)-handles.eye_data.start_times/1000);
+						sacc_summary_tbl.DriftMedianVelHor(sacc_summary_cnt)	 = sacclist.as_median_horiz(sac_num);
+						sacc_summary_tbl.DriftMeanVelHor(sacc_summary_cnt)	 = sacclist.as_mean_horiz(sac_num);
+						sacc_summary_tbl.DriftVarVelHor(sacc_summary_cnt)	 = sacclist.as_var_horiz(sac_num);
+						sacc_summary_tbl.DriftstdVelHor(sacc_summary_cnt)	 = sacclist.as_std_horiz(sac_num);
+						sacc_summary_tbl.DriftMedianVelVert(sacc_summary_cnt)	 = sacclist.as_median_vert(sac_num);
+						sacc_summary_tbl.DriftMeanVelVert(sacc_summary_cnt)	 = sacclist.as_mean_vert(sac_num);
+						sacc_summary_tbl.DriftvarVelVert(sacc_summary_cnt)	 = sacclist.as_var_vert(sac_num);
+						sacc_summary_tbl.DriftstdVelVert(sacc_summary_cnt)	 = sacclist.as_std_vert(sac_num);
+						sacc_summary_tbl.DriftMedianVel(sacc_summary_cnt)	 = sacclist.as_median_norm_vel(sac_num);
+						sacc_summary_tbl.DriftMeanVel(sacc_summary_cnt)	 = sacclist.as_mean_norm_vel(sac_num);
+						sacc_summary_tbl.DriftvarVel(sacc_summary_cnt)	 = sacclist.as_var_norm_vel(sac_num);
+						sacc_summary_tbl.DriftstdVel(sacc_summary_cnt)	 = sacclist.as_std_norm_vel(sac_num);
+						sacc_summary_tbl.DriftMedianPos(sacc_summary_cnt)	 = sacclist.as_median_norm_pos(sac_num);
+						sacc_summary_tbl.DriftMeanPos(sacc_summary_cnt)	 = sacclist.as_mean_norm_pos(sac_num);
+						sacc_summary_tbl.DriftvarPos(sacc_summary_cnt)	 = sacclist.as_var_norm_pos(sac_num);
+						sacc_summary_tbl.DriftstdPos(sacc_summary_cnt)	 = sacclist.as_std_norm_pos(sac_num);
+
+
 						if ~isempty(grid_vals)
 							if ~isempty(out_tbl.region_of_interest{beg_row})
 								sacc_summary_tbl.region_of_interest_start(sacc_summary_cnt) = out_tbl.region_of_interest{beg_row};
