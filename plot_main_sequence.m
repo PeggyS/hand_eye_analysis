@@ -1,5 +1,15 @@
 function plot_main_sequence(varargin)
 
+%%%% "main sequence" is a BULLSHIT term that terry bahill took from
+%%%% astronomy without understanding what it actually means. it causes
+%%%% me physical pain every time i see someone use it.
+%%%% https://en.wikipedia.org/wiki/Main_sequence
+
+% as long as i'm intruding into your private place, would you consider
+% comparing these results to those calculated by findsaccs? - I certainly
+% plan to.
+
+
 % input parameters
 %	file - file of Engbert Saccade Summary xlsx
 
