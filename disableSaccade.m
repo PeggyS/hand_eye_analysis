@@ -26,7 +26,17 @@ saccade_beg_line = findobj(handles.axes_eye, '-regexp', 'Tag', srch_str);
 
 % which channel of data
 tmp = regexp(saccade_tag, '(lh)|(rh)|(lv)|(lh)', 'match');
-eye_chan = tmp{1};
+try
+	eye_chan = tmp{1};
+catch
+	fname = ['disableSaccade eye_chan error ' datestr(now)];
+	save(fname)
+	beep
+	disp('*********')
+	disp('Error finding disabled saccade line by tag')
+	disp(['Send the file ' fname ' to Peggy.'])
+	disp('*********')
+end
 % source of saccades
 tmp = regexp(saccade_tag, '(engbert)|(findsaccs)|(eyelink)', 'match');
 sacc_source = tmp{1};
