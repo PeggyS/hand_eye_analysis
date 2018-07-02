@@ -1810,8 +1810,12 @@ end
 
 
 % write data
-waitbar(0.95, h_wait, 'Writing data');
+waitbar(0.85, h_wait, 'Writing data');
 writetable(out_tbl, export_filename, 'delimiter', '\t');
+
+% summarize the file and create a new file named *_summary.txt
+waitbar(0.95, h_wait, 'Summarizing data');
+summarize_export_file(export_filename)
 
 % close the waitbar
 close(h_wait)
