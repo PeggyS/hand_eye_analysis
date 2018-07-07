@@ -797,7 +797,8 @@ for click_cnt = 1:height(handles.click_data_tbl)
 	click_coords = parse_click_coords(handles.click_data_tbl.CLICK_COORDINATES(click_cnt));
 	% line in the eye data axes
 	axes(handles.axes_eye)
-	h_eye = line([click_time, click_time], ylims, 'Color', 'k', 'Tag', ['click_id#' num2str(click_cnt) '_line']);
+	h_eye = line([click_time, click_time], ylims, 'Color', 'r', 'LineWidth', 3, ...
+		'Tag', ['click_id#' num2str(click_cnt) '_line']);
 	uistack(h_eye, 'bottom')
 	[hcmenu, ud] = createClickLineMenu(h_eye);
 	ud.click_coords = click_coords;
@@ -853,8 +854,10 @@ return
 % ------------------------------------------------------------
 function [hcmenu, ud] = createClickLineMenu(h_line)
 hcmenu = uicontextmenu;
-ud.hMenuShowClick = uimenu(hcmenu, 'Label', 'Show Location', 'Tag', 'menuShowClick', ...
-   'Callback', {@menuClickLine_Callback, h_line}, 'Checked', 'on');
+ud.hMenuShowClick = uimenu(hcmenu, 'Label', 'Highlight Location', 'Tag', 'menuShowClick', ...
+   'Callback', {@menuClickLine_Callback, h_line}, 'Checked', 'off');
+ud.hMenuDeleteClick = uimenu(hcmenu, 'Label', 'Delete', 'Tag', 'menuDeleteClick', ...
+   'Callback', {@menuClickLine_Callback, h_line}, 'Checked', 'off');
 return
 
 function menuClickLine_Callback(source, callbackdata, h_line)
@@ -862,12 +865,32 @@ switch source.Tag
 	case 'menuShowClick'
 		if strcmp(source.Checked, 'on')
 			source.Checked = 'off';
-			h_line.UserData.h_click_on_pic.Visible = 'off';
+			h_line.UserData.h_click_on_pic.Color = 'k';
+			h_line.UserData.h_click_on_pic.MarkerSize = 10;
+			h_line.UserData.h_click_on_pic_text.Color = 'k';
+			h_line.UserData.h_click_on_pic_text.FontSize = 15;
+% 			h_line.UserData.h_click_on_pic.Visible = 'off';
 		else
 			source.Checked = 'on';
-			h_line.UserData.h_click_on_pic.Visible = 'on';
+			h_line.UserData.h_click_on_pic.Color = 'r';
+			h_line.UserData.h_click_on_pic.MarkerSize = 20;
+			h_line.UserData.h_click_on_pic_text.Color = 'r';
+			h_line.UserData.h_click_on_pic_text.FontSize = 18;
+% 			h_line.UserData.h_click_on_pic.Visible = 'on';
 		end
-		
+	case 'menuDeleteClick'
+% 		keyboard
+		handles = guidata(gcf);
+		row = find_click_tbl_row(handles.click_data_tbl, h_line.UserData.click_coords);
+		assert(~isempty(row), 'error finding the row in click_data_tbl for %d, %d', ...
+			h_line.UserData.click_coords.x, h_line.UserData.click_coords.y)
+		handles.click_data_tbl(row,:) = [];
+		guidata(gcf, handles)
+		delete(h_line.UserData.hMenuShowClick)
+		delete(h_line.UserData.hMenuDeleteClick)
+		delete(h_line.UserData.h_click_on_pic)
+		delete(h_line.UserData.h_click_on_pic_text)	
+		delete(h_line)
 end
 return
 
@@ -875,6 +898,17 @@ function coords = parse_click_coords(cell_str_coords)
 str_coords = regexp(cell_str_coords{:},'\[(?<x>\d+), (?<y>\d+)\]','names');
 coords.x = str2double(str_coords.x);
 coords.y = str2double(str_coords.y);
+return
+
+function row = find_click_tbl_row(click_data_tbl, click_coords)
+row = [];
+for row_cnt = 1:height(click_data_tbl)
+	coords = parse_click_coords(click_data_tbl.CLICK_COORDINATES(row_cnt));
+	if coords.x == click_coords.x && coords.y == click_coords.y
+		row = row_cnt;
+		return
+	end
+end
 return
 
 % ----------------------------
