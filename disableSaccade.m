@@ -25,10 +25,9 @@ srch_str = ['^' saccade_tag_no_beg_end '_(begin)$'];
 saccade_beg_line = findobj(handles.axes_eye, '-regexp', 'Tag', srch_str);
 
 % which channel of data
-<<<<<<< HEAD
 tmp = regexp(saccade_tag, '(lh)|(rh)|(lv)|(lh)', 'match');
 eye_chan = tmp{1};
-=======
+
 tmp = regexp(saccade_tag, '(lh)|(rh)|(lv)|(rv)', 'match');
 try
 	eye_chan = tmp{1};
@@ -41,7 +40,7 @@ catch
 	disp(['Send the file ' fname ' to Peggy.'])
 	disp('*********')
 end
->>>>>>> c602f57a00543d459574c64b2ec9f558a8ea2820
+
 % source of saccades
 tmp = regexp(saccade_tag, '(engbert)|(findsaccs)|(eyelink)', 'match');
 sacc_source = tmp{1};
