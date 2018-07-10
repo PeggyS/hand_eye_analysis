@@ -63,6 +63,7 @@ str = {'Scenecam task with Opal', 'Scenecam task without Opal', ...
     'Picture Difference with Opal', 'Picture Difference without Opal', ...
 	'Reading Text with Opal', 'Reading Text without Opal', ...
     'Gaze Holding with Opal', 'Gaze Holding without Opal', ...
+    'Eccentric Gaze Holding with Opal', 'Eccentric Gaze Holding without Opal', ...
     'Vergence with Opal', 'Vergence without Opal', ...
     'Restore Previous Analysis'};
 [choice_num, ok] = listdlg('PromptString', 'Select the type of experiment', ...
@@ -72,7 +73,7 @@ if ~ok
     return
 end
 
-if choice_num == 15 % restore data 
+if choice_num == 17 % restore data 
     [fnSave, pnSave] = uigetfile({'*.mat'}, 'Choose *.mat file ...');
     if isequal(fnSave,0) || isequal(pnSave,0)
         disp('no  file chosen ... ')
@@ -115,7 +116,7 @@ end
 
 
 if choice_num==1 || choice_num==3 || choice_num==5 || choice_num==7  || choice_num==9 ...
-		|| choice_num==11 || choice_num==13  % there is opal/apdm data to read in
+		|| choice_num==11 || choice_num==13 || choice_num==15  % there is opal/apdm data to read in
 % if ~isfield(handles, 'restore_data')
     % apdm sensor data - we can handle up to 2 sensors
     disp('Choose APDM data *.h5 file')
@@ -160,9 +161,11 @@ switch choice_num
 		handles = get_page_text_image(handles);
     case {11 12} % gaze holding: 
 % 		handles = handles;
-	case {13 14} % vergence: get led data
+   case {13 14} % eccentric gaze holding
+		handles = parse_msg_file_for_targets(handles, 'ecc_gaze');
+	case {15 16} % vergence: get led data
 		handles = get_led_data(handles);
-	case 15 % restoring data from *_gui.mat
+	case 17 % restoring data from *_gui.mat
 		% change the choice_num corresponding to the saved .mat
 		if isfield(handles, 'vid_filename')
 			choice_num = 1;
@@ -182,7 +185,7 @@ switch choice_num
 		elseif isfield(handles, 'click_data_tbl')
 			choice_num = 7;
 		elseif isfield(handles, 'led_data_tbl')
-			choice_num = 13;
+			choice_num = 15;
 		end
 		
 end
@@ -320,7 +323,7 @@ switch choice_num
 			handles = add_pict_diff_roi_grid(handles);
 		end
 		
-	case {11 12} % gaze holding
+	case {11 12 13 14} % gaze holding
 		% remove video axes
 		delete(handles.axes_video_overlay)
 		delete(handles.axes_video)
@@ -332,7 +335,7 @@ switch choice_num
  		% make eye data axes wider
 		handles = widen_axes(handles);
 		
-	case {13 14} % vergence
+	case {15 16} % vergence
 		% remove video axes
 		delete(handles.axes_video_overlay)
 		delete(handles.axes_video)
