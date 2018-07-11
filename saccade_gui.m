@@ -204,7 +204,7 @@ switch sacc_source
 			v_other = vecvel(x_other, samp_freq, 2);
 			sac_other = microsacc_ps(x_other, v_other, vel_factor, min_num_samples);
 			
-			sac = binsacc(sac, sac_other);
+			sac = binsacc_ps(sac, sac_other);
 		end
 		
 		% save saccades in handles
