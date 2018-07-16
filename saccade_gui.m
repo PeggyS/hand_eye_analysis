@@ -159,6 +159,7 @@ switch sacc_source
             %    ptlist : map of segment: saccade==0, non-saccade==1
             %    pvel   : list of peak velocities
             %    pv_ind : sample indices of peak velocities
+			%    detcrit: criteria (vel and/or acc) used to detect saccade
             %    v_sacc_beg, v_sacc_end : saccade begin/end (using vel criteria)
             %    a_sacc_beg, a_sacc_end : saccade begin/end (using acc criteria)
             %    start, stop            : saccade begin/end (final selection)
