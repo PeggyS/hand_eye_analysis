@@ -26,21 +26,29 @@ else
 	else
 		% go up 2 folders and look for the image in 'picture_diff' folder
 		cur_dir = pwd;
-		cd(['..' filesep '..'])
+		cd(['..'])
 		if exist('picture_diff','dir')
 			cd 'picture_diff'
 			if exist(strrep(char(handles.click_data_tbl.image(1)), '_', ' '),'file')
 				handles.im_data = imread(strrep(char(handles.click_data_tbl.image(1)), '_', ' '));
 			end
 		else
-			% request file location
-			disp('choose image file ...')
-			[fnImg, pnImg] = uigetfile({'*.*'}, 'Choose image file ...');
-			if isequal(fnImg,0) || isequal(pnImg,0)
-				disp('no image file')
-				return
+			cd(['..'])
+			if exist('picture_diff','dir')
+				cd 'picture_diff'
+				if exist(strrep(char(handles.click_data_tbl.image(1)), '_', ' '),'file')
+					handles.im_data = imread(strrep(char(handles.click_data_tbl.image(1)), '_', ' '));
+				end
 			else
-				handles.im_data = imread(fullfile(pnImg,fnImg));
+				% request file location
+				disp('choose image file ...')
+				[fnImg, pnImg] = uigetfile({'*.*'}, 'Choose image file ...');
+				if isequal(fnImg,0) || isequal(pnImg,0)
+					disp('no image file')
+					return
+				else
+					handles.im_data = imread(fullfile(pnImg,fnImg));
+				end
 			end
 		end
 		cd(cur_dir)
