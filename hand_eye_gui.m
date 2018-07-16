@@ -1414,6 +1414,7 @@ for st_cnt = 1:length(sacc_type_list)
 						warning off
 						sacc_summary_cnt = sacc_summary_cnt + 1;
 						sacc_summary_tbl.startTime(sacc_summary_cnt) = beg_t;
+						sacc_summary_tbl.endTime(sacc_summary_cnt) = end_t;
 						sacc_summary_tbl.hAmpl(sacc_summary_cnt) = sacclist.sacc_horiz_component(sac_num);
 						sacc_summary_tbl.vAmpl(sacc_summary_cnt) = sacclist.sacc_vert_component(sac_num);
 						sacc_summary_tbl.Ampl(sacc_summary_cnt) = sacclist.sacc_ampl(sac_num);

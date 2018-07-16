@@ -144,22 +144,45 @@ switch sacc_source
         gap_sp = str2double(h.edGapSP.String);
         vel_or_acc = h.popmenuAccelVel.Value; % 1=Accel, 2=Vel, 3=Both
         extend = str2double(h.edExtend.String);
-        dataName = 'unknown';
-        strict_strip = 1;
-        [ptlist, pvlist] = findsaccs(h.eye_data.(eye_str).pos, thresh_a, thresh_v, acc_stop, ...
-			vel_stop, gap_fp, gap_sp, vel_or_acc, extend, dataName, strict_strip);
-        saccstart = evalin('base','saccstart');
-        saccstop = evalin('base','saccstop');
-             
+        range = [];
+        direction = '';
+%         dataName = 'unknown';
+%         strict_strip = 1;
+%         [ptlist, pvlist] = findsaccs(h.eye_data.(eye_str).pos, thresh_a, thresh_v, acc_stop, ...
+% 			vel_stop, gap_fp, gap_sp, vel_or_acc, extend, dataName, strict_strip);
+ %         saccstart = evalin('base','saccstart');
+%         saccstop = evalin('base','saccstop');
+        foundsaccs = findsaccs(h.eye_data.(eye_str).pos, thresh_a, thresh_v, acc_stop, ...
+            vel_stop, gap_fp, gap_sp, vel_or_acc, extend, range, direction);
+            % foundsaccs stuct:
+            %    num    : number found in segment
+            %    ptlist : map of segment: saccade==0, non-saccade==1
+            %    pvel   : list of peak velocities
+            %    pv_ind : sample indices of peak velocities
+            %    v_sacc_beg, v_sacc_end : saccade begin/end (using vel criteria)
+            %    a_sacc_beg, a_sacc_end : saccade begin/end (using acc criteria)
+            %    start, stop            : saccade begin/end (final selection)
+        saccstart = foundsaccs.start;
+        saccstop = foundsaccs.stop;
+        % saccstart sometimes has repeats (maybe) & nans (absolutely has nans)
+         nonnans = find(~isnan(saccstart));
+         youneek = find(unique(saccstart));     % indices of unique saccade starts
+         youneek = intersect(youneek,nonnans);
+         saccstart = saccstart(youneek); % indices of saccade starts
+         saccstop  = saccstop(youneek);  % indices of saccade stops
+         peak_vel  = foundsaccs.pvel(youneek);   % indices of peak velocities
 		
         start_ms = 1/samp_freq;
         % convert index values to time in ms
         sacclist.start = saccstart / samp_freq * 1000;
         sacclist.end = saccstop / samp_freq * 1000;
+		sacclist.peak_vel = peak_vel;
 		
 % 		h.findsacc_data.(eye_str).start_time = start_ms;
 		h.findsacc_data.(eye_str).start = sacclist.start + h.eye_data.start_times;
         h.findsacc_data.(eye_str).end = sacclist.end + h.eye_data.start_times;
+		h.findsacc_data.(eye_str).peak_vel = sacclist.peak_vel;
+		
 		% save new figure handles
 		guidata(h.figure1, h)
 		
