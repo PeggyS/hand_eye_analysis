@@ -25,8 +25,8 @@ srch_str = ['^' saccade_tag_no_beg_end '_(begin)$'];
 saccade_beg_line = findobj(handles.axes_eye, '-regexp', 'Tag', srch_str);
 
 % which channel of data
-tmp = regexp(saccade_tag, '(lh)|(rh)|(lv)|(lh)', 'match');
-eye_chan = tmp{1};
+% tmp = regexp(saccade_tag, '(lh)|(rh)|(lv)|(rv)', 'match');
+% eye_chan = tmp{1};
 
 tmp = regexp(saccade_tag, '(lh)|(rh)|(lv)|(rv)', 'match');
 try
