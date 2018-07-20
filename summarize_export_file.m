@@ -77,7 +77,32 @@ for eye_cnt = 1:length(sacc_type_list)
 			large_sacc_inds = find(sacc_tbl.Ampl >= 1);
 			fprintf(fid, '%s %s number of >= 1 deg saccades = %d\n', sacc_source_list{source_cnt}, ...
 				sacc_type_list{eye_cnt}, length(large_sacc_inds));
-		end
+			
+			% examine saccades for the other eye
+			switch sacc_type_list{eye_cnt}(1)
+				case 'r'
+					other_eye = strrep(sacc_type_list{eye_cnt}, 'r', 'l');
+				case 'l'
+					other_eye = strrep(sacc_type_list{eye_cnt}, 'l', 'r');
+				otherwise
+					error('unknown sacc_type: %s', sacc_type_list{eye_cnt})
+			end
+			other_sacc_fname = strrep(fname, '.txt', ['_', sacc_source_list{source_cnt} '_' other_eye '.txt']);
+			if exist(other_sacc_fname, 'file')
+				other_sacc_tbl = readtable(other_sacc_fname);
+				% remove exluded time segments
+				for ex_seg_cnt = 1:excluded_segments_count
+				other_sacc_tbl(other_sacc_tbl.startTime >= exclude_beg_time(ex_seg_cnt) & ...
+						 other_sacc_tbl.startTime <= exclude_end_time(ex_seg_cnt), :) = [];
+				end % excluded segments
+% 				keyboard
+				% look for nonoverlapping saccades of the other eye
+				nonoverlap_inds = find_nonoverlapping_saccades(sacc_tbl, other_sacc_tbl);
+				% if no overlapping saccade, get the other eye's info during the saccade
+				keyboard	
+
+			end
+		end %sacc_source & type file exists
 	end % sacc_source
 end % sacc_type
 
