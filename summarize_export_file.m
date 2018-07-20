@@ -99,8 +99,16 @@ for eye_cnt = 1:length(sacc_type_list)
 				% look for nonoverlapping saccades of the other eye
 				nonoverlap_inds = find_nonoverlapping_saccades(sacc_tbl, other_sacc_tbl);
 				% if no overlapping saccade, get the other eye's info during the saccade
-				keyboard	
-
+% 				keyboard
+% 				for no_cnt = 1:length(nonoverlap_inds)
+					sacc_start = sacc_tbl.startTime(nonoverlap_inds);
+					sacc_end =  sacc_tbl.endTime(nonoverlap_inds);
+					other_eye_info_tbl = get_other_eye_info(tbl, sacc_start, sacc_end, other_eye);
+					
+					new_sacc_tbl = outerjoin(sacc_tbl, other_eye_info_tbl, 'MergeKeys', true);
+					new_filename = strrep(sacc_fname, '.txt', '_plus_other_eye_non_sacc_info.txt');
+					writetable(new_sacc_tbl, new_filename, 'delimiter', '\t');
+% 				end % each non overlapping saccade
 			end
 		end %sacc_source & type file exists
 	end % sacc_source
