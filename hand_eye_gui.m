@@ -242,6 +242,11 @@ if isfield(handles,'apdm_data') && ~isempty(handles.apdm_data.sensor)
      end
    drawCorrectedVelocityLine(handles.apdm_data, 1)
    scale_norm_gyro_corrected_vel_to_axes(handles.axes_hand)
+   
+   % if pursuit, add a head movement threshold line
+   if choice_num == 5
+	   add_head_vel_threshold_line(handles.axes_hand)
+   end
      
    handles.linkprop_list(1) = linkprop([handles.axes_eye, handles.axes_hand ], 'XLim');
 
@@ -506,7 +511,7 @@ l_r_angle = atan2(mag_rel_earth(:,2), mag_rel_earth(:,1)) * 180 / pi - cal_offse
 
 line(apdm_data.time, l_r_angle, 'Tag', ['line_' sensor '_l_r_angle'], 'Color', [0.2 0.8 0.2], 'Linewidth', 1.5)
 
-line(get(gca,'XLim'),[0 0],'color','k')
+line([0 max(apdm_data.time)],[0 0],'color','k')
 return
 
 % -------------------------------------------------------------
@@ -594,6 +599,23 @@ scale_factor = ylims(2)/max_data;
 
 h_line.YData = h_line.YData * scale_factor;
 
+return
+
+% ------------------------------------------------------------------------------
+function add_head_vel_threshold_line(h_ax)
+y = [1 1];
+xmax = 1;
+for cnt = 1:length(h_ax.Children)
+	if strcmp(h_ax.Children(cnt).Type, 'line')
+		xmax = max([xmax, max(h_ax.Children(cnt).XData)]);
+	end
+end
+h_line = line([0 xmax], y, 'Tag', 'head_vel_threshold_line', 'Color', [0 0 0.8], 'LineWidth', 2);
+draggable(h_line, 'v')
+% add context menu to the line
+h_menu = uicontextmenu;
+h_line.UIContextMenu = h_menu;
+uimenu(h_menu, 'Label', 'Show Eye Data Below Threshold', 'Callback', {@showEyeDataBelowThresh, h_ax})
 return
 
 % -------------------------------------------------------------
@@ -2224,6 +2246,14 @@ data = h_line.YData(h_line.XData >= h_ax.XLim(1) & h_line.XData <= h_ax.XLim(2))
 % scale factor so data is within 90% of the axes y limits
 scale = h_ax.YLim(2) * 0.9 / max(data);
 h_line.YData = h_line.YData * scale;
+return
+
+% -------------------------------
+function showEyeDataBelowThresh(source, callbackdata, h_ax)
+% h_ax is the head data axes
+
+% get the threshold line and the norm
+%Tag', ['line_' sensor '_vel_norm']
 return
 
 % -------------------------------
