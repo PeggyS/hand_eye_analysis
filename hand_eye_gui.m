@@ -1528,9 +1528,21 @@ if ~isempty(h_blinks)
 		end_txt = ['blink_#' num2str(blink_num) '_end'];
 		% put the line tag into the table
 		row = find(out_tbl.t_eye >= beg_t, 1, 'first');
-		out_tbl.blinks{row} = beg_txt;
+		if ~isempty(row)
+			out_tbl.blinks{row} = beg_txt;
+		else
+			beep
+			disp('****** hand_eye_gui line 1535 *******')
+			disp('there will be a missing blink beginning in the exported file')
+		end
 		row = find(out_tbl.t_eye >= end_t, 1, 'first');
-		out_tbl.blinks{row} = end_txt;
+		if ~isempty(row)
+			out_tbl.blinks{row} = end_txt;
+		else
+			beep
+			disp('****** hand_eye_gui line 1542 *******')
+			disp('there will be a missing blink end in the exported file')
+		end
    end
 end
 
