@@ -2264,8 +2264,44 @@ return
 function showEyeDataBelowThresh(source, callbackdata, h_ax)
 % h_ax is the head data axes
 
+handles = guidata(gcf);
+
+
 % get the threshold line and the norm
-%Tag', ['line_' sensor '_vel_norm']
+thresh_line = findobj(h_ax, 'Tag', 'head_vel_threshold_line');
+norm_vel_line = findobj(h_ax, 'Tag', 'line_HEAD_vel_norm');
+
+% remove existing eye data below thresh lines
+eye_thresh_lines = findobj(handles.axes_eye, '-regexp', 'Tag', 'line_.*_below_thresh');
+if ~isempty(eye_thresh_lines)
+	delete(eye_thresh_lines)
+end
+
+% get eye data lines
+eye_lines = findobj(handles.axes_eye, '-regexp', 'Tag', 'line_.(h)|(v)');
+if ~isempty(eye_lines)
+	t_eye = eye_lines(1).XData;
+else
+	return
+end
+
+% resample the norm_vel_line data so it is the same as the eye data
+[resamp_norm_vel, resamp_t] = resample(norm_vel_line.YData, norm_vel_line.XData, handles.eye_data.samp_freq);
+% resamp_t begins at 0, t_eye begins at the t = 0.002, resamp_t may be longer than t_eye
+
+
+[t, ind_norm_vel, ~] = intersect(resamp_t, t_eye); % common time vector
+norm_vel = resamp_norm_vel(ind_norm_vel);
+
+for eye_cnt = 1:length(eye_lines)
+	tmp_data = eye_lines(eye_cnt).YData;
+	tmp_data(norm_vel>thresh_line.YData(1)) = nan; % replace above thresh values with nan
+	
+	% new line
+	line(handles.axes_eye, t, tmp_data, 'Tag', [eye_lines(eye_cnt).Tag '_below_thresh'], ...
+		'Color', eye_lines(eye_cnt).Color, 'LineWidth', eye_lines(eye_cnt).LineWidth*3)
+end
+
 return
 
 % -------------------------------
