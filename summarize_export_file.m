@@ -117,6 +117,49 @@ for eye_cnt = 1:length(sacc_type_list)
 	end % sacc_source
 end % sacc_type
 
+% if it's a smooth pursuit file, there will be a column with target_t
+if any(strcmp(tbl.Properties.VariableNames, 'target_t'))
+	
+	sm_out_tbl = tbl;
+	
+	blink_time_total = 0;
+	blink_segments_count = 0;
+
+	% look for blinks in sm_out_tbl.blinks and remove them
+	if iscell(tbl.blinks)
+		
+		blink_match_cell = regexp(sm_out_tbl.blinks, 'blink.*_begin');
+		blink_beg_ind_list = find(~cellfun(@isempty,blink_match_cell));
+
+		while ~isempty(blink_beg_ind_list)
+			blink_beg_ind = blink_beg_ind_list(1);
+	 		% corresponding blink end
+			end_str = strrep(sm_out_tbl.blinks{blink_beg_ind}, 'begin', 'end');
+			tmp = strfind(sm_out_tbl.blinks, end_str);
+			end_ind = find(~cellfun(@isempty,tmp));
+			
+			if isempty(end_ind)
+				warning('did not find blink end corresponding to %s', sm_out_tbl.blinks{blink_beg_ind})
+			else
+				blink_segments_count = blink_segments_count + 1;
+				blink_beg_time = sm_out_tbl.t_eye(blink_beg_ind);
+				blink_end_time = sm_out_tbl.t_eye(end_ind);
+				blink_time_total = blink_time_total + (blink_end_time - blink_beg_time);
+				
+				% remove the data from the table
+				sm_out_tbl(blink_beg_ind:end_ind,:) = [];
+				% search for more blinks
+				blink_match_cell = regexp(sm_out_tbl.blinks, 'blink.*_begin');
+				blink_beg_ind_list = find(~cellfun(@isempty,blink_match_cell));
+					
+			end
+		end % while there are still blinks in the table
+	end % there is a blinks column
+	fprintf(fid, 'smooth pursuit: removed %d blinks, total time duration = %g\n', ...
+		blink_segments_count, blink_time_total);
+	keyboard
+end % target_t is a column - smooth pursuit data
+
 fclose(fid);
 
 
