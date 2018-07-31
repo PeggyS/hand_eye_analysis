@@ -1355,6 +1355,9 @@ if ~isempty(h_lines)
 	out_tbl.region_of_interest = cell(height(out_tbl), 1);
 end
 
+% for smooth pursuit add col if using data below head motion threshold
+
+
 % saccades
 sacc_type_list = {'lh' 'lv' 'rh' 'rv'};
 sacc_source_list = {'eyelink', 'findsaccs', 'engbert'};
