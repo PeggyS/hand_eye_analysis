@@ -157,7 +157,15 @@ if any(strcmp(tbl.Properties.VariableNames, 'target_t'))
 	end % there is a blinks column
 	fprintf(fid, 'smooth pursuit: removed %d blinks, total time duration = %g\n', ...
 		blink_segments_count, blink_time_total);
-	keyboard
+	
+	% remove saccades
+	% what type of saccades are in the table?
+	tmp = regexpi(sm_out_tbl.Properties.VariableNames, '(edf_parser)|(engbert)|(findsaccs).*', 'match');
+	tmp(cellfun(@isempty, tmp)) = []; % remove empty cells
+	tmp2 = [tmp{:}];
+	
+	sac_types = unique(tmp2);
+	
 end % target_t is a column - smooth pursuit data
 
 fclose(fid);
