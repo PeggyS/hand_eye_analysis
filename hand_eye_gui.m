@@ -1794,6 +1794,10 @@ if isfield(handles, 'target_pos') && strcmp(handles.target_pos.type, 'smoothp')
 	out_tbl.target_xvel_deg_s = lpf(x_vel, 4, 1, handles.eye_data.samp_freq); 
 	out_tbl.target_yvel_deg_s = lpf(y_vel, 4, 1, handles.eye_data.samp_freq);
 	
+	% head velocity threshold line
+	thresh_line = findobj(handles.axes_hand, 'Tag', 'head_vel_threshold_line');
+	out_tbl.HEAD_below_threshold = out_tbl.HEAD_gyro_corrected_velocity_norm < thresh_line.YData(1);
+	
 end % target_pos smoothp
 
 % mouse click info
