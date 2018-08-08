@@ -72,6 +72,7 @@ if ~ok
     % user canceled - just quit
     return
 end
+disp(['Analysis choice = ' num2str(choice_num), ' - ' str{choice_num}])
 
 if choice_num == 17 % restore data 
     [fnSave, pnSave] = uigetfile({'*.mat'}, 'Choose *.mat file ...');
