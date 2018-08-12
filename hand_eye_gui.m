@@ -1797,7 +1797,9 @@ if isfield(handles, 'target_pos') && strcmp(handles.target_pos.type, 'smoothp')
 	
 	% head velocity threshold line
 	thresh_line = findobj(handles.axes_hand, 'Tag', 'head_vel_threshold_line');
-	out_tbl.HEAD_below_threshold = out_tbl.HEAD_gyro_corrected_velocity_norm < thresh_line.YData(1);
+    if ~isempty(thresh_line)
+        out_tbl.HEAD_below_threshold = out_tbl.HEAD_gyro_corrected_velocity_norm < thresh_line.YData(1);
+    end
 	
 end % target_pos smoothp
 

@@ -197,7 +197,8 @@ if any(strcmp(tbl.Properties.VariableNames, 'target_t'))
 				idx_start = find(contains(sm_out_tbl.(sacc_cols{c_cnt}), sacc_starts{ss_cnt}));
 				idx_end = find(contains(sm_out_tbl.(sacc_cols{c_cnt}), strrep(sacc_starts{ss_cnt}, 'start', 'end')));
 				assert(~isempty(idx_end), 'missing saccade end for %s', [ sacc_cols{c_cnt} sacc_starts{ss_cnt}] );
-				
+				% FIX ME - missing end for engbert saccade
+                
 				% make the saccade mask between indices = 1
 				sacc_mask(idx_start:idx_end) = 1;
 			end

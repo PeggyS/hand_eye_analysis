@@ -74,10 +74,10 @@ t = (1:numsamps)/samp_freq;
 
 % initialize the data in the axes
 axes(handles.axes_eye)
-handles.line_rh = line(t, handles.eye_data.rh.pos, 'Tag', 'line_rh', 'Color', 'g');
-handles.line_lh = line(t, handles.eye_data.lh.pos, 'Tag', 'line_lh', 'Color', 'r');
-handles.line_rv = line(t, handles.eye_data.rv.pos, 'Tag', 'line_rv', 'Color', 'g', 'LineStyle', '--');
-handles.line_lv = line(t, handles.eye_data.lv.pos, 'Tag', 'line_lv', 'Color', 'r', 'LineStyle', '--');
+handles.line_rh = line(t, handles.eye_data.rh.pos, 'Tag', 'line_rh', 'Color', [0 .8 0]);
+handles.line_lh = line(t, handles.eye_data.lh.pos, 'Tag', 'line_lh', 'Color', [0.8 0 0]);
+handles.line_rv = line(t, handles.eye_data.rv.pos, 'Tag', 'line_rv', 'Color', [0 1 0]);
+handles.line_lv = line(t, handles.eye_data.lv.pos, 'Tag', 'line_lv', 'Color', [1 0 0]);
 ylabel('Gaze Pos (\circ)')
 xlabel('Time (s)')
 
@@ -166,9 +166,12 @@ switch sacc_source
         saccstart = foundsaccs.start;
         saccstop = foundsaccs.stop;
         % saccstart sometimes has repeats (maybe) & nans (absolutely has nans)
-         nonnans = find(~isnan(saccstart));
+         nonnanstart = find(~isnan(saccstart));
+		 nonnanstop = find(~isnan(saccstop));
+		 nonnans = intersect(nonnanstart, nonnanstop);
          youneek = find(unique(saccstart));     % indices of unique saccade starts
          youneek = intersect(youneek,nonnans);
+
          saccstart = saccstart(youneek); % indices of saccade starts
          saccstop  = saccstop(youneek);  % indices of saccade stops
          peak_vel  = foundsaccs.pvel(youneek);   % indices of peak velocities
