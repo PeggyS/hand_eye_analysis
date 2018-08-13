@@ -56,7 +56,7 @@ fprintf(fid, 'excluded time = %g\n', excluded_time_total);
 % saccade summary
 sacc_type_list = {'lh' 'lv' 'rh' 'rv'};
 
-tmp = regexpi(tbl.Properties.VariableNames, '(edf_parser)|(engbert)|(findsaccs).*', 'match');
+tmp = regexpi(tbl.Properties.VariableNames, '(edf_parser)|(engbert)|(findsaccs)', 'match');
 tmp(cellfun(@isempty, tmp)) = []; % remove empty cells
 tmp2 = [tmp{:}];
 sacc_source_list = unique(tmp2); %% {'EDF_PARSER', 'findsaccs', 'engbert'};
@@ -165,7 +165,7 @@ if any(strcmp(tbl.Properties.VariableNames, 'target_t'))
 	
 	% remove saccades
 	% what type of saccades are in the table?
-	tmp = regexpi(sm_out_tbl.Properties.VariableNames, '(edf_parser)|(engbert)|(findsaccs).*', 'match');
+	tmp = regexpi(sm_out_tbl.Properties.VariableNames, '(edf_parser)|(engbert)|(findsaccs)', 'match');
 	tmp(cellfun(@isempty, tmp)) = []; % remove empty cells
 	tmp2 = [tmp{:}];
 	
@@ -196,7 +196,11 @@ if any(strcmp(tbl.Properties.VariableNames, 'target_t'))
 			for ss_cnt = 1:length(sacc_starts)
 				idx_start = find(contains(sm_out_tbl.(sacc_cols{c_cnt}), sacc_starts{ss_cnt}));
 				idx_end = find(contains(sm_out_tbl.(sacc_cols{c_cnt}), strrep(sacc_starts{ss_cnt}, 'start', 'end')));
-				assert(~isempty(idx_end), 'missing saccade end for %s', [ sacc_cols{c_cnt} sacc_starts{ss_cnt}] );
+				if isempty(idx_end)
+					% missing saccade end - probably because it was rmoved with a blink
+					% look for the index of the next discontinuity in time
+					keyboard
+				end	%for %s', [ sacc_cols{c_cnt} sacc_starts{ss_cnt}] );
 				% FIX ME - missing end for engbert saccade
                 
 				% make the saccade mask between indices = 1

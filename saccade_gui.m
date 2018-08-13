@@ -134,7 +134,7 @@ switch sacc_source
 		start_ms = h.eye_data.start_times;
 		sacclist = h.eye_data.(eye_str).saccades.sacclist; % eyelink data
 		sacc_marker = 'o';
-	case 'findsacc'
+	case 'findsaccs'
         % get parameter values
         thresh_a = str2double(h.edAccelThresh.String);
         acc_stop = str2double(h.edAccelStop.String);
@@ -169,20 +169,40 @@ switch sacc_source
          nonnanstart = find(~isnan(saccstart));
 		 nonnanstop = find(~isnan(saccstop));
 		 nonnans = intersect(nonnanstart, nonnanstop);
+		 saccstart = saccstart(nonnans);
+		 saccstop = saccstop(nonnans);
+		 
          youneek = find(unique(saccstart));     % indices of unique saccade starts
-         youneek = intersect(youneek,nonnans);
 
          saccstart = saccstart(youneek); % indices of saccade starts
          saccstop  = saccstop(youneek);  % indices of saccade stops
          peak_vel  = foundsaccs.pvel(youneek);   % indices of peak velocities
-		
-        start_ms = 1/samp_freq;
+		 
+% 		 % check the saccades for each start to have a matching stop
+% 		 % if there are more than 1 starts in a row or stops in a row
+		start_ms = 1/samp_freq;
+		 for s_cnt = 1:length(saccstart)
+			 if (saccstart(s_cnt) - start_ms)/1000 > 5.4 %in seconds% time > 5.4
+%  				 keyboard
+			 end
+			
+		 end
+
+
+        
         % convert index values to time in ms
         sacclist.start = saccstart / samp_freq * 1000;
         sacclist.end = saccstop / samp_freq * 1000;
 		sacclist.peak_vel = peak_vel;
 		
-% 		h.findsacc_data.(eye_str).start_time = start_ms;
+		% FIXME
+		% change this to h.eye)data.(eye_chan).sacclist(index of the next type of saccades to store)
+		% so disableSaccade works
+		
+	% then change the saved data 
+	
+	% do the same thing for engbert saccades
+
 		h.findsacc_data.(eye_str).start = sacclist.start + h.eye_data.start_times;
         h.findsacc_data.(eye_str).end = sacclist.end + h.eye_data.start_times;
 		h.findsacc_data.(eye_str).peak_vel = sacclist.peak_vel;
@@ -309,6 +329,9 @@ end
 for sacc_num = 1:length(sacclist.start)
    % saccade begin
    time1 = (sacclist.start(sacc_num) - start_ms)/1000; %in seconds
+%    if time1 > 5.4 %in seconds% time > 5.4
+%  				 keyboard
+% 			 end
    y = h.eye_data.(eye_str).pos(round(time1*samp_freq));
    h_beg_line = line( time1, y, 'Tag', ['saccade_' eye_str '_' sacc_source '_#' num2str(sacc_num) '_begin'], ...
       'Color', beg_line_color, 'Marker', sacc_marker, 'MarkerSize', 10);
@@ -421,10 +444,10 @@ function tbSaccadesRightHorizFindSacc_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 if get(hObject,'Value') 
-   showSaccades(handles, 'right','horizontal', 'findsacc');
-   hObject.UserData = 'findsacc';
+   showSaccades(handles, 'right','horizontal', 'findsaccs');
+   hObject.UserData = 'findsaccs';
 else
-   hideSaccades(handles, 'right','horizontal', 'findsacc');
+   hideSaccades(handles, 'right','horizontal', 'findsaccs');
 end
 return
 
@@ -436,10 +459,10 @@ function tbSaccadesLeftHorizFindSacc_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 if get(hObject,'Value') % returns toggle state of tbFixations
-   showSaccades(handles, 'left','horizontal', 'findsacc');
-   hObject.UserData = 'findsacc';
+   showSaccades(handles, 'left','horizontal', 'findsaccs');
+   hObject.UserData = 'findsaccs';
 else
-   hideSaccades(handles, 'left','horizontal', 'findsacc');
+   hideSaccades(handles, 'left','horizontal', 'findsaccs');
 end
 return
 
@@ -450,10 +473,10 @@ function tbSaccadesRightVertFindSacc_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 if get(hObject,'Value') % returns toggle state of tbFixations
-   showSaccades(handles, 'right','vertical', 'findsacc');
-   hObject.UserData = 'findsacc';
+   showSaccades(handles, 'right','vertical', 'findsaccs');
+   hObject.UserData = 'findsaccs';
 else
-   hideSaccades(handles, 'right','vertical', 'findsacc');
+   hideSaccades(handles, 'right','vertical', 'findsaccs');
 end
 return
 
@@ -464,10 +487,10 @@ function tbSaccadesLeftVertFindSacc_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 if get(hObject,'Value') % returns toggle state of tbFixations
-   showSaccades(handles, 'left','vertical', 'findsacc');
-   hObject.UserData = 'findsacc';
+   showSaccades(handles, 'left','vertical', 'findsaccs');
+   hObject.UserData = 'findsaccs';
 else
-   hideSaccades(handles, 'left','vertical', 'findsacc');
+   hideSaccades(handles, 'left','vertical', 'findsaccs');
 end
 return
 
@@ -666,7 +689,7 @@ function pbClearOldSaccs_Callback(hObject, eventdata, handles)
 eye_str_list = {'rh', 'lh', 'rv', 'lv'};
 for e_cnt = 1:length(eye_str_list)
 	eye_str = eye_str_list{e_cnt};
-	tag_search_str = ['^saccade_' eye_str '_findsacc.*'];
+	tag_search_str = ['^saccade_' eye_str '_findsaccs.*'];
 	line_list = findobj(handles.figure1,'-regexp', 'Tag', tag_search_str);
 	if ~isempty(line_list)
 		delete(line_list)
@@ -707,7 +730,7 @@ else
 	disp(['Saving ', fullfile(pathname, filename)])
 	data = handles.findsacc_data;
 	% remove disabled saccades
-	data = remove_disabled_saccades(handles, data, 'findsacc');
+	data = remove_disabled_saccades(handles, data, 'findsaccs');
 	params.accelThresh = handles.edAccelThresh.String;
 	params.velThresh = handles.edVelThresh.String;
 	params.accelStop = handles.edAccelStop.String;
@@ -947,7 +970,7 @@ if visible
 		data_line = findobj(line_list, '-regexp', 'Tag', 'line_.*');
 		set(data_line, 'Visible', 'on')
 		% if the togglebutton indicates that there is saccade lines to
-		% display - userData contains the saccade type (eyelink, findsacc,
+		% display - userData contains the saccade type (eyelink, findsaccs,
 		% engbert)
 		if ~isempty(tb_list(tb_cnt).UserData)
 			set(tb_list(tb_cnt), 'Value', 1)
@@ -978,7 +1001,7 @@ if visible
 		data_line = findobj(line_list, '-regexp', 'Tag', 'line_.*');
 		set(data_line, 'Visible', 'on')
 		% if the togglebutton indicates that there is saccade lines to
-		% display - userData contains the saccade type (eyelink, findsacc,
+		% display - userData contains the saccade type (eyelink, findsaccs,
 		% engbert)
 		if ~isempty(tb_list(tb_cnt).UserData)
 			set(tb_list(tb_cnt), 'Value', 1)
@@ -1007,7 +1030,7 @@ if visible
 		data_line = findobj(line_list, '-regexp', 'Tag', 'line_.*');
 		set(data_line, 'Visible', 'on')
 		% if the togglebutton indicates that there is saccade lines to
-		% display - userData contains the saccade type (eyelink, findsacc,
+		% display - userData contains the saccade type (eyelink, findsaccs,
 		% engbert)
 		if ~isempty(tb_list(tb_cnt).UserData)
 			set(tb_list(tb_cnt), 'Value', 1)
@@ -1036,7 +1059,7 @@ if visible
 		data_line = findobj(line_list, '-regexp', 'Tag', 'line_.*');
 		set(data_line, 'Visible', 'on')
 		% if the togglebutton indicates that there is saccade lines to
-		% display - userData contains the saccade type (eyelink, findsacc,
+		% display - userData contains the saccade type (eyelink, findsaccs,
 		% engbert)
 		if ~isempty(tb_list(tb_cnt).UserData)
 			set(tb_list(tb_cnt), 'Value', 1)
