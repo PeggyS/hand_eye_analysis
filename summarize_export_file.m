@@ -193,6 +193,9 @@ if any(strcmp(tbl.Properties.VariableNames, 'target_t'))
 			
 			% find corresponding sacc ends
 
+			% if a saccade end for 2 different saccades was at the same
+			% time, the 1st saccade end is written over in the export file
+			%FIXME
 			for ss_cnt = 1:length(sacc_starts)
 				idx_start = find(contains(sm_out_tbl.(sacc_cols{c_cnt}), sacc_starts{ss_cnt}));
 				idx_end = find(contains(sm_out_tbl.(sacc_cols{c_cnt}), strrep(sacc_starts{ss_cnt}, 'start', 'end')));

@@ -25,7 +25,7 @@ for e_cnt = 1:length(e_list)
 		% add this new type
 		handles.eye_data.(eye_str).saccades(num_sacc_types+1).paramtype = sacc_type_str;
 		handles.eye_data.(eye_str).saccades(num_sacc_types+1).params = sacc.params;
-		handles.eye_data.(eye_str).saccades(num_sacc_types+1).sacclist = sacc.data.(eye_str);
+		handles.eye_data.(eye_str).saccades(num_sacc_types+1).sacclist = sacc.data.(eye_str).sacclist;
 	end
 end % each type of eye data present
 

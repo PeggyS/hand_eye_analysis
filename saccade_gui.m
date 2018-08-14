@@ -171,12 +171,13 @@ switch sacc_source
 		 nonnans = intersect(nonnanstart, nonnanstop);
 		 saccstart = saccstart(nonnans);
 		 saccstop = saccstop(nonnans);
+		 peak_vel  = foundsaccs.pvel(nonnans);   % indices of peak velocities
 		 
          youneek = find(unique(saccstart));     % indices of unique saccade starts
 
          saccstart = saccstart(youneek); % indices of saccade starts
          saccstop  = saccstop(youneek);  % indices of saccade stops
-         peak_vel  = foundsaccs.pvel(youneek);   % indices of peak velocities
+         peak_vel  = peak_vel(youneek);   % indices of peak velocities
 		 
 % 		 % check the saccades for each start to have a matching stop
 % 		 % if there are more than 1 starts in a row or stops in a row
@@ -187,25 +188,34 @@ switch sacc_source
 			 end
 			
 		 end
-
-
         
         % convert index values to time in ms
         sacclist.start = saccstart / samp_freq * 1000;
         sacclist.end = saccstop / samp_freq * 1000;
 		sacclist.peak_vel = peak_vel;
 		
-		% FIXME
-		% change this to h.eye)data.(eye_chan).sacclist(index of the next type of saccades to store)
-		% so disableSaccade works
-		
-	% then change the saved data 
+		sac_type_num = 1;
+		if isfield(h.eye_data.(eye_str), 'saccades')
+			sac_type_num = length(h.eye_data.(eye_str).saccades) +1; % (index of the next type of saccades to store)
+		end
+		h.eye_data.(eye_str).saccades(sac_type_num).sacclist = sacclist;
+		h.eye_data.(eye_str).saccades(sac_type_num).sacclist.start = h.eye_data.(eye_str).saccades(sac_type_num).sacclist.start ...
+																		+ h.eye_data.start_times;
+		h.eye_data.(eye_str).saccades(sac_type_num).sacclist.end = h.eye_data.(eye_str).saccades(sac_type_num).sacclist.end ...
+																		+ h.eye_data.start_times;
+		h.eye_data.(eye_str).saccades(sac_type_num).paramtype = 'findsaccs';
+
+
 	
 	% do the same thing for engbert saccades
 
-		h.findsacc_data.(eye_str).start = sacclist.start + h.eye_data.start_times;
-        h.findsacc_data.(eye_str).end = sacclist.end + h.eye_data.start_times;
-		h.findsacc_data.(eye_str).peak_vel = sacclist.peak_vel;
+		% FIXME - remove this findsacc_data struct and use
+		% h.eye_data.(eye_str).saccades instead 
+		% then change the saved data 
+	
+% 		h.findsacc_data.(eye_str).start = sacclist.start + h.eye_data.start_times;
+%         h.findsacc_data.(eye_str).end = sacclist.end + h.eye_data.start_times;
+% 		h.findsacc_data.(eye_str).peak_vel = sacclist.peak_vel;
 		
 		% save new figure handles
 		guidata(h.figure1, h)
@@ -708,10 +718,22 @@ handles.tbSaccadesLeftHorizFindSacc.UserData = [];
 handles.tbSaccadesLeftVertFindSacc.UserData = [];
 
 % remove data saved in handles
-if isfield(handles, 'findsacc_data')
-	handles = rmfield(handles, 'findsacc_data');
-	guidata(handles.figure1, handles)
+eye_list = {'lh', 'rh', 'lv', 'rv'};
+for e_cnt = 1:length(eye_list)
+	eye_str = eye_list{e_cnt};
+	if isfield(handles.eye_data.(eye_str), 'saccades')
+		for s_cnt = 1:length(handles.eye_data.(eye_str).saccades)
+			if strcmp(handles.eye_data.(eye_str).saccades(s_cnt).paramtype, 'findsaccs')
+				handles.eye_data.(eye_str).saccades(s_cnt) = [];
+			end
+		end
+	end
 end
+guidata(handles.figure1, handles)
+% if isfield(handles, 'findsacc_data')
+% 	handles = rmfield(handles, 'findsacc_data');
+% 	guidata(handles.figure1, handles)
+% end
 
 return
 
@@ -728,9 +750,21 @@ if isequal(filename,0) || isequal(pathname,0)
 	disp('User pressed cancel')
 else
 	disp(['Saving ', fullfile(pathname, filename)])
-	data = handles.findsacc_data;
+	eye_list = {'lh', 'rh', 'lv', 'rv'};
+	for e_cnt = 1:length(eye_list)
+		eye_str = eye_list{e_cnt};
+		if isfield(handles.eye_data.(eye_str), 'saccades')
+			for s_cnt = 1:length(handles.eye_data.(eye_str).saccades)
+				if strcmp(handles.eye_data.(eye_str).saccades(s_cnt).paramtype, 'findsaccs')
+					data.(eye_str).sacclist = handles.eye_data.(eye_str).saccades(s_cnt).sacclist;
+				end
+			end
+		end
+	end
+					
+% 	data = handles.findsacc_data;
 	% remove disabled saccades
-	data = remove_disabled_saccades(handles, data, 'findsaccs');
+% 	data = remove_disabled_saccades(handles, data, 'findsaccs');
 	params.accelThresh = handles.edAccelThresh.String;
 	params.velThresh = handles.edVelThresh.String;
 	params.accelStop = handles.edAccelStop.String;
@@ -753,7 +787,7 @@ for e_cnt = 1:length(eye_str_list)
 	if ~isempty(disabled_lines)
 		for sac_num = 1:length(disabled_lines)
 			sacc_time_ms = round(disabled_lines(sac_num).XData*1000 + handles.eye_data.start_times);
-			sac_ind = find(data.(eye_str).start == sacc_time_ms, 1);
+			sac_ind = find(data.(eye_str).sacclist.start == sacc_time_ms, 1);
 			assert(~isempty(sac_ind), 'error finding saccade at %d\n', sacc_time_ms)
 			data.(eye_str).start(sac_ind) = [];
 			data.(eye_str).end(sac_ind) = [];
