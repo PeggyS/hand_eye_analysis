@@ -180,6 +180,10 @@ if any(strcmp(tbl.Properties.VariableNames, 'target_t'))
 		s_type = strrep(sac_types{sel}, 'eyelink', 'EDF_PARSER');
 		sacc_mask = zeros(height(sm_out_tbl), 1); % 1 = saccade data, 0 = non saccade data
 		
+		% discontinuities in time
+		t_diff = diff(sm_out_tbl.t_eye);
+		t_diff_min = min(unique(t_diff));
+		
 		% find if there are columns for rh, lh, rv, lv
 		tmp = regexpi(sm_out_tbl.Properties.VariableNames, [s_type '_((r)|(l))((h)|(v))_saccades$'], 'match');
 		tmp(cellfun(@isempty, tmp)) = []; % remove empty cells
@@ -195,16 +199,26 @@ if any(strcmp(tbl.Properties.VariableNames, 'target_t'))
 
 			% if a saccade end for 2 different saccades was at the same
 			% time, the 1st saccade end is written over in the export file
-			%FIXME
+
 			for ss_cnt = 1:length(sacc_starts)
 				idx_start = find(contains(sm_out_tbl.(sacc_cols{c_cnt}), sacc_starts{ss_cnt}));
 				idx_end = find(contains(sm_out_tbl.(sacc_cols{c_cnt}), strrep(sacc_starts{ss_cnt}, 'start', 'end')));
 				if isempty(idx_end)
-					% missing saccade end - probably because it was rmoved with a blink
-					% look for the index of the next discontinuity in time
-					keyboard
-				end	%for %s', [ sacc_cols{c_cnt} sacc_starts{ss_cnt}] );
-				% FIX ME - missing end for engbert saccade
+					% missing saccade end - probably because it was rmoved
+					% with a blink or overwritten by another saccade ending
+					% at the same time
+					if ss_cnt + 1 >= length(sacc_starts) % there are no more sacc starts, exclude everything to the end
+						idx_end = height(sm_out_tbl);
+					else
+						% look for the index of the next discontinuity in time
+						% or the start of the next saccade, whichever is sooner
+						% the next saccade start
+						idx_next_start = find(contains(sm_out_tbl.(sacc_cols{c_cnt}), sacc_starts{ss_cnt+1}));
+						% the end of the next discontinuity in time
+						idx_discont = find(t_diff(idx_start:end)>t_diff_min*1.5, 1) + idx_start;
+						idx_end = min([idx_next_start idx_discont]);
+					end
+				end	%for each saccade start
                 
 				% make the saccade mask between indices = 1
 				sacc_mask(idx_start:idx_end) = 1;
@@ -221,11 +235,11 @@ if any(strcmp(tbl.Properties.VariableNames, 'target_t'))
 		% stop_zeros = strfind([sacc_mask' 1],[0 1])
 
 		% Get lengths of islands of ones and zeros using those start-stop indices 
-		length_ones = stop_ones - start_ones + 1;
+% 		length_ones = stop_ones - start_ones + 1;
 		% length_zeros = stop_zeros - start_zeros + 1
 		
-		fprintf(fid, 'smooth pursuit: removed %d saccades, total number of samples = %g\n', ...
-			length(start_ones), sum(sacc_mask));
+		fprintf(fid, 'smooth pursuit: removed %d saccades, total number of samples = %g, time =  %g\n', ...
+			length(start_ones), sum(sacc_mask), sum(sacc_mask)*t_diff_min);
 	else
 		disp('Not removing saccades from smooth pursuit data.')
 	end
@@ -241,7 +255,7 @@ if any(strcmp(tbl.Properties.VariableNames, 'target_t'))
 		start_ones = strfind([0 msk'],[0 1]);
 		stop_ones = strfind([msk' 0],[1 0]);
 		fprintf(fid, 'smooth pursuit: removed %d segments with head motion above threshold, total number of samples = %g\n', ...
-			length(start_ones), sum(msk));
+			length(start_ones), sum(msk)*min(unique(diff(sm_out_tbl.t_eye))));
 	end
 	
 	% add column to smooth p output table
