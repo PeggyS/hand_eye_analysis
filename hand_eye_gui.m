@@ -82,6 +82,7 @@ if choice_num == 17 % restore data
     end
     handles = read_restore_state(handles, fullfile(pnSave, fnSave));
 else % all other choices, read in *.bin file for eye data
+	disp('Choose eye data *.bin file ...')
     [fnSave, pnSave] = uigetfile({'*.bin';'*.edf'}, 'Choose eye data *.bin file ...');
     if isequal(fnSave,0) || isequal(pnSave,0)
         disp('no  file chosen ... ')
@@ -2288,7 +2289,7 @@ if ~isempty(eye_thresh_lines)
 end
 
 % get eye data lines
-eye_lines = findobj(handles.axes_eye, '-regexp', 'Tag', 'line_.(h)|(v)');
+eye_lines = findobj(handles.axes_eye, '-regexp', 'Tag', '^line_((l)|(r))((h)|(v))');
 if ~isempty(eye_lines)
 	t_eye = eye_lines(1).XData;
 else
