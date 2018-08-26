@@ -171,6 +171,7 @@ if any(strcmp(tbl.Properties.VariableNames, 'target_t'))
 	
 	sac_types = strrep(unique(tmp2), 'EDF_PARSER', 'eyelink');
 	% ask what type of saccades to remove from the data
+	disp('There are more than 1 type of saccades in the export file. Select which type to summarize.')
 	if numel(sac_types) > 1
 		[sel, ok] = listdlg('ListString', sac_types, 'SelectionMode', 'single', 'Name', 'Saccade Type');
 	else
@@ -238,8 +239,8 @@ if any(strcmp(tbl.Properties.VariableNames, 'target_t'))
 % 		length_ones = stop_ones - start_ones + 1;
 		% length_zeros = stop_zeros - start_zeros + 1
 		
-		fprintf(fid, 'smooth pursuit: removed %d saccades, total number of samples = %g, time =  %g\n', ...
-			length(start_ones), sum(sacc_mask), sum(sacc_mask)*t_diff_min);
+		fprintf(fid, 'smooth pursuit: removed %d %s saccades, total number of samples = %g, time =  %g\n', ...
+			length(start_ones), s_type, sum(sacc_mask), sum(sacc_mask)*t_diff_min);
 	else
 		disp('Not removing saccades from smooth pursuit data.')
 	end

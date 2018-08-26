@@ -297,39 +297,54 @@ switch sacc_source
 		sacclist = compute_diff_vel_peaks(sacclist, h.eye_data.(h_str).pos, h.eye_data.(v_str).pos, samp_freq);
 		sacclist = compute_drift(sacclist, h.eye_data.(h_str).pos, h.eye_data.(v_str).pos, samp_freq);
 		
+		sac_type_num = 1;
+		if isfield(h.eye_data.(eye_str), 'saccades')
+			sac_type_num = length(h.eye_data.(eye_str).saccades) +1; % (index of the next type of saccades to store)
+		end
+		h.eye_data.(eye_str).saccades(sac_type_num).sacclist = sacclist;
+		h.eye_data.(eye_str).saccades(sac_type_num).sacclist.start = h.eye_data.(eye_str).saccades(sac_type_num).sacclist.start ...
+																		+ h.eye_data.start_times;
+		h.eye_data.(eye_str).saccades(sac_type_num).sacclist.end = h.eye_data.(eye_str).saccades(sac_type_num).sacclist.end ...
+																		+ h.eye_data.start_times;
+		h.eye_data.(eye_str).saccades(sac_type_num).sacclist.as_peak_vel_horiz_time = sacclist.as_peak_vel_horiz_ind/samp_freq + h.eye_data.start_times/1000;
+		h.eye_data.(eye_str).saccades(sac_type_num).sacclist.as_peak_vel_vert_time = sacclist.as_peak_vel_vert_ind/samp_freq + h.eye_data.start_times/1000;
+		h.eye_data.(eye_str).saccades(sac_type_num).sacclist.as_drift_mean_time = sacclist.as_mean_ind/samp_freq + h.eye_data.start_times/1000;
+		
+		h.eye_data.(eye_str).saccades(sac_type_num).paramtype = 'engbert';
+		
 % 		h.engbertsacc_data.(eye_str).start_time = start_ms;
-		h.engbertsacc_data.(eye_str).start = sacclist.start + h.eye_data.start_times;
-        h.engbertsacc_data.(eye_str).end = sacclist.end + h.eye_data.start_times;
-		h.engbertsacc_data.(eye_str).peak_vel = sacclist.peak_vel;
-		h.engbertsacc_data.(eye_str).sacc_ampl = sacclist.sacc_ampl;
-		h.engbertsacc_data.(eye_str).sacc_horiz_component = sacclist.sacc_horiz_component;
-		h.engbertsacc_data.(eye_str).sacc_vert_component = sacclist.sacc_vert_component;
-		h.engbertsacc_data.(eye_str).peak_vel_horiz_component = sacclist.peak_vel_horiz_component;
-		h.engbertsacc_data.(eye_str).peak_vel_vert_component = sacclist.peak_vel_vert_component;
-		h.engbertsacc_data.(eye_str).as_ampl_horiz = sacclist.as_ampl_horiz;
-		h.engbertsacc_data.(eye_str).as_ampl_vert = sacclist.as_ampl_vert;
-		h.engbertsacc_data.(eye_str).as_peak_vel_horiz = sacclist.as_peak_vel_horiz;
-		h.engbertsacc_data.(eye_str).as_peak_vel_vert = sacclist.as_peak_vel_vert;
-		h.engbertsacc_data.(eye_str).as_peak_vel_horiz_time = sacclist.as_peak_vel_horiz_ind/samp_freq + h.eye_data.start_times/1000;
-		h.engbertsacc_data.(eye_str).as_peak_vel_vert_time = sacclist.as_peak_vel_vert_ind/samp_freq + h.eye_data.start_times/1000;
-
-		h.engbertsacc_data.(eye_str).as_drift_mean_time = sacclist.as_mean_ind/samp_freq + h.eye_data.start_times/1000;
-		h.engbertsacc_data.(eye_str).as_median_horiz	 = sacclist.as_median_horiz;
-		h.engbertsacc_data.(eye_str).as_mean_horiz	 = sacclist.as_mean_horiz;
-		h.engbertsacc_data.(eye_str).as_var_horiz	 = sacclist.as_var_horiz;
-		h.engbertsacc_data.(eye_str).as_std_horiz	 = sacclist.as_std_horiz;
-		h.engbertsacc_data.(eye_str).as_median_vert	 = sacclist.as_median_vert;
-		h.engbertsacc_data.(eye_str).as_mean_vert	 = sacclist.as_mean_vert;
-		h.engbertsacc_data.(eye_str).as_var_vert	 = sacclist.as_var_vert;
-		h.engbertsacc_data.(eye_str).as_std_vert	 = sacclist.as_std_vert;
-		h.engbertsacc_data.(eye_str).as_median_norm_vel	 = sacclist.as_median_norm_vel;
-		h.engbertsacc_data.(eye_str).as_mean_norm_vel	 = sacclist.as_mean_norm_vel;
-		h.engbertsacc_data.(eye_str).as_var_norm_vel	 = sacclist.as_var_norm_vel;
-		h.engbertsacc_data.(eye_str).as_std_norm_vel	 = sacclist.as_std_norm_vel;
-		h.engbertsacc_data.(eye_str).as_median_norm_pos	 = sacclist.as_median_norm_pos;
-		h.engbertsacc_data.(eye_str).as_mean_norm_pos	 = sacclist.as_mean_norm_pos;
-		h.engbertsacc_data.(eye_str).as_var_norm_pos	 = sacclist.as_var_norm_pos;
-		h.engbertsacc_data.(eye_str).as_std_norm_pos	 = sacclist.as_std_norm_pos;
+% 		h.engbertsacc_data.(eye_str).start = sacclist.start + h.eye_data.start_times;
+%         h.engbertsacc_data.(eye_str).end = sacclist.end + h.eye_data.start_times;
+% 		h.engbertsacc_data.(eye_str).peak_vel = sacclist.peak_vel;
+% 		h.engbertsacc_data.(eye_str).sacc_ampl = sacclist.sacc_ampl;
+% 		h.engbertsacc_data.(eye_str).sacc_horiz_component = sacclist.sacc_horiz_component;
+% 		h.engbertsacc_data.(eye_str).sacc_vert_component = sacclist.sacc_vert_component;
+% 		h.engbertsacc_data.(eye_str).peak_vel_horiz_component = sacclist.peak_vel_horiz_component;
+% 		h.engbertsacc_data.(eye_str).peak_vel_vert_component = sacclist.peak_vel_vert_component;
+% 		h.engbertsacc_data.(eye_str).as_ampl_horiz = sacclist.as_ampl_horiz;
+% 		h.engbertsacc_data.(eye_str).as_ampl_vert = sacclist.as_ampl_vert;
+% 		h.engbertsacc_data.(eye_str).as_peak_vel_horiz = sacclist.as_peak_vel_horiz;
+% 		h.engbertsacc_data.(eye_str).as_peak_vel_vert = sacclist.as_peak_vel_vert;
+% 		h.engbertsacc_data.(eye_str).as_peak_vel_horiz_time = sacclist.as_peak_vel_horiz_ind/samp_freq + h.eye_data.start_times/1000;
+% 		h.engbertsacc_data.(eye_str).as_peak_vel_vert_time = sacclist.as_peak_vel_vert_ind/samp_freq + h.eye_data.start_times/1000;
+% 
+% 		h.engbertsacc_data.(eye_str).as_drift_mean_time = sacclist.as_mean_ind/samp_freq + h.eye_data.start_times/1000;
+% 		h.engbertsacc_data.(eye_str).as_median_horiz	 = sacclist.as_median_horiz;
+% 		h.engbertsacc_data.(eye_str).as_mean_horiz	 = sacclist.as_mean_horiz;
+% 		h.engbertsacc_data.(eye_str).as_var_horiz	 = sacclist.as_var_horiz;
+% 		h.engbertsacc_data.(eye_str).as_std_horiz	 = sacclist.as_std_horiz;
+% 		h.engbertsacc_data.(eye_str).as_median_vert	 = sacclist.as_median_vert;
+% 		h.engbertsacc_data.(eye_str).as_mean_vert	 = sacclist.as_mean_vert;
+% 		h.engbertsacc_data.(eye_str).as_var_vert	 = sacclist.as_var_vert;
+% 		h.engbertsacc_data.(eye_str).as_std_vert	 = sacclist.as_std_vert;
+% 		h.engbertsacc_data.(eye_str).as_median_norm_vel	 = sacclist.as_median_norm_vel;
+% 		h.engbertsacc_data.(eye_str).as_mean_norm_vel	 = sacclist.as_mean_norm_vel;
+% 		h.engbertsacc_data.(eye_str).as_var_norm_vel	 = sacclist.as_var_norm_vel;
+% 		h.engbertsacc_data.(eye_str).as_std_norm_vel	 = sacclist.as_std_norm_vel;
+% 		h.engbertsacc_data.(eye_str).as_median_norm_pos	 = sacclist.as_median_norm_pos;
+% 		h.engbertsacc_data.(eye_str).as_mean_norm_pos	 = sacclist.as_mean_norm_pos;
+% 		h.engbertsacc_data.(eye_str).as_var_norm_pos	 = sacclist.as_var_norm_pos;
+% 		h.engbertsacc_data.(eye_str).as_std_norm_pos	 = sacclist.as_std_norm_pos;
 		% save new figure handles
 		guidata(h.figure1, h)
 		
@@ -725,6 +740,7 @@ for e_cnt = 1:length(eye_list)
 		for s_cnt = 1:length(handles.eye_data.(eye_str).saccades)
 			if strcmp(handles.eye_data.(eye_str).saccades(s_cnt).paramtype, 'findsaccs')
 				handles.eye_data.(eye_str).saccades(s_cnt) = [];
+				break
 			end
 		end
 	end
@@ -773,10 +789,15 @@ else
 	params.gapSP = handles.edGapSP.String;
 	params.accelVel = handles.popmenuAccelVel.Value;
 	params.extend = handles.edExtend.String;
-	save(fullfile(pathname, filename), 'data', 'params')
+	if exist('data','var')
+		save(fullfile(pathname, filename), 'data', 'params')
+	else
+		disp('No findsaccs saccades to save')
+	end
 end
 return
 
+% disabled saccades are not being removed
 function data = remove_disabled_saccades(handles, data, sacc_type)
 eye_str_list = {'rh', 'lh', 'rv', 'lv'};
 for e_cnt = 1:length(eye_str_list)
@@ -897,12 +918,21 @@ handles.tbSaccadesRightVertEngbert.UserData = [];
 handles.tbSaccadesLeftHorizEngbert.UserData = [];
 handles.tbSaccadesLeftVertEngbert.UserData = [];
 
+% clear the saccades generated by engbert
 % remove data saved in handles
-if isfield(handles, 'engbertsacc_data')
-	handles = rmfield(handles, 'engbertsacc_data');
-	guidata(handles.figure1, handles)
+eye_list = {'lh', 'rh', 'lv', 'rv'};
+for e_cnt = 1:length(eye_list)
+	eye_str = eye_list{e_cnt};
+	if isfield(handles.eye_data.(eye_str), 'saccades')
+		for s_cnt = 1:length(handles.eye_data.(eye_str).saccades)
+			if strcmp(handles.eye_data.(eye_str).saccades(s_cnt).paramtype, 'engbert')
+				handles.eye_data.(eye_str).saccades(s_cnt) = [];
+				break
+			end
+		end
+	end
 end
-
+guidata(handles.figure1, handles)
 return
 
 
@@ -977,14 +1007,31 @@ if isequal(filename,0) || isequal(pathname,0)
 	disp('User pressed cancel')
 else
 	disp(['Saving ', fullfile(pathname, filename)])
-	data = handles.engbertsacc_data;
-	% remove disabled saccades
-	data = remove_disabled_saccades(handles, data, 'engbert');
-	
+	eye_list = {'lh', 'rh', 'lv', 'rv'};
+	for e_cnt = 1:length(eye_list)
+		eye_str = eye_list{e_cnt};
+		if isfield(handles.eye_data.(eye_str), 'saccades')
+			for s_cnt = 1:length(handles.eye_data.(eye_str).saccades)
+				if strcmp(handles.eye_data.(eye_str).saccades(s_cnt).paramtype, 'engbert')
+					data.(eye_str).sacclist = handles.eye_data.(eye_str).saccades(s_cnt).sacclist;
+				end
+			end
+		end
+	end
+% 	data = handles.engbertsacc_data;
+% 	% remove disabled saccades
+% 	data = remove_disabled_saccades(handles, data, 'engbert');
+% 	
 	params.velFactor = handles.edVelFactor.String;
 	params.minSamples = handles.edMinSaccDur.String;
+	params.edInterSaccInterval = handles.edInterSaccInterval.String;
+	params.binocOnly = handles.chbxBinocular.Value;
 	
-	save(fullfile(pathname, filename), 'data', 'params')
+	if exist('data','var')
+		save(fullfile(pathname, filename), 'data', 'params')
+	else
+		disp('no Engbert saccade data to save')
+	end
 end
 return
 
