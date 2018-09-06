@@ -822,6 +822,9 @@ for click_cnt = 1:height(handles.click_data_tbl)
 	% use the abs click time and eye_data start time to display the click time
 	click_time = (handles.click_data_tbl.abs_click_time(click_cnt) - handles.eye_data.start_times )/1000;
 	click_coords = parse_click_coords(handles.click_data_tbl.CLICK_COORDINATES(click_cnt));
+	if isempty(click_coords)
+		return
+	end
 	% line in the eye data axes
 	axes(handles.axes_eye)
 	h_eye = line([click_time, click_time], ylims, 'Color', 'r', 'LineWidth', 3, ...
@@ -922,6 +925,10 @@ end
 return
 
 function coords = parse_click_coords(cell_str_coords)
+if ~iscell(cell_str_coords)
+	coords = []; % return empty, not a valid coordinate
+	return
+end
 str_coords = regexp(cell_str_coords{:},'\[(?<x>\d+), (?<y>\d+)\]','names');
 coords.x = str2double(str_coords.x);
 coords.y = str2double(str_coords.y);

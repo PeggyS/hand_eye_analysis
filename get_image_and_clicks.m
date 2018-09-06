@@ -14,9 +14,28 @@ handles.click_filename = fullfile(pnSave, fnSave);
 
 % read in
 handles.click_data_tbl = readtable(handles.click_filename,'delimiter','\t');
+if isempty(handles.click_data_tbl)
+	reply = input('There are no clicks recorded. Is there an image to display? y/n [y]:','s');
+	if isempty(reply)
+		reply = 'y';
+	end
+	if strcmp(reply, 'y')
+		% request file location
+		disp('choose image file ...')
+		[fnImg, pnImg] = uigetfile({'*.*'}, 'Choose image file ...');
+		if isequal(fnImg,0) || isequal(pnImg,0)
+			disp('no image file')
+			return
+		else
+			handles.im_data = imread(fullfile(pnImg,fnImg));
+		end
+	else
+		% display a gray blank image
+		handles.im_data = imread('gray.png');
+	end
 
 % get the image 
-if exist(fullfile(pnSave, char(handles.click_data_tbl.image(1))),'file')
+elseif exist(fullfile(pnSave, char(handles.click_data_tbl.image(1))),'file')
 	handles.im_data = imread(fullfile(pnSave, char(handles.click_data_tbl.image(1))));
 else
 
