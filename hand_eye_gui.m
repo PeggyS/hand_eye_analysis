@@ -820,28 +820,32 @@ end
 ylims = get(handles.axes_eye, 'YLim');
 for click_cnt = 1:height(handles.click_data_tbl)
 	% use the abs click time and eye_data start time to display the click time
-	click_time = (handles.click_data_tbl.abs_click_time(click_cnt) - handles.eye_data.start_times )/1000;
-	click_coords = parse_click_coords(handles.click_data_tbl.CLICK_COORDINATES(click_cnt));
-	if isempty(click_coords)
-		return
-	end
-	% line in the eye data axes
-	axes(handles.axes_eye)
-	h_eye = line([click_time, click_time], ylims, 'Color', 'r', 'LineWidth', 3, ...
-		'Tag', ['click_id#' num2str(click_cnt) '_line']);
-	uistack(h_eye, 'bottom')
-	[hcmenu, ud] = createClickLineMenu(h_eye);
-	ud.click_coords = click_coords;
-	% symbol on the image
-	axes(handles.axes_video_overlay)
-	ud.h_click_on_pic = line((ud.click_coords.x-handles.eye_data.h_pix_z) / 30, ...
-		-(ud.click_coords.y-handles.eye_data.v_pix_z) / 30, 'Color', 'k', ...
-		'MarkerSize', 10, 'Marker', '+', 'Linewidth', 3);
-	ud.h_click_on_pic_text = text((ud.click_coords.x-handles.eye_data.h_pix_z) / 30 + 0.5, ...
-		-(ud.click_coords.y-handles.eye_data.v_pix_z) / 30 + 0.5, ...
-		num2str(click_time,3), ...
-		'FontSize', 15, 'FontWeight', 'bold');
-	set(h_eye, 'UIContextMenu', hcmenu, 'Userdata', ud)
+	if any(strcmp(handles.click_data_tbl.Properties.VariableNames, 'abs_click_time'))
+		click_time = (handles.click_data_tbl.abs_click_time(click_cnt) - handles.eye_data.start_times )/1000;
+
+		if click_time >= handles.axes_eye.XLim(1) && click_time <= handles.axes_eye.XLim(2) % only display clicks within the eye data times
+			click_coords = parse_click_coords(handles.click_data_tbl.CLICK_COORDINATES(click_cnt));
+			if ~isempty(click_coords)
+				% line in the eye data axes
+				axes(handles.axes_eye)
+				h_eye = line([click_time, click_time], ylims, 'Color', 'r', 'LineWidth', 3, ...
+					'Tag', ['click_id#' num2str(click_cnt) '_line']);
+				uistack(h_eye, 'bottom')
+				[hcmenu, ud] = createClickLineMenu(h_eye);
+				ud.click_coords = click_coords;
+				% symbol on the image
+				axes(handles.axes_video_overlay)
+				ud.h_click_on_pic = line((ud.click_coords.x-handles.eye_data.h_pix_z) / 30, ...
+					-(ud.click_coords.y-handles.eye_data.v_pix_z) / 30, 'Color', 'y', ...
+					'MarkerSize', 10, 'Marker', '+', 'Linewidth', 3);
+				ud.h_click_on_pic_text = text((ud.click_coords.x-handles.eye_data.h_pix_z) / 30 + 0.5, ...
+					-(ud.click_coords.y-handles.eye_data.v_pix_z) / 30 + 0.5, ...
+					num2str(click_time,3), ...
+					'FontSize', 15, 'FontWeight', 'bold', 'Color', 'y');
+				set(h_eye, 'UIContextMenu', hcmenu, 'Userdata', ud)
+			end
+		end
+	end % if abs_click_time is a colum in the click_data_tbl
 end
 return
 
@@ -1816,25 +1820,33 @@ if isfield(handles, 'click_data_tbl')
 	out_tbl.mouse_click_display_begin = cell(height(out_tbl),1);
 	disp_time = (handles.click_data_tbl.time_display_begin(1) - handles.eye_data.start_times )/1000;
 	row = find(out_tbl.t_eye >= disp_time, 1, 'first');
-	out_tbl.mouse_click_display_begin{row} = [handles.click_data_tbl.image{1} ' displayed'];
-	out_tbl.mouse_click_x_pix = cell(height(out_tbl),1);
-	out_tbl.mouse_click_y_pix = cell(height(out_tbl),1);
-	out_tbl.mouse_click_x_deg = cell(height(out_tbl),1);
-	out_tbl.mouse_click_y_deg = cell(height(out_tbl),1);
+	if ~any(strcmp(handles.click_data_tbl.Properties.VariableNames, 'abs_click_time'))
+		out_tbl.mouse_click_display_begin{row} = 'image displayed';	%
+	else
+		out_tbl.mouse_click_display_begin{row} = [handles.click_data_tbl.image{1} ' displayed'];
+		out_tbl.mouse_click_x_pix = cell(height(out_tbl),1);
+		out_tbl.mouse_click_y_pix = cell(height(out_tbl),1);
+		out_tbl.mouse_click_x_deg = cell(height(out_tbl),1);
+		out_tbl.mouse_click_y_deg = cell(height(out_tbl),1);
+	end
 	for click_cnt = 1:height(handles.click_data_tbl)
-% 		click_time = handles.click_data_tbl.CLICK_TIME(click_cnt)/1000;
-		click_time = (handles.click_data_tbl.abs_click_time(click_cnt) - handles.eye_data.start_times )/1000;
-		click_coords = parse_click_coords(handles.click_data_tbl.CLICK_COORDINATES(click_cnt));
-		row = find(out_tbl.t_eye >= click_time, 1, 'first');
-		out_tbl.mouse_click_x_pix{row} = click_coords.x;
-		out_tbl.mouse_click_y_pix{row} = click_coords.y;
-		out_tbl.mouse_click_x_deg{row} = (click_coords.x-handles.eye_data.h_pix_z) / 30;
-		out_tbl.mouse_click_y_deg{row} = -(click_coords.y-handles.eye_data.v_pix_z) / 30;
-		
-% 		['mouse click: pixel_pos = ' ...
-% 			num2str(click_coords.x) ', ' num2str(click_coords.y) ...
-% 			'; deg = ' num2str((click_coords.x-handles.eye_data.h_pix_z) / 30) ', ' ...
-% 			num2str(-(click_coords.y-handles.eye_data.v_pix_z) / 30)];
+		if ~any(strcmp(handles.click_data_tbl.Properties.VariableNames, 'abs_click_time'))
+			break
+		end
+		if handles.click_data_tbl.abs_click_time(click_cnt) > 0
+			click_time = (handles.click_data_tbl.abs_click_time(click_cnt) - handles.eye_data.start_times )/1000;
+			click_coords = parse_click_coords(handles.click_data_tbl.CLICK_COORDINATES(click_cnt));
+			row = find(out_tbl.t_eye >= click_time, 1, 'first');
+			out_tbl.mouse_click_x_pix{row} = click_coords.x;
+			out_tbl.mouse_click_y_pix{row} = click_coords.y;
+			out_tbl.mouse_click_x_deg{row} = (click_coords.x-handles.eye_data.h_pix_z) / 30;
+			out_tbl.mouse_click_y_deg{row} = -(click_coords.y-handles.eye_data.v_pix_z) / 30;
+
+	% 		['mouse click: pixel_pos = ' ...
+	% 			num2str(click_coords.x) ', ' num2str(click_coords.y) ...
+	% 			'; deg = ' num2str((click_coords.x-handles.eye_data.h_pix_z) / 30) ', ' ...
+	% 			num2str(-(click_coords.y-handles.eye_data.v_pix_z) / 30)];
+		end
 	end
 end % click data
 
