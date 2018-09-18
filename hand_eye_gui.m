@@ -934,6 +934,10 @@ if ~iscell(cell_str_coords)
 	return
 end
 str_coords = regexp(cell_str_coords{:},'\[(?<x>\d+), (?<y>\d+)\]','names');
+if isempty(str_coords)
+	coords = []; % return empty, not a valid coordinate
+	return
+end
 coords.x = str2double(str_coords.x);
 coords.y = str2double(str_coords.y);
 return

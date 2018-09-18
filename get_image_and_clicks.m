@@ -211,7 +211,16 @@ for line_cnt = line_ind:length(msgs)
 			if any(strcmp(handles.click_data_tbl.Properties.VariableNames, 'trial_sequence_num'))
 				found_inds = find(handles.click_data_tbl.trial_sequence_num == trial_num, click_cnt);
 				if length(found_inds) >= click_cnt
-					tbl_row = found_inds(click_cnt);
+					% if first found ind is for a row with CLICK_TIME = 0,
+					% then use the table row + 1. This is because the mult
+					% pict diff has an addition row in the clickdata table
+					% for the initial picture being displayed, not a mouse
+					% click. Its click_time = 0.
+					if handles.click_data_tbl.CLICK_TIME(found_inds(1)) == 0
+						tbl_row = found_inds(click_cnt)+1;
+					else
+						tbl_row = found_inds(click_cnt);
+					end
 					handles.click_data_tbl.abs_click_time(tbl_row) = str2double(word_list{2});
 				else
 					break
