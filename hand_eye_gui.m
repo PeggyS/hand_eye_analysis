@@ -550,13 +550,19 @@ vel = cumsum(accel_no_g,1)/samp_freq;
 gyro_corrected_vel = zeros(size(vel));
 ind = 1;
 threshold = 0.1;
-while ind <= length(norm_gyroEarth)
+while ind < length(norm_gyroEarth)
    if norm_gyroEarth(ind) < threshold % zero vel, look for end of zero vel segment
       next_ind = find(norm_gyroEarth(ind:end) > threshold, 1) + ind - 1; % index of 1st non-zero velocity
-      if isempty(next_ind)
+%       if ind > 1 && isempty(next_ind)
+      if  isempty(next_ind)
          break
-      end
-      
+	  end
+% 	  else
+% 		  next_ind = length(norm_gyroEarth);
+%       end
+      % during this non-zero segment, compute the integral of accel
+%       gyro_corrected_vel(ind:next_ind,:) = cumsum(accel_no_g(ind:next_ind,:),1)/samp_freq;
+	  
       ind = next_ind;
    else
       % in non-zero segment, look for its end
@@ -597,6 +603,7 @@ h_line = findobj(h_ax, '-regexp', 'Tag', 'line.*_vel_norm');
 assert(~isempty(h_line), 'did not find line.*_vel_norm');
 ylims = h_ax.YLim;
 max_data = max(h_line.YData);
+if max_data < 1, max_data = 1; end % if gyro line is all zeros, scale_factor becomes 0, so line data turns into nans
 scale_factor = ylims(2)/max_data;
 
 h_line.YData = h_line.YData * scale_factor;
@@ -1841,10 +1848,12 @@ if isfield(handles, 'click_data_tbl')
 			click_time = (handles.click_data_tbl.abs_click_time(click_cnt) - handles.eye_data.start_times )/1000;
 			click_coords = parse_click_coords(handles.click_data_tbl.CLICK_COORDINATES(click_cnt));
 			row = find(out_tbl.t_eye >= click_time, 1, 'first');
-			out_tbl.mouse_click_x_pix{row} = click_coords.x;
-			out_tbl.mouse_click_y_pix{row} = click_coords.y;
-			out_tbl.mouse_click_x_deg{row} = (click_coords.x-handles.eye_data.h_pix_z) / 30;
-			out_tbl.mouse_click_y_deg{row} = -(click_coords.y-handles.eye_data.v_pix_z) / 30;
+			if ~isempty(row)
+				out_tbl.mouse_click_x_pix{row} = click_coords.x;
+				out_tbl.mouse_click_y_pix{row} = click_coords.y;
+				out_tbl.mouse_click_x_deg{row} = (click_coords.x-handles.eye_data.h_pix_z) / 30;
+				out_tbl.mouse_click_y_deg{row} = -(click_coords.y-handles.eye_data.v_pix_z) / 30;
+			end
 
 	% 		['mouse click: pixel_pos = ' ...
 	% 			num2str(click_coords.x) ', ' num2str(click_coords.y) ...
