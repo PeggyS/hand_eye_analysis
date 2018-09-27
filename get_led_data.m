@@ -1,6 +1,43 @@
 function handles = get_led_data(handles)
 % get the led data from the message file and distances from led_distances.csv
+% change this. get led data from *_results.mat
+% in results.mat:
+% tgtpos = 
+%   1×43 struct array with fields:
+%     led
+%     when
+%     distance
+%     angle
+% tgtpos(1)
+% ans = 
+%   struct with fields:
+% 
+%          led: 0
+%         when: 1830808
+%     distance: []
+%        angle: []
+% tgtpos(2)
+% ans = 
+%   struct with fields:
+% 
+%          led: 9
+%         when: 5899527
+%     distance: 200
+%        angle: 0
 
+% when time is psychtoolbox time in ms
+% in results.mat
+% t = 
+%   struct with fields:
+% 
+%      rec_startEL: 1830808
+%     rec_startPTB: 5899450
+%        cal_endEL: 1830808
+%       cal_endPTB: 5899508
+%      exp_startEL: 1830808
+%     exp_startPTB: 5899508
+
+% t.exp_startPTB = when the exp/eyelink recording started
 
 % get the led_distances.csv
 fname = 'led_distances.csv';
