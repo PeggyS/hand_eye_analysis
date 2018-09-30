@@ -113,7 +113,7 @@ if ~found_img
 					end
 				else
 					% request file location
-					disp('choose image file ...')
+					disp(['choose image file ' char(handles.click_data_tbl.image(click_tbl_row))])
 					[fnImg, pnImg] = uigetfile({'*.*'}, 'Choose image file ...');
 					if isequal(fnImg,0) || isequal(pnImg,0)
 						disp('no image file')
@@ -131,8 +131,8 @@ if ~found_img
 				disp(['Choose image file: ' char(handles.click_data_tbl.image(click_tbl_row)) ])
 				[fnImg, pnImg] = uigetfile({'*.*'}, 'Choose image file ...');
 				if isequal(fnImg,0) || isequal(pnImg,0)
-					disp('no image file')
-					return
+					disp('no image file - will display gray image')
+					handles.im_data = imread('gray.png');
 				else
 					handles.im_data = imread(fullfile(pnImg,fnImg));
 				end
