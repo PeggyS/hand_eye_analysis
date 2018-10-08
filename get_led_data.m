@@ -123,21 +123,32 @@ handles.target_data.y = nan(size(handles.target_data.t));
 ipd = handles.led_results.testresults.ipd;
 t_start = handles.led_results.testresults.startPTB;
 r_cal_offset = atan2d(-ipd/2,550);
+l_cal_offset = -r_cal_offset;
 
 % turn led results.tgtpos struct into target lines
 for cnt = 1:length(handles.led_results.tgtpos)
-	% if led is on, determine the eye angle to display
+	% if led is on, determine the target eye angle to display
 	if handles.led_results.tgtpos(cnt).led > 0
-		x_led = handles.led_results.tgtpos(cnt).distance * tand(handles.led_results.tgtpos(cnt).angle);
-		y_led = handles.led_results.tgtpos(cnt).distance;
-		x_right = atan2d((x_led-ipd/2),y_led) - r_cal_offset;
+% 		x_led = handles.led_results.tgtpos(cnt).distance * tand(handles.led_results.tgtpos(cnt).angle);
+% 		y_led = handles.led_results.tgtpos(cnt).distance;
+		led_dist_away = handles.led_results.tgtpos(cnt).distance;
+		led_horiz_from_center = led_dist_away * tand(handles.led_results.tgtpos(cnt).angle);
+		led_rel_right = led_horiz_from_center - ipd/2;
+		led_rel_left = led_horiz_from_center + ipd/2;
+		x_right = atan2d(led_rel_right,led_dist_away);
+		x_left = atan2d(led_rel_left,led_dist_away);
 	else % led is off don't show any number
 		x_right = nan;
+		x_left = nan;
 	end
 	mask = handles.target_data.t >= (handles.led_results.tgtpos(cnt).when-t_start)/1000;
-	handles.target_data.x(mask) = x_right;
+	handles.target_data_right.x(mask) = x_right;
+	handles.target_data_left.x(mask) = x_left;
 end
 % draw the target lines
 axes(handles.axes_eye)
-handles.line_target_x = line(handles.target_data.t, handles.target_data.x, 'Tag', 'line_target_x', 'Color', 'b');
+handles.line_target_x_right = line(handles.target_data.t, handles.target_data_right.x, ...
+	'Tag', 'line_target_x_right', 'Color', [0 0.8 0]);
+handles.line_target_x_left = line(handles.target_data.t, handles.target_data_left.x, ...
+	'Tag', 'line_target_x_left', 'Color', [0.8 0 0]);
 return % get_led_data
