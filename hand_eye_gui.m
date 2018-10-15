@@ -217,9 +217,29 @@ handles = resizeAxes(handles);
 axes(handles.axes_eye)
 handles.line_rh = line(t, handles.eye_data.rh.pos, 'Tag', 'line_rh', 'Color', 'g');
 handles.line_lh = line(t, handles.eye_data.lh.pos, 'Tag', 'line_lh', 'Color', 'r');
-handles.line_rv = line(t, handles.eye_data.rv.pos, 'Tag', 'line_rv', 'Color', 'g', 'LineStyle', '--');
-handles.line_lv = line(t, handles.eye_data.lv.pos, 'Tag', 'line_lv', 'Color', 'r', 'LineStyle', '--');
-ylabel('Gaze Pos (\circ)')
+if choice_num == 15 || choice_num == 16 % vergence
+	% ?????????
+	% no vertical data & add vergence angle at calibration to the data
+% 	ipd = handles.led_results.testresults.ipd;
+% 	r_cal_offset = atan2d(-ipd/2,550);
+% 	l_cal_offset = -r_cal_offset;
+% 	ylabel('Eye in Head Pos (\circ)')
+	% ????????????
+	
+	% lh-rh = vergence
+	verg = handles.eye_data.lh.pos - handles.eye_data.rh.pos;
+	% (lh+rh)/2 = conjugate
+	conj = (handles.eye_data.lh.pos + handles.eye_data.rh.pos)/2;
+	handles.line_vergence = line(t, verg, 'Tag', 'line_vergence', 'Color', 'b');
+	handles.line_vergence = line(t, conj, 'Tag', 'line_conjugate', 'Color', 'c');
+	
+	ylabel('Gaze Pos (\circ)')
+	
+else
+	handles.line_rv = line(t, handles.eye_data.rv.pos, 'Tag', 'line_rv', 'Color', 'g', 'LineStyle', '--');
+	handles.line_lv = line(t, handles.eye_data.lv.pos, 'Tag', 'line_lv', 'Color', 'r', 'LineStyle', '--');
+	ylabel('Gaze Pos (\circ)')
+end
 
 
 if isfield(handles,'apdm_data') && ~isempty(handles.apdm_data.sensor)

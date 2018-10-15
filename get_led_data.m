@@ -151,4 +151,11 @@ handles.line_target_x_right = line(handles.target_data.t, handles.target_data_ri
 	'Tag', 'line_target_x_right', 'Color', [0 0.8 0]);
 handles.line_target_x_left = line(handles.target_data.t, handles.target_data_left.x, ...
 	'Tag', 'line_target_x_left', 'Color', [0.8 0 0]);
+
+% % draw the lh-rh (vergence) & (lh+rh)/2 (conjugate) target lines
+% axes(handles.axes_eye)
+% handles.line_vergence = line(handles.target_data.t, handles.target_data_left.x-handles.target_data_right.x, ...
+% 	'Tag', 'line_target_x_right', 'Color', [0 0 0.8]);
+% handles.line_target_x_left = line(handles.target_data.t, (handles.target_data_left.x+handles.target_data_right.x)/2, ...
+% 	'Tag', 'line_target_x_left', 'Color', [0.5 0 0.8]);
 return % get_led_data
