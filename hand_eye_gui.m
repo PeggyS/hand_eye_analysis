@@ -231,7 +231,7 @@ if choice_num == 15 || choice_num == 16 % vergence
 	% (lh+rh)/2 = conjugate
 	conj = (handles.eye_data.lh.pos + handles.eye_data.rh.pos)/2;
 	handles.line_vergence = line(t, verg, 'Tag', 'line_vergence', 'Color', 'b');
-	handles.line_vergence = line(t, conj, 'Tag', 'line_conjugate', 'Color', 'c');
+	handles.line_conjugate = line(t, conj, 'Tag', 'line_conjugate', 'Color', 'c');
 	
 	ylabel('Gaze Pos (\circ)')
 	
@@ -1379,17 +1379,35 @@ h_wait = waitbar(0, 'Gathering data');
 t_eye = handles.line_rh.XData;
 rh = handles.line_rh.YData;
 lh = handles.line_lh.YData;
-rv = handles.line_rv.YData;
-lv = handles.line_lv.YData;
+if isfield(handles, 'line_vergence') % vergence & no vertical data
+	rv = nan(size(rh));
+	lv = nan(size(lh));
+	verge_data = handles.line_vergence.YData;
+	conj_data = handles.line_conjugate.YData;
+else
+	rv = handles.line_rv.YData;
+	lv = handles.line_lv.YData;
+end
 
 % and velocities
 rhv = d2pt(rh, 3, handles.eye_data.samp_freq);
 lhv = d2pt(lh, 3, handles.eye_data.samp_freq);
-rvv = d2pt(rv, 3, handles.eye_data.samp_freq);
-lvv = d2pt(lv, 3, handles.eye_data.samp_freq);
+if isfield(handles, 'line_vergence') % vergence & no vertical data
+	rvv = rv';
+	lvv = lv';
+else
+	rvv = d2pt(rv, 3, handles.eye_data.samp_freq);
+	lvv = d2pt(lv, 3, handles.eye_data.samp_freq);
+end
+
 
 out_tbl = table(t_eye', rh', lh', rv', lv', rhv, lhv, rvv, lvv);
 out_tbl.Properties.VariableNames = {'t_eye', 'rh', 'lh', 'rv', 'lv', 'rh_vel', 'lh_vel', 'rv_vel', 'lv_vel'};
+
+if isfield(handles, 'line_vergence') % vergence
+	out_tbl.vergence = verge_data';
+	out_tbl.conjugate = conj_data';
+end
 
 % for pic diff & reading tasks, add cols for region of interest
 h_lines = findobj(handles.axes_video_overlay, '-regexp', 'Tag', 'line.*grid.*');
