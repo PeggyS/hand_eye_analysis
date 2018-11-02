@@ -1384,6 +1384,8 @@ if isfield(handles, 'line_vergence') % vergence & no vertical data
 	lv = nan(size(lh));
 	verge_data = handles.line_vergence.YData;
 	conj_data = handles.line_conjugate.YData;
+	verg_target_x_right = handles.line_target_x_right.YData;
+	verg_target_x_left = handles.line_target_x_left.YData;
 else
 	rv = handles.line_rv.YData;
 	lv = handles.line_lv.YData;
@@ -1407,6 +1409,8 @@ out_tbl.Properties.VariableNames = {'t_eye', 'rh', 'lh', 'rv', 'lv', 'rh_vel', '
 if isfield(handles, 'line_vergence') % vergence
 	out_tbl.vergence = verge_data';
 	out_tbl.conjugate = conj_data';
+	out_tbl.verg_target_right = verg_target_x_right';
+	out_tbl.verg_target_left = verg_target_x_left';
 end
 
 % for pic diff & reading tasks, add cols for region of interest
