@@ -215,16 +215,20 @@ handles = resizeAxes(handles);
 
 % initialize the data in the axes
 axes(handles.axes_eye)
-handles.line_rh = line(t, handles.eye_data.rh.pos, 'Tag', 'line_rh', 'Color', 'g');
-handles.line_lh = line(t, handles.eye_data.lh.pos, 'Tag', 'line_lh', 'Color', 'r');
+
 if choice_num == 15 || choice_num == 16 % vergence
 	% ?????????
-	% no vertical data & add vergence angle at calibration to the data
-% 	ipd = handles.led_results.testresults.ipd;
-% 	r_cal_offset = atan2d(-ipd/2,550);
-% 	l_cal_offset = -r_cal_offset;
-% 	ylabel('Eye in Head Pos (\circ)')
+	%  add vergence angle at calibration to the data
+	% this is just offset at cycolpean zero calibration. It doesn't take
+	% into account the IPD at eccentric viewing angles
+	ipd = handles.led_results.testresults.ipd;
+	r_cal_offset = atan2d(-ipd/2,550);
+	l_cal_offset = -r_cal_offset;
+	ylabel('Eye in Head Pos (\circ)')
 	% ????????????
+	
+	handles.line_rh = line(t, handles.eye_data.rh.pos+r_cal_offset, 'Tag', 'line_rh', 'Color', 'g');
+	handles.line_lh = line(t, handles.eye_data.lh.pos+l_cal_offset, 'Tag', 'line_lh', 'Color', 'r');
 	
 	% lh-rh = vergence
 	verg = handles.eye_data.lh.pos - handles.eye_data.rh.pos;
@@ -233,13 +237,16 @@ if choice_num == 15 || choice_num == 16 % vergence
 	handles.line_vergence = line(t, verg, 'Tag', 'line_vergence', 'Color', 'b');
 	handles.line_conjugate = line(t, conj, 'Tag', 'line_conjugate', 'Color', 'c');
 	
-	ylabel('Gaze Pos (\circ)')
 	
 else
-	handles.line_rv = line(t, handles.eye_data.rv.pos, 'Tag', 'line_rv', 'Color', 'g', 'LineStyle', '--');
-	handles.line_lv = line(t, handles.eye_data.lv.pos, 'Tag', 'line_lv', 'Color', 'r', 'LineStyle', '--');
+	handles.line_rh = line(t, handles.eye_data.rh.pos, 'Tag', 'line_rh', 'Color', 'g');
+	handles.line_lh = line(t, handles.eye_data.lh.pos, 'Tag', 'line_lh', 'Color', 'r');
 	ylabel('Gaze Pos (\circ)')
 end
+handles.line_rv = line(t, handles.eye_data.rv.pos, 'Tag', 'line_rv', 'Color', 'g', 'LineStyle', '--');
+handles.line_lv = line(t, handles.eye_data.lv.pos, 'Tag', 'line_lv', 'Color', 'r', 'LineStyle', '--');
+% 	ylabel('Gaze Pos (\circ)')
+% end
 
 
 if isfield(handles,'apdm_data') && ~isempty(handles.apdm_data.sensor)
@@ -1380,27 +1387,37 @@ t_eye = handles.line_rh.XData;
 rh = handles.line_rh.YData;
 lh = handles.line_lh.YData;
 if isfield(handles, 'line_vergence') % vergence & no vertical data
-	rv = nan(size(rh));
-	lv = nan(size(lh));
 	verge_data = handles.line_vergence.YData;
 	conj_data = handles.line_conjugate.YData;
 	verg_target_x_right = handles.line_target_x_right.YData;
 	verg_target_x_left = handles.line_target_x_left.YData;
-else
-	rv = handles.line_rv.YData;
-	lv = handles.line_lv.YData;
 end
+if isfield(handles, 'line_rv')
+	rv = handles.line_rv.YData;
+	rvv = d2pt(rv, 3, handles.eye_data.samp_freq);
+else
+	rv = nan(size(rh));
+	rvv = nan(size(rh))';
+end
+if isfield(handles, 'line_lv')
+	lv = handles.line_lv.YData;
+	lvv = d2pt(lv, 3, handles.eye_data.samp_freq);
+else
+	lv = nan(size(lh));
+	lvv = nan(size(lh))';
+end
+
 
 % and velocities
 rhv = d2pt(rh, 3, handles.eye_data.samp_freq);
 lhv = d2pt(lh, 3, handles.eye_data.samp_freq);
-if isfield(handles, 'line_vergence') % vergence & no vertical data
-	rvv = rv';
-	lvv = lv';
-else
-	rvv = d2pt(rv, 3, handles.eye_data.samp_freq);
-	lvv = d2pt(lv, 3, handles.eye_data.samp_freq);
-end
+% if isfield(handles, 'line_vergence') % vergence & no vertical data
+% 	rvv = rv';
+% 	lvv = lv';
+% else
+% 	rvv = d2pt(rv, 3, handles.eye_data.samp_freq);
+% 	lvv = d2pt(lv, 3, handles.eye_data.samp_freq);
+% end
 
 
 out_tbl = table(t_eye', rh', lh', rv', lv', rhv, lhv, rvv, lvv);
