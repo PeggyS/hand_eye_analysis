@@ -220,7 +220,7 @@ if choice_num == 15 || choice_num == 16 % vergence
 	% ?????????
 	%  add vergence angle at calibration to the data
 	% this is just offset at cycolpean zero calibration. It doesn't take
-	% into account the IPD at eccentric viewing angles
+	% into account the IPD at eccentric angles
 	ipd = handles.led_results.testresults.ipd;
 	r_cal_offset = atan2d(-ipd/2,550);
 	l_cal_offset = -r_cal_offset;
