@@ -1448,6 +1448,10 @@ sacc_source_list = {'eyelink', 'findsaccs', 'engbert'};
 % handles.eye_data.lh.saccades(2).sacclist.enabled(1:5)
 
 
+summ_filename = {}; % array to contain filenames if saccade summary file is created  (will
+% need to remove blinks and excluded data from the files)
+summ_fname_cnt = 0;
+
 %for ss_cnt = 1:length(sacc_source_list)
 for st_cnt = 1:length(sacc_type_list)
 	st = sacc_type_list{st_cnt};
@@ -1520,6 +1524,7 @@ for st_cnt = 1:length(sacc_type_list)
 					% to a summary file
 					if strcmp(sacc_source, 'engbert')
 						warning off
+						engbert_summary_sacc_file_flg = true;
 						sacc_summary_cnt = sacc_summary_cnt + 1;
 						sacc_summary_tbl.startTime(sacc_summary_cnt) = beg_t;
 						sacc_summary_tbl.endTime(sacc_summary_cnt) = end_t;
@@ -1574,8 +1579,9 @@ for st_cnt = 1:length(sacc_type_list)
 				% add 1 more column
 				sacc_summary_tbl.asPeakVelCombined = sqrt(sacc_summary_tbl.asPeakVelH .^2 + ...
 															sacc_summary_tbl.asPeakVelV .^2);
-				summ_filename = strrep(export_filename, '.txt', ['_' sacc_type '.txt']);
-				writetable(sacc_summary_tbl, summ_filename, 'delimiter', '\t');
+				summ_fname_cnt = summ_fname_cnt + 1;
+				summ_filename{summ_fname_cnt} = strrep(export_filename, '.txt', ['_' sacc_type '.txt']);
+				writetable(sacc_summary_tbl, summ_filename{summ_fname_cnt}, 'delimiter', '\t');
 			end
 		end % if there are saccades of this type for this source
 	end % sacc source
@@ -1603,34 +1609,6 @@ for fix_cnt = 1:length(fix_type_list)
 	end
 end
 
-% blinks
-h_blinks = findobj(handles.axes_eye, '-regexp', 'Tag', 'blink_id#\d*_patch');
-if ~isempty(h_blinks)
-	out_tbl.blinks = cell(height(out_tbl), 1);
-	for blink_num = 1:length(h_blinks)
-		beg_t = min(h_blinks(blink_num).XData);
-		beg_txt = ['blink_#' num2str(blink_num) '_begin'];
-		end_t = max(h_blinks(blink_num).XData);
-		end_txt = ['blink_#' num2str(blink_num) '_end'];
-		% put the line tag into the table
-		row = find(out_tbl.t_eye >= beg_t, 1, 'first');
-		if ~isempty(row)
-			out_tbl.blinks{row} = beg_txt;
-		else
-			beep
-			disp('****** hand_eye_gui line 1535 *******')
-			disp('there will be a missing blink beginning in the exported file')
-		end
-		row = find(out_tbl.t_eye >= end_t, 1, 'first');
-		if ~isempty(row)
-			out_tbl.blinks{row} = end_txt;
-		else
-			beep
-			disp('****** hand_eye_gui line 1542 *******')
-			disp('there will be a missing blink end in the exported file')
-		end
-   end
-end
 
 % sensors
 if isfield(handles, 'apdm_data')
@@ -1947,8 +1925,53 @@ if ~isempty(h_exclude_patches)
       out_tbl.annotation(ind_excl_beg) = {'begin excluding data'};
       out_tbl.annotation(ind_excl_end) = {'end excluding data'};
       
+	  % remove data from out_tbl
       out_tbl = out_tbl([1:ind_excl_beg, ind_excl_end:height(out_tbl)], :);
+	  % remove data from summ_filename(summ_fname_cnt)
+	  for sf_cnt = 1:summ_fname_cnt
+		remove_data_summ_file(summ_filename{sf_cnt}, excl_beg, excl_end);
+	  end
    end
+end
+
+% remove blinks 
+waitbar(0.6, h_wait, 'Removing blinks from data');
+h_blinks = findobj(handles.axes_eye, '-regexp', 'Tag', 'blink_id#\d*_patch');
+if ~isempty(h_blinks)
+	out_tbl.blinks = cell(height(out_tbl), 1);
+	for blink_num = 1:length(h_blinks)
+		beg_t = min(h_blinks(blink_num).XData);
+		beg_txt = ['blink_#' num2str(blink_num) '_begin'];
+		end_t = max(h_blinks(blink_num).XData);
+		end_txt = ['blink_#' num2str(blink_num) '_end'];
+		% put the line tag into the table
+		row_beg = find(out_tbl.t_eye >= beg_t, 1, 'first');
+		excl_flg = true;
+		if ~isempty(row_beg)
+			out_tbl.blinks{row_beg} = beg_txt;
+		else
+			beep
+			disp('****** hand_eye_gui line 1535 *******')
+			disp('there will be a missing blink beginning in the exported file')
+			excl_flg = false;
+		end
+		row_end = find(out_tbl.t_eye >= end_t, 1, 'first');
+		if ~isempty(row_end)
+			out_tbl.blinks{row_end} = end_txt;
+		else
+			beep
+			disp('****** hand_eye_gui line 1542 *******')
+			disp('there will be a missing blink end in the exported file')
+			excl_flg = false;
+		end
+		if excl_flg
+			out_tbl = out_tbl([1:row_beg, row_end:height(out_tbl)], :);
+			% remove data from summ_filename(summ_fname_cnt)
+			for sf_cnt = 1:summ_fname_cnt
+				remove_data_summ_file(summ_filename{sf_cnt}, beg_t, end_t);
+			end
+		end
+	end
 end
 
 analyze_out_tbl = table();
