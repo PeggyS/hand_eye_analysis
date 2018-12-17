@@ -2314,7 +2314,7 @@ blinks.start = [];
 blinks.end = [];
 for elcnt = 1:length(eye_list)
 	if isfield(h.eye_data.(eye_list{elcnt}), 'blink')
-		if isfield(h.eye_data.(eye_list{1}).blink.blinklist, 'start')
+		if isfield(h.eye_data.(eye_list{elcnt}).blink.blinklist, 'start')
 			blinks.start = [blinks.start h.eye_data.(eye_list{elcnt}).blink.blinklist.start(:)'];
 			blinks.end = [blinks.end h.eye_data.(eye_list{elcnt}).blink.blinklist.end(:)'];
 		end
