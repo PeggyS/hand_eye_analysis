@@ -908,8 +908,37 @@ function pbSaveCal_Callback(hObject, eventdata, handles)
 % hObject    handle to pbSaveCal (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-handles = parse_msg_file_for_targets(handles, 'sacc');
-guidata(handles.figure1, handles)
+ipd = str2double(handles.editIPD.String);
+dist = str2double(handles.editTargetDistance.String);
+
+eye = handles.popupmenuEye.String{handles.popupmenuEye.Value}; % Right or Left
+
+h_editTargetAngles = findobj(handles.figure1, '-regexp', 'Tag', 'editTarget\d+Angle');
+for h_cnt = 1:length(h_editTargetAngles)
+	% corresponding checkbox
+	chbx_tag_str = strrep(h_editTargetAngles(h_cnt).Tag, 'edit', 'checkbox');
+	chbx_tag_str = strrep(chbx_tag_str, 'Angle', '');
+	h_chkbx = findobj(handles.figure1, 'Tag', chbx_tag_str);
+	
+	if h_chkbx.Value % is checked
+		target_angle = str2double(h_editTargetAngles(h_cnt).String);
+		% get the y value of the corresponding draggable line
+		y_val = h_chkbx.UserData.target_line.YData(1);
+	end
+	
+end
+
+cal_info.offset_angle = atand(ipd/(2*dist));
+if strcmp(lower(eye), 'right')
+	cal_info.offset_angle = -cal_info.offset_angle;
+end
+
+cal_info.data_offset = -4;
+cal_info.scale_angle = [10 -10 ];
+cal_info.scale_factor = [2 3];
+
+save_fname = [eye '_verg_cal.mat'];
+save(save_fname, 'cal_info')
 return
 
 
