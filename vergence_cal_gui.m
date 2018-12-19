@@ -913,6 +913,11 @@ dist = str2double(handles.editTargetDistance.String);
 
 eye = handles.popupmenuEye.String{handles.popupmenuEye.Value}; % Right or Left
 
+cal_info.target_angle = [];
+cal_info.eyelink_gaze_angle = [];
+cal_info.eye_in_head_angle = [];
+
+
 h_editTargetAngles = findobj(handles.figure1, '-regexp', 'Tag', 'editTarget\d+Angle');
 for h_cnt = 1:length(h_editTargetAngles)
 	% corresponding checkbox
@@ -924,18 +929,41 @@ for h_cnt = 1:length(h_editTargetAngles)
 		target_angle = str2double(h_editTargetAngles(h_cnt).String);
 		% get the y value of the corresponding draggable line
 		y_val = h_chkbx.UserData.target_line.YData(1);
+
+		cal_info.target_angle = [cal_info.target_angle target_angle];
+		cal_info.eyelink_gaze_angle = [cal_info.eyelink_gaze_angle y_val];
+		
+		if abs(target_angle) < eps % zero (center) target			
+			eye_angle = atand(ipd/(2*dist));
+			if strcmpi(eye, 'right')
+				eye_angle = -atand(ipd/(2*dist));
+			else
+				eye_angle = atand(ipd/(2*dist));
+			end
+			cal_info.eye_in_head_angle = [cal_info.eye_in_head_angle  eye_angle];
+		elseif target_angle > 0 % rightward angle
+			if strcmpi(eye, 'right')
+				eye_angle = atand(tand(target_angle) - ipd/(2*dist));
+			else
+				eye_angle = atand(tand(target_angle) + ipd/(2*dist));
+			end
+			cal_info.eye_in_head_angle = [cal_info.eye_in_head_angle  eye_angle];
+		else % target angle < 0 = leftward angle
+			
+		end
 	end
 	
 end
 
-cal_info.offset_angle = atand(ipd/(2*dist));
-if strcmp(lower(eye), 'right')
-	cal_info.offset_angle = -cal_info.offset_angle;
-end
+% cal_info.offset_angle = atand(ipd/(2*dist));
+% if strcmpi(eye, 'right')
+% 	cal_info.offset_angle = -cal_info.offset_angle;
+% end
 
-cal_info.data_offset = -4;
-cal_info.scale_angle = [10 -10 ];
-cal_info.scale_factor = [2 3];
+% % verify there was a 0 target
+% if isempty(cal_info.data_offset)
+% 	error('No zero target defined. Calibration requires a target at the center, 0 deg.')
+% end
 
 save_fname = [eye '_verg_cal.mat'];
 save(save_fname, 'cal_info')
