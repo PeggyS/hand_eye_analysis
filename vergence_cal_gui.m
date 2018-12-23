@@ -87,6 +87,7 @@ if exist(res_fname, 'file')
 	results = load(res_fname);
 	if isfield(results.testresults, 'ipd')
 		handles.editIPD.String = num2str(results.testresults.ipd);
+		update_eye_angles(handles)
 	end
 end
 
@@ -936,20 +937,24 @@ for h_cnt = 1:length(h_editTargetAngles)
 		if abs(target_angle) < eps % zero (center) target			
 			eye_angle = atand(ipd/(2*dist));
 			if strcmpi(eye, 'right')
-				eye_angle = -atand(ipd/(2*dist));
-			else
-				eye_angle = atand(ipd/(2*dist));
+				eye_angle = -eye_angle;
 			end
 			cal_info.eye_in_head_angle = [cal_info.eye_in_head_angle  eye_angle];
-		elseif target_angle > 0 % rightward angle
+% 		elseif target_angle > 0 % rightward angle
+		else
 			if strcmpi(eye, 'right')
 				eye_angle = atand(tand(target_angle) - ipd/(2*dist));
 			else
 				eye_angle = atand(tand(target_angle) + ipd/(2*dist));
 			end
 			cal_info.eye_in_head_angle = [cal_info.eye_in_head_angle  eye_angle];
-		else % target angle < 0 = leftward angle
-			
+% 		else % target angle < 0 = leftward angle
+% 			if strcmpi(eye, 'right')
+% 				eye_angle = atand(tand(target_angle) - ipd/(2*dist));
+% 			else
+% 				eye_angle = atand(tand(target_angle) + ipd/(2*dist));
+% 			end
+% 			cal_info.eye_in_head_angle = [cal_info.eye_in_head_angle  eye_angle];
 		end
 	end
 	
@@ -969,6 +974,38 @@ save_fname = [eye '_verg_cal.mat'];
 save(save_fname, 'cal_info')
 return
 
+% --- 
+function update_eye_angles(handles)
+ipd = str2double(handles.editIPD.String);
+dist = str2double(handles.editTargetDistance.String);
+
+eye = handles.popupmenuEye.String{handles.popupmenuEye.Value}; % Right or Left
+h_editTargetAngles = findobj(handles.figure1, '-regexp', 'Tag', 'editTarget\d+Angle');
+for h_cnt = 1:length(h_editTargetAngles)
+
+	target_angle = str2double(h_editTargetAngles(h_cnt).String);
+
+	if abs(target_angle) < eps % zero (center) target			
+		eye_angle = atand(ipd/(2*dist));
+		if strcmpi(eye, 'right')
+			eye_angle = -eye_angle;
+		end
+
+	else
+		if strcmpi(eye, 'right')
+			eye_angle = atand(tand(target_angle) - ipd/(2*dist));
+		else
+			eye_angle = atand(tand(target_angle) + ipd/(2*dist));
+		end
+	end
+
+	text_str = strrep(h_editTargetAngles(h_cnt).Tag, 'Angle', '');
+	text_str = strrep(text_str, 'edit', 'textAngle');
+	handles.(text_str).String = num2str(round(eye_angle,1));
+	
+end
+
+return
 
 % --- Executes on button press in pbLoadSmoothTarget.
 function pbLoadSmoothTarget_Callback(hObject, eventdata, handles)
@@ -1042,8 +1079,8 @@ function editIPD_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: get(hObject,'String') returns contents of editIPD as text
-%        str2double(get(hObject,'String')) returns contents of editIPD as a double
+% ipd = (get(hObject,'String')); % returns contents of editIPD as a double
+update_eye_angles(handles);
 
 
 % --- Executes during object creation, after setting all properties.
