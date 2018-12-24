@@ -1,17 +1,32 @@
-function out_data = apply_vergence_cal(in_data, cal_info)
+function out_data = apply_vergence_cal(in_data, cal_info, display_flag)
+% use the vergence calibration info from vergence_cal_gui to calibrate the
+% data and optionally view the original and calibrated data
+% 
+%
+% example: rh_calibrated = apply_vergence_cal(rh, cal_info, false) will
+% calibrate the rh data and return the calibrated data.
+%
+% example: lh_cal = apply_vergence_cal(lh, cal_info, true) will calibrate
+% lh and display a figure showin the original data (blue) and the
+% calibrated data (red)
 
-figure
-plot(1:length(in_data), in_data);
+if display_flag
+	figure
+	plot(1:length(in_data), in_data);
+	ylabel('Eye Pos (°)')
+end
 
 % zero offset
 zero_ind = find(cal_info.target_angle == 0);
 center_offset = - cal_info.eyelink_gaze_angle(zero_ind) + cal_info.eye_in_head_angle(zero_ind);
 out_data = in_data + center_offset;
 
-hl_out = line(1:length(out_data),out_data,'color','r');
-chng_data=out_data;
-chng_data=nan(size(out_data));
-h_chng = line(1:length(chng_data),chng_data, 'color', 'g');
+if display_flag
+	hl_out = line(1:length(out_data),out_data,'color','r');
+	chng_data=out_data;
+	chng_data=nan(size(out_data));
+	h_chng = line(1:length(chng_data),chng_data, 'color', 'g');
+end
 
 % zero centered eyelink gaze data
 el_gaze_offset = cal_info.eyelink_gaze_angle(zero_ind);
@@ -35,17 +50,19 @@ scale_factor = (cal_info.eye_in_head_angle(t_inds(1)) - cal_info.eye_in_head_ang
 % the data being scaled
 msk = out_data > cal_info.eye_in_head_angle(zero_ind) & ...
 	out_data <=  cal_info.eyelink_gaze_angle(t_inds(1)) + center_offset;
-chng_data=nan(size(out_data));
-chng_data(msk) = out_data(msk);
-h_chng.YData = chng_data;
-
+if display_flag
+	chng_data=nan(size(out_data));
+	chng_data(msk) = out_data(msk);
+	h_chng.YData = chng_data;
+end
 % scale the data
 shift_data = in_data - cal_info.eyelink_gaze_angle(zero_ind);
 out_data(msk) = shift_data(msk) * scale_factor + cal_info.eye_in_head_angle(zero_ind);
-chng_data(msk) = out_data(msk);
-h_chng.YData = chng_data;
-hl_out.YData = out_data;
-
+if display_flag
+	chng_data(msk) = out_data(msk);
+	h_chng.YData = chng_data;
+	hl_out.YData = out_data;
+end
 
 % second scale area (usually 20deg target)
 scale_factor = (cal_info.eye_in_head_angle(t_inds(2)) - cal_info.eye_in_head_angle(t_inds(1))) / ...
@@ -53,13 +70,17 @@ scale_factor = (cal_info.eye_in_head_angle(t_inds(2)) - cal_info.eye_in_head_ang
 
 % data being changed
 msk = out_data > cal_info.eye_in_head_angle(t_inds(1));
-chng_data=nan(size(out_data));
-chng_data(msk) = out_data(msk);
-h_chng.YData = chng_data;
+if display_flag
+	chng_data=nan(size(out_data));
+	chng_data(msk) = out_data(msk);
+	h_chng.YData = chng_data;
+end
 % scale the data
 out_data(msk) = (out_data(msk)-cal_info.eyelink_gaze_angle(t_inds(1))-center_offset) * scale_factor + ...
 	cal_info.eye_in_head_angle(t_inds(1));
-hl_out.YData = out_data;
+if display_flag
+	hl_out.YData = out_data;
+end
 
 
 % find negative target angles
@@ -76,13 +97,16 @@ scale_factor = (cal_info.eye_in_head_angle(t_inds(1)) - cal_info.eye_in_head_ang
 % data being scaled
 msk = out_data < cal_info.eye_in_head_angle(zero_ind) ...
 	& out_data >=  cal_info.eyelink_gaze_angle(t_inds(1)) + center_offset;
-chng_data=nan(size(out_data));
-chng_data(msk) = out_data(msk);
-h_chng.YData = chng_data;
-
+if display_flag
+	chng_data=nan(size(out_data));
+	chng_data(msk) = out_data(msk);
+	h_chng.YData = chng_data;
+end
 % scale the data
 out_data(msk) = shift_data(msk) * scale_factor + cal_info.eye_in_head_angle(zero_ind);
-hl_out.YData = out_data;
+if display_flag
+	hl_out.YData = out_data;
+end
 
 
 % second (-20deg) 	
@@ -91,16 +115,22 @@ scale_factor = (cal_info.eye_in_head_angle(t_inds(2)) - cal_info.eye_in_head_ang
 
 % data being scaled
 msk = out_data < cal_info.eye_in_head_angle(t_inds(1));
-chng_data=nan(size(out_data));
-chng_data(msk) = out_data(msk);
-h_chng.YData = chng_data;
+if display_flag
+	chng_data=nan(size(out_data));
+	chng_data(msk) = out_data(msk);
+	h_chng.YData = chng_data;
+end
 
 % scale the data
-out_data(msk) = (out_data(msk)-cal_info.eye_in_head_angle(t_inds(1))-center_offset) * scale_factor + ...
+out_data(msk) = (out_data(msk)-cal_info.eyelink_gaze_angle(t_inds(1))-center_offset) * scale_factor + ...
 	cal_info.eye_in_head_angle(t_inds(1));
-hl_out.YData = out_data;
-zoomtool
+if display_flag
+	hl_out.YData = out_data;
 
+	chng_data=nan(size(out_data));
+	h_chng.YData = chng_data;
+	zoomtool
+end
 
 % 
 % if length(pos_inds==1)

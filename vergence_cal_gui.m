@@ -22,7 +22,7 @@ function varargout = vergence_cal_gui(varargin)
 
 % Edit the above text to modify the response to help vergence_cal_gui
 
-% Last Modified by GUIDE v2.5 16-Dec-2018 18:37:35
+% Last Modified by GUIDE v2.5 24-Dec-2018 18:06:20
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 0;
@@ -86,7 +86,7 @@ res_fname = strrep(handles.bin_filename, '.bin', '_results.mat');
 if exist(res_fname, 'file')
 	results = load(res_fname);
 	if isfield(results.testresults, 'ipd')
-		handles.editIPD.String = num2str(results.testresults.ipd);
+ 		handles.editIPD.String = num2str(results.testresults.ipd);
 		update_eye_angles(handles)
 	end
 end
@@ -909,10 +909,30 @@ function pbSaveCal_Callback(hObject, eventdata, handles)
 % hObject    handle to pbSaveCal (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+eye = handles.popupmenuEye.String{handles.popupmenuEye.Value}; % Right or Left
+
+compute_calibration_info(handles);
+cal_info = handles.cal_info;
+
+save_fname = [eye '_verg_cal.mat'];
+if exist(save_fname, 'file')
+	disp(['Calibration file ' save_fname ' already exists. Choose where to save the calibration info.'])
+	[filename, pathname] = uiputfile(save_fname, 'Save vergence calibration info as');
+	if isequal(filename,0) || isequal(pathname,0)
+		disp('User pressed cancel')
+	else
+		save_fname = fullfile(pathname, filename);
+	end
+end
+save(save_fname, 'cal_info')
+return
+
+
+function compute_calibration_info(handles)
 ipd = str2double(handles.editIPD.String);
 dist = str2double(handles.editTargetDistance.String);
 
-eye = handles.popupmenuEye.String{handles.popupmenuEye.Value}; % Right or Left
 
 cal_info.target_angle = [];
 cal_info.eyelink_gaze_angle = [];
@@ -940,7 +960,7 @@ for h_cnt = 1:length(h_editTargetAngles)
 				eye_angle = -eye_angle;
 			end
 			cal_info.eye_in_head_angle = [cal_info.eye_in_head_angle  eye_angle];
-% 		elseif target_angle > 0 % rightward angle
+
 		else
 			if strcmpi(eye, 'right')
 				eye_angle = atand(tand(target_angle) - ipd/(2*dist));
@@ -948,30 +968,13 @@ for h_cnt = 1:length(h_editTargetAngles)
 				eye_angle = atand(tand(target_angle) + ipd/(2*dist));
 			end
 			cal_info.eye_in_head_angle = [cal_info.eye_in_head_angle  eye_angle];
-% 		else % target angle < 0 = leftward angle
-% 			if strcmpi(eye, 'right')
-% 				eye_angle = atand(tand(target_angle) - ipd/(2*dist));
-% 			else
-% 				eye_angle = atand(tand(target_angle) + ipd/(2*dist));
-% 			end
-% 			cal_info.eye_in_head_angle = [cal_info.eye_in_head_angle  eye_angle];
+
 		end
-	end
-	
+	end	
 end
 
-% cal_info.offset_angle = atand(ipd/(2*dist));
-% if strcmpi(eye, 'right')
-% 	cal_info.offset_angle = -cal_info.offset_angle;
-% end
-
-% % verify there was a 0 target
-% if isempty(cal_info.data_offset)
-% 	error('No zero target defined. Calibration requires a target at the center, 0 deg.')
-% end
-
-save_fname = [eye '_verg_cal.mat'];
-save(save_fname, 'cal_info')
+handles.cal_info = cal_info;
+guidata(handles.figure1, handles)
 return
 
 % --- 
@@ -1007,61 +1010,26 @@ end
 
 return
 
-% --- Executes on button press in pbLoadSmoothTarget.
-function pbLoadSmoothTarget_Callback(hObject, eventdata, handles)
-% hObject    handle to pbLoadSmoothTarget (see GCBO)
+
+% --- Executes on button press in pbViewCal.
+function pbViewCal_Callback(hObject, eventdata, handles)
+% hObject    handle to pbViewCal (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-handles = parse_msg_file_for_targets(handles, 'smoothp');
-guidata(handles.figure1, handles)
-return
 
+%   compute & save the calibration
+compute_calibration_info(handles)
+handles = guidata(handles.figure1);
 
-% --- Executes on button press in tbTargetV.
-function tbTargetV_Callback(hObject, eventdata, handles)
-% hObject    handle to tbTargetV (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-if get(hObject,'Value') % returns toggle state 
-   set(handles.line_target_y, 'Visible', 'on')
+% find which eye
+eye = handles.popupmenuEye.String{handles.popupmenuEye.Value}; % Right or Left
+if strcmpi(eye, 'right')
+	in_data = handles.line_rh.YData;
 else
-   set(handles.line_target_y, 'Visible', 'off')
+	in_data = handles.line_lh.YData;
 end
-return
 
-% --- Executes on button press in tbTargetH.
-function tbTargetH_Callback(hObject, eventdata, handles)
-% hObject    handle to tbTargetH (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-if get(hObject,'Value') % returns toggle state 
-   set(handles.line_target_x, 'Visible', 'on')
-else
-   set(handles.line_target_x, 'Visible', 'off')
-end
-return
-
-
-function edInterSaccInterval_Callback(hObject, eventdata, handles)
-% hObject    handle to edInterSaccInterval (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edInterSaccInterval as text
-%        str2double(get(hObject,'String')) returns contents of edInterSaccInterval as a double
-
-
-% --- Executes during object creation, after setting all properties.
-function edInterSaccInterval_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edInterSaccInterval (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
+out_data = apply_vergence_cal(in_data, handles.cal_info, true);
 
 
 % --- Executes on button press in chbxBinocular.
@@ -1101,7 +1069,7 @@ function popupmenuEye_Callback(hObject, eventdata, handles)
 % hObject    handle to popupmenuEye (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
+update_eye_angles(handles)
 % Hints: contents = cellstr(get(hObject,'String')) returns popupmenuEye contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from popupmenuEye
 
@@ -1300,3 +1268,4 @@ function checkboxTarget5_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of checkboxTarget5
+
