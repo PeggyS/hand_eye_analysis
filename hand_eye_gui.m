@@ -217,23 +217,49 @@ handles = resizeAxes(handles);
 axes(handles.axes_eye)
 
 if choice_num == 15 || choice_num == 16 % vergence
-	% ?????????
-	%  add vergence angle at calibration to the data
-	% this is just offset at cycolpean zero calibration. It doesn't take
-	% into account the IPD at eccentric angles
-	ipd = handles.led_results.testresults.ipd;
-	r_cal_offset = atan2d(-ipd/2,550);
-	l_cal_offset = -r_cal_offset;
-	ylabel('Eye in Head Pos (\circ)')
-	% ????????????
+	% calibrate the data with the vergence cal_info 
+	% look for the Left & Right_verg_cal.mat files 
+	[~, rcal_fname] = system('mdfind -onlyin ../ -name Right_verg_cal.mat');
+	handles.rcal_fname = strtrim(rcal_fname);
+	if isempty(handles.rcal_fname)
+		disp('Choose right eye vergence cal mat.')
+		[fnSave, pnSave] = uigetfile({'*.mat'},'Choose right eye vergence cal mat.');
+		if isequal(fnSave,0) || isequal(pnSave,0)
+		   disp('no file chosen ... ')
+		else
+		   handles.rcal_fname = fullfile(pnSave, fnSave);
+		end
+	end
+	if ~isempty(handles.rcal_fname)
+		load(handles.rcal_fname);
+		handles.rcal_info = cal_info;
+		handles.eye_data.rh.pos_verge_cal = apply_vergence_cal(handles.eye_data.rh.pos, handles.rcal_info, false);
+		handles.line_rh = line(t, handles.eye_data.rh.pos_verge_cal, 'Tag', 'line_rh', 'Color', 'g');
+	end
 	
-	handles.line_rh = line(t, handles.eye_data.rh.pos+r_cal_offset, 'Tag', 'line_rh', 'Color', 'g');
-	handles.line_lh = line(t, handles.eye_data.lh.pos+l_cal_offset, 'Tag', 'line_lh', 'Color', 'r');
+	[~, lcal_fname] = system('mdfind -onlyin ../ -name Left_verg_cal.mat');
+	handles.lcal_fname = strtrim(lcal_fname);
+	if isempty(handles.lcal_fname)
+		disp('Choose left eye vergence cal mat.')
+		[fnSave, pnSave] = uigetfile({'*.mat'},'Choose left eye vergence cal mat.');
+		if isequal(fnSave,0) || isequal(pnSave,0)
+		   disp('no file chosen ... ')
+		else
+		   handles.lcal_fname = fullfile(pnSave, fnSave);
+		end
+	end
+	if ~isempty(handles.lcal_fname)
+		load(handles.lcal_fname);
+		handles.lcal_info = cal_info;
+		handles.eye_data.lh.pos_verge_cal = apply_vergence_cal(handles.eye_data.lh.pos, handles.lcal_info, false);
+		handles.line_lh = line(t, handles.eye_data.lh.pos_verge_cal, 'Tag', 'line_lh', 'Color', 'r');
+	end
+		
 	
 	% lh-rh = vergence
-	verg = handles.eye_data.lh.pos - handles.eye_data.rh.pos;
+	verg = handles.eye_data.lh.pos_verge_cal - handles.eye_data.rh.pos_verge_cal;
 	% (lh+rh)/2 = conjugate
-	conj = (handles.eye_data.lh.pos + handles.eye_data.rh.pos)/2;
+	conj = (handles.eye_data.lh.pos_verge_cal + handles.eye_data.rh.pos_verge_cal)/2;
 	handles.line_vergence = line(t, verg, 'Tag', 'line_vergence', 'Color', 'b');
 	handles.line_conjugate = line(t, conj, 'Tag', 'line_conjugate', 'Color', 'c');
 	
@@ -2180,11 +2206,17 @@ beg_line_color = getLineColor(h, ['saccade_' sacc_source '_' eye_str '_begin']);
 end_line_color = getLineColor(h, ['saccade_' sacc_source '_' eye_str '_end']);
 samp_freq = h.eye_data.samp_freq;
 
+% get eye_data - if there was vergence calibration, then use that data,
+% otherwise just the eye.pos data
+eye_data = h.eye_data.(eye_str).pos;
+if isfield(h.eye_data.(eye_str), 'pos_verge_cal')
+	eye_data = h.eye_data.(eye_str).pos_verge_cal;
+end
 
 for sacc_num = 1:num_saccs
    % saccade begin
    time1 = (h.eye_data.(eye_str).saccades(sacc_type_num).sacclist.start(sacc_num) - start_ms)/1000; %in seconds
-   y = h.eye_data.(eye_str).pos(round(time1*samp_freq));
+   y = eye_data(round(time1*samp_freq));
    h_beg_line = line( time1, y, 'Tag', ['saccade_' sacc_source '_' eye_str '_#' num2str(sacc_num) '_begin'], ...
       'Color', beg_line_color, 'Marker', 'o', 'MarkerSize', 15);
    eye_m = uicontextmenu;
@@ -2202,15 +2234,15 @@ for sacc_num = 1:num_saccs
    
    % saccade end
    time2 = (h.eye_data.(eye_str).saccades(sacc_type_num).sacclist.end(sacc_num) - start_ms)/1000;
-   y = h.eye_data.(eye_str).pos(round(time2*samp_freq));
+   y = eye_data(round(time2*samp_freq));
    line( time2, y, 'Tag', ['saccade_' sacc_source '_' eye_str '_#' num2str(sacc_num) '_end'], ...
       'Color', end_line_color, 'Marker', 'o', 'MarkerSize', 15);
    
    % saccade segment
    sac_start_ind = round(time1*samp_freq);
    sac_stop_ind  = round(time2*samp_freq);
-   tempdata = h.eye_data.(eye_str).pos;
-   segment = tempdata(sac_start_ind:sac_stop_ind);
+%    tempdata = h.eye_data.(eye_str).pos;
+   segment = eye_data(sac_start_ind:sac_stop_ind);
    time3 = maket(segment)+time1 - 1/samp_freq;
    line(time3, segment,'Tag', ['saccade_' sacc_source '_' eye_str '_#' num2str(sacc_num) ], 'Color','b' , ...
       'Linewidth', 1.5)
