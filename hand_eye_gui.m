@@ -826,6 +826,10 @@ switch tag_str
 		p_color = [0.2 0.7 0.2];
 	case 'analysis_3'
 		p_color = [0.2 0.2 0.75];
+	case 'verg_analysis_seg1'
+		p_color = [0.4 0.7 0.4];
+	case 'verg_analysis_seg2'
+		p_color = [0.4 0.4 0.75];
 	otherwise
 		p_color = [0.7 0.75 0.2];
 end
@@ -2235,8 +2239,12 @@ for sacc_num = 1:num_saccs
    % saccade end
    time2 = (h.eye_data.(eye_str).saccades(sacc_type_num).sacclist.end(sacc_num) - start_ms)/1000;
    y = eye_data(round(time2*samp_freq));
-   line( time2, y, 'Tag', ['saccade_' sacc_source '_' eye_str '_#' num2str(sacc_num) '_end'], ...
+   h_end_line = line( time2, y, 'Tag', ['saccade_' sacc_source '_' eye_str '_#' num2str(sacc_num) '_end'], ...
       'Color', end_line_color, 'Marker', 'o', 'MarkerSize', 15);
+   eye_m2 = uicontextmenu;
+   h_end_line.UIContextMenu = eye_m2;
+   uimenu(eye_m2, 'Label', 'Add analysis segments', 'Callback', @addAnalSegs, ...
+      'Tag', ['menu_saccade_' sacc_source '_' eye_str '_#' num2str(sacc_num) '_end']);
    
    % saccade segment
    sac_start_ind = round(time1*samp_freq);
@@ -2249,6 +2257,50 @@ for sacc_num = 1:num_saccs
 end
 guidata(h.figure1, h)
 return
+
+function addAnalSegs(source, callbackdata)
+handles = guidata(gcf);
+axes(handles.axes_eye)
+
+% find the saccade lines for the corresponding tag like
+% (saccade_lh_#38_end)
+saccade_tag = strrep(source.Tag, 'menu_', '');
+saccade_tag_no_beg_end = strrep(saccade_tag, '_end', '');
+srch_str = ['^' saccade_tag_no_beg_end '_((begin)|(end))$'];
+saccade_beg_end_lines = findobj(handles.axes_eye, '-regexp', 'Tag', srch_str);
+% change the marker style 
+% set(saccade_beg_end_lines, 'MarkerFaceColor', saccade_beg_end_lines(1).Color)
+
+h_sacc_end = findobj(handles.axes_eye, '-regexp', 'Tag', saccade_tag);
+sacc_end_t = h_sacc_end.XData;
+
+% which channel of data
+
+% tmp = regexp(saccade_tag, '(lh)|(rh)|(lv)|(rv)', 'match');
+% try
+% 	eye_chan = tmp{1};
+% catch
+% 	fname = ['addAnalSegs eye_chan error ' datestr(now)];
+% 	save(fname)
+% 	beep
+% 	disp('*********')
+% 	disp('Error finding disabled saccade line by tag')
+% 	disp(['Send the file ' fname ' to Peggy.'])
+% 	disp('*********')
+% end
+
+
+box_tag = 'verg_analysis_seg1';
+createBox(source,callbackdata, [sacc_end_t+0.02 sacc_end_t+0.12], box_tag)
+
+
+box_tag = strrep(box_tag, 'seg1', 'seg2');
+createBox(source,callbackdata, [sacc_end_t+0.12 sacc_end_t+0.32], box_tag)
+
+
+guidata(handles.figure1, handles)
+return
+
 
 % function disableSaccade(source, callbackdata)
 % handles = guidata(gcf);
