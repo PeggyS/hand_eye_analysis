@@ -74,10 +74,18 @@ t = (1:numsamps)/samp_freq;
 
 % initialize the data in the axes
 axes(handles.axes_eye)
-handles.line_rh = line(t, handles.eye_data.rh.pos, 'Tag', 'line_rh', 'Color', [0 .8 0]);
-handles.line_lh = line(t, handles.eye_data.lh.pos, 'Tag', 'line_lh', 'Color', [0.8 0 0]);
-handles.line_rv = line(t, handles.eye_data.rv.pos, 'Tag', 'line_rv', 'Color', [0 1 0]);
-handles.line_lv = line(t, handles.eye_data.lv.pos, 'Tag', 'line_lv', 'Color', [1 0 0]);
+if ~isempty(handles.eye_data.rh.pos)
+	handles.line_rh = line(t, handles.eye_data.rh.pos, 'Tag', 'line_rh', 'Color', [0 .8 0]);
+end
+if ~isempty(handles.eye_data.lh.pos)
+	handles.line_lh = line(t, handles.eye_data.lh.pos, 'Tag', 'line_lh', 'Color', [0.8 0 0]);
+end
+if ~isempty(handles.eye_data.rv.pos)
+	handles.line_rv = line(t, handles.eye_data.rv.pos, 'Tag', 'line_rv', 'Color', [0 1 0]);
+end
+if ~isempty(handles.eye_data.lv.pos)
+	handles.line_lv = line(t, handles.eye_data.lv.pos, 'Tag', 'line_lv', 'Color', [1 0 0]);
+end
 ylabel('Gaze Pos (\circ)')
 xlabel('Time (s)')
 
@@ -913,6 +921,7 @@ function pbSaveCal_Callback(hObject, eventdata, handles)
 eye = handles.popupmenuEye.String{handles.popupmenuEye.Value}; % Right or Left
 
 compute_calibration_info(handles);
+handles = guidata(handles.figure1);
 cal_info = handles.cal_info;
 
 save_fname = [eye '_verg_cal.mat'];

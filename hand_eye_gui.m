@@ -235,6 +235,8 @@ if choice_num == 15 || choice_num == 16 % vergence
 		handles.rcal_info = cal_info;
 		handles.eye_data.rh.pos_verge_cal = apply_vergence_cal(handles.eye_data.rh.pos, handles.rcal_info, false);
 		handles.line_rh = line(t, handles.eye_data.rh.pos_verge_cal, 'Tag', 'line_rh', 'Color', 'g');
+	else
+		handles.line_rh = line(t, handles.eye_data.rh.pos, 'Tag', 'line_rh', 'Color', 'g');
 	end
 	
 	[~, lcal_fname] = system('mdfind -onlyin ../ -name Left_verg_cal.mat');
@@ -253,13 +255,15 @@ if choice_num == 15 || choice_num == 16 % vergence
 		handles.lcal_info = cal_info;
 		handles.eye_data.lh.pos_verge_cal = apply_vergence_cal(handles.eye_data.lh.pos, handles.lcal_info, false);
 		handles.line_lh = line(t, handles.eye_data.lh.pos_verge_cal, 'Tag', 'line_lh', 'Color', 'r');
+	else
+		handles.line_lh = line(t, handles.eye_data.lh.pos, 'Tag', 'line_lh', 'Color', 'r');
 	end
 		
 	
 	% lh-rh = vergence
-	verg = handles.eye_data.lh.pos_verge_cal - handles.eye_data.rh.pos_verge_cal;
+	verg = handles.line_lh.YData - handles.line_rh.YData;
 	% (lh+rh)/2 = conjugate
-	conj = (handles.eye_data.lh.pos_verge_cal + handles.eye_data.rh.pos_verge_cal)/2;
+	conj = (handles.line_lh.YData + handles.line_rh.YData)/2;
 	handles.line_vergence = line(t, verg, 'Tag', 'line_vergence', 'Color', 'b');
 	handles.line_conjugate = line(t, conj, 'Tag', 'line_conjugate', 'Color', 'c');
 	
@@ -1454,6 +1458,8 @@ out_tbl = table(t_eye', rh', lh', rv', lv', rhv, lhv, rvv, lvv);
 out_tbl.Properties.VariableNames = {'t_eye', 'rh', 'lh', 'rv', 'lv', 'rh_vel', 'lh_vel', 'rv_vel', 'lv_vel'};
 
 if isfield(handles, 'line_vergence') % vergence
+	out_tbl.rh_vergence_calibrated = handles.line_rh.YData;
+	out_tbl.lh_vergence_calibrated = handles.line_lh.YData;
 	out_tbl.vergence = verge_data';
 	out_tbl.conjugate = conj_data';
 	out_tbl.verg_target_right = verg_target_x_right';
