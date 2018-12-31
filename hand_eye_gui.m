@@ -22,7 +22,7 @@ function varargout = hand_eye_gui(varargin)
 
 % Edit the above text to modify the response to help hand_eye_gui
 
-% Last Modified by GUIDE v2.5 31-Jan-2018 17:45:18
+% Last Modified by GUIDE v2.5 31-Dec-2018 13:38:59
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 0;
@@ -262,9 +262,15 @@ if choice_num == 15 || choice_num == 16 % vergence
 	
 	% lh-rh = vergence
 	verg = handles.line_lh.YData - handles.line_rh.YData;
+	% vergence velocity - filter the data first
+	lh_filt = lpf(handles.line_lh.YData, 4, 25, handles.eye_data.samp_freq);
+	rh_filt = lpf(handles.line_rh.YData, 4, 25, handles.eye_data.samp_freq);
+	verg_filt = lh_filt - rh_filt;
+	verg_vel = d2pt(verg_filt, 10, handles.eye_data.samp_freq);
 	% (lh+rh)/2 = conjugate
 	conj = (handles.line_lh.YData + handles.line_rh.YData)/2;
 	handles.line_vergence = line(t, verg, 'Tag', 'line_vergence', 'Color', 'b');
+	handles.line_vergence_velocity = line(t, verg_vel, 'Tag', 'line_vergence_velocity', 'Color', 'k', 'Visible', 'off');
 	handles.line_conjugate = line(t, conj, 'Tag', 'line_conjugate', 'Color', 'c');
 	
 	
@@ -353,7 +359,8 @@ switch choice_num
 		% make extraneous objects invisible
 		obj_list = [handles.tbPlayPause, handles.text29, handles.text2, handles.edTime, handles.text2, handles.text23, ...
 					handles.edPlaybackSpeed, handles.ahead1samp, handles.back1samp, handles.samp_tweak, ...
-					handles.text21, handles.text20, handles.pbBack, handles.pbForward];
+					handles.text21, handles.text20, handles.pbBack, handles.pbForward, ...
+					handles.txtVergence, handles.tbConjugate, handles.tbVergence, handles.tbVergenceVelocity];
 		set(obj_list, 'Visible', 'off')
  		% make eye data axes wider
 		handles = widen_axes(handles);
@@ -364,6 +371,8 @@ switch choice_num
 	case {7 8 9 10} % picture diff & read text
 		imshow(handles.im_data, 'Parent', handles.axes_video, 'XData', [0 1024], 'YData', [0 768] )
 % 		handles.axes_video.Visible = 'on';
+		obj_list = [handles.txtVergence, handles.tbConjugate, handles.tbVergence, handles.tbVergenceVelocity];
+		set(obj_list, 'Visible', 'off')
 		% eye position overlay on pciture
 		handles.axes_video_overlay.Color = 'none';
 		handles.axes_video_overlay.Visible = 'off';
@@ -394,7 +403,8 @@ switch choice_num
 		% make extraneous objects invisible
 		obj_list = [handles.tbPlayPause, handles.text29, handles.text2, handles.edTime, handles.text2, handles.text23, ...
 					handles.edPlaybackSpeed, handles.ahead1samp, handles.back1samp, handles.samp_tweak, ...
-					handles.text21, handles.text20, handles.pbBack, handles.pbForward];
+					handles.text21, handles.text20, handles.pbBack, handles.pbForward, ...
+					handles.txtVergence, handles.tbConjugate, handles.tbVergence, handles.tbVergenceVelocity];
 		set(obj_list, 'Visible', 'off')
  		% make eye data axes wider
 		handles = widen_axes(handles);
@@ -406,8 +416,10 @@ switch choice_num
 		% make extraneous objects invisible
 		obj_list = [handles.tbPlayPause, handles.text29, handles.text2, handles.edTime, handles.text2, handles.text23, ...
 					handles.edPlaybackSpeed, handles.ahead1samp, handles.back1samp, handles.samp_tweak, ...
-					handles.text21, handles.text20, handles.pbBack, handles.pbForward];
+					handles.text21, handles.text20, handles.pbBack, handles.pbForward, handles.uibgReachType];
 		set(obj_list, 'Visible', 'off')
+		obj_list = [handles.txtVergence, handles.tbConjugate, handles.tbVergence, handles.tbVergenceVelocity];
+		set(obj_list, 'Visible', 'on')
  		% make eye data axes wider
 		handles = widen_axes(handles);
 end
@@ -1422,6 +1434,7 @@ rh = handles.line_rh.YData;
 lh = handles.line_lh.YData;
 if isfield(handles, 'line_vergence') % vergence & no vertical data
 	verge_data = handles.line_vergence.YData;
+	verg_vel_data = handles.line_vergence_velocity.YData;
 	conj_data = handles.line_conjugate.YData;
 	verg_target_x_right = handles.line_target_x_right.YData;
 	verg_target_x_left = handles.line_target_x_left.YData;
@@ -1458,9 +1471,10 @@ out_tbl = table(t_eye', rh', lh', rv', lv', rhv, lhv, rvv, lvv);
 out_tbl.Properties.VariableNames = {'t_eye', 'rh', 'lh', 'rv', 'lv', 'rh_vel', 'lh_vel', 'rv_vel', 'lv_vel'};
 
 if isfield(handles, 'line_vergence') % vergence
-	out_tbl.rh_vergence_calibrated = handles.line_rh.YData;
-	out_tbl.lh_vergence_calibrated = handles.line_lh.YData;
+	out_tbl.rh_vergence_calibrated = handles.line_rh.YData';
+	out_tbl.lh_vergence_calibrated = handles.line_lh.YData';
 	out_tbl.vergence = verge_data';
+	out_tbl.vergence_velocity = verg_vel_data';
 	out_tbl.conjugate = conj_data';
 	out_tbl.verg_target_right = verg_target_x_right';
 	out_tbl.verg_target_left = verg_target_x_left';
@@ -3688,4 +3702,42 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 hObject.UserData.prev_choice = lower(hObject.String{hObject.Value});
+return
+
+
+% --- Executes on button press in tbVergence.
+function tbVergence_Callback(hObject, eventdata, handles)
+% hObject    handle to tbVergence (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+if get(hObject,'Value') % returns toggle state 
+   set(handles.line_vergence, 'Visible', 'on')
+else
+   set(handles.line_vergence, 'Visible', 'off')
+end
+return
+
+% --- Executes on button press in tbConjugate.
+function tbConjugate_Callback(hObject, eventdata, handles)
+% hObject    handle to tbConjugate (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+if get(hObject,'Value') % returns toggle state 
+   set(handles.line_conjugate, 'Visible', 'on')
+else
+   set(handles.line_conjugate, 'Visible', 'off')
+end
+return
+
+% --- Executes on button press in tbVergenceVelocity.
+function tbVergenceVelocity_Callback(hObject, eventdata, handles)
+% hObject    handle to tbVergenceVelocity (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+if get(hObject,'Value') % returns toggle state 
+   set(handles.line_vergence_velocity, 'Visible', 'on')
+else
+   set(handles.line_vergence_velocity, 'Visible', 'off')
+end
 return
