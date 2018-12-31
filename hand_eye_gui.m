@@ -2317,7 +2317,7 @@ createBox(source,callbackdata, [sacc_end_t+0.02 sacc_end_t+0.12], box_tag)
 box_tag = strrep(box_tag, 'seg1', 'seg2');
 createBox(source,callbackdata, [sacc_end_t+0.12 sacc_end_t+0.32], box_tag)
 
-
+handles = guidata(handles.figure1);
 guidata(handles.figure1, handles)
 return
 
