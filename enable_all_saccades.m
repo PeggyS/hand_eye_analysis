@@ -6,8 +6,10 @@ for eye_cnt = 1:length(eye_list)
 	eye = eye_list{eye_cnt};
 	for source_num = 1:length(eye_data.(eye).saccades)
 		if ~isfield(eye_data.(eye).saccades(source_num).sacclist, 'enabled')
-			new_eye_data.(eye).saccades(source_num).sacclist.enabled = ...
-				ones(size(eye_data.(eye).saccades(source_num).sacclist.start));
+			if isfield(eye_data.(eye).saccades(source_num).sacclist, 'start')
+				new_eye_data.(eye).saccades(source_num).sacclist.enabled = ...
+					ones(size(eye_data.(eye).saccades(source_num).sacclist.start));
+			end
 		end
 	end %source_num
 end % eye

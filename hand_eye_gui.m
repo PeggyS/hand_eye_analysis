@@ -22,7 +22,7 @@ function varargout = hand_eye_gui(varargin)
 
 % Edit the above text to modify the response to help hand_eye_gui
 
-% Last Modified by GUIDE v2.5 31-Dec-2018 13:38:59
+% Last Modified by GUIDE v2.5 01-Jan-2019 12:28:24
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 0;
@@ -262,17 +262,14 @@ if choice_num == 15 || choice_num == 16 % vergence
 	
 	% lh-rh = vergence
 	verg = handles.line_lh.YData - handles.line_rh.YData;
-	% vergence velocity - filter the data first
-	lh_filt = lpf(handles.line_lh.YData, 4, 25, handles.eye_data.samp_freq);
-	rh_filt = lpf(handles.line_rh.YData, 4, 25, handles.eye_data.samp_freq);
-	verg_filt = lh_filt - rh_filt;
-	verg_vel = d2pt(verg_filt, 10, handles.eye_data.samp_freq);
+	
 	% (lh+rh)/2 = conjugate
 	conj = (handles.line_lh.YData + handles.line_rh.YData)/2;
 	handles.line_vergence = line(t, verg, 'Tag', 'line_vergence', 'Color', 'b');
-	handles.line_vergence_velocity = line(t, verg_vel, 'Tag', 'line_vergence_velocity', 'Color', 'k', 'Visible', 'off');
 	handles.line_conjugate = line(t, conj, 'Tag', 'line_conjugate', 'Color', 'c');
 	
+	
+	handles = create_verg_vel_lines(handles);
 	
 else
 	handles.line_rh = line(t, handles.eye_data.rh.pos, 'Tag', 'line_rh', 'Color', 'g');
@@ -404,7 +401,8 @@ switch choice_num
 		obj_list = [handles.tbPlayPause, handles.text29, handles.text2, handles.edTime, handles.text2, handles.text23, ...
 					handles.edPlaybackSpeed, handles.ahead1samp, handles.back1samp, handles.samp_tweak, ...
 					handles.text21, handles.text20, handles.pbBack, handles.pbForward, ...
-					handles.txtVergence, handles.tbConjugate, handles.tbVergence, handles.tbVergenceVelocity];
+					handles.txtVergence, handles.tbConjugate, handles.tbVergence, handles.tbVergenceVelocity, ...
+					handles.tbLHVel, handles.tbRHVel];
 		set(obj_list, 'Visible', 'off')
  		% make eye data axes wider
 		handles = widen_axes(handles);
@@ -418,7 +416,8 @@ switch choice_num
 					handles.edPlaybackSpeed, handles.ahead1samp, handles.back1samp, handles.samp_tweak, ...
 					handles.text21, handles.text20, handles.pbBack, handles.pbForward, handles.uibgReachType];
 		set(obj_list, 'Visible', 'off')
-		obj_list = [handles.txtVergence, handles.tbConjugate, handles.tbVergence, handles.tbVergenceVelocity];
+		obj_list = [handles.txtVergence, handles.tbConjugate, handles.tbVergence, handles.tbVergenceVelocity, ...
+					handles.tbLHVel, handles.tbRHVel];
 		set(obj_list, 'Visible', 'on')
  		% make eye data axes wider
 		handles = widen_axes(handles);
@@ -466,6 +465,38 @@ end
 guidata(hObject, handles);
 return
 
+
+% -----------
+function handles = create_verg_vel_lines(handles)
+
+t = handles.line_lh.XData;
+lp_filt_freq = str2double(handles.editLPFilt.String);
+
+% vergence velocity - filter the data first
+lh_filt = lpf(handles.line_lh.YData, 4, lp_filt_freq, handles.eye_data.samp_freq);
+rh_filt = lpf(handles.line_rh.YData, 4, lp_filt_freq, handles.eye_data.samp_freq);
+verg_filt = lh_filt - rh_filt;
+verg_vel = d2pt(verg_filt, 4, handles.eye_data.samp_freq);
+if isfield(handles, 'line_vergence_velocity')
+	handles.line_vergence_velocity.YData = verg_vel;
+else
+	handles.line_vergence_velocity = line(t, verg_vel, 'Tag', 'line_vergence_velocity', 'Color', 'k', 'Visible', 'off');
+end
+
+% lh & rh velocity
+lh_vel = d2pt(lh_filt, 4, handles.eye_data.samp_freq);
+if isfield(handles, 'line_lh_velocity')
+	handles.line_lh_velocity.YData = lh_vel;
+else
+	handles.line_lh_velocity = line(t,lh_vel, 'Tag', 'line_lh', 'Color', 'r', 'LineStyle', '-.', 'Visible', 'off');
+end
+rh_vel = d2pt(rh_filt, 4, handles.eye_data.samp_freq);
+if isfield(handles, 'line_rh_velocity')
+	handles.line_rh_velocity.YData = rh_vel;
+else
+	handles.line_rh_velocity = line(t,rh_vel, 'Tag', 'line_rh', 'Color', 'g', 'LineStyle', '-.', 'Visible', 'off');
+end
+return
 
 % --------------
 function handles = widen_axes(handles)
@@ -3741,3 +3772,55 @@ else
    set(handles.line_vergence_velocity, 'Visible', 'off')
 end
 return
+
+
+% --- Executes on button press in tbLHVel.
+function tbLHVel_Callback(hObject, eventdata, handles)
+% hObject    handle to tbLHVel (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+if get(hObject,'Value') % returns toggle state 
+   set(handles.line_lh_velocity, 'Visible', 'on')
+else
+   set(handles.line_lh_velocity, 'Visible', 'off')
+end
+return
+
+% --- Executes on button press in tbRHVel.
+function tbRHVel_Callback(hObject, eventdata, handles)
+% hObject    handle to tbRHVel (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+if get(hObject,'Value') % returns toggle state 
+   set(handles.line_rh_velocity, 'Visible', 'on')
+else
+   set(handles.line_rh_velocity, 'Visible', 'off')
+end
+return
+
+
+
+function editLPFilt_Callback(hObject, eventdata, handles)
+% hObject    handle to editLPFilt (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of editLPFilt as text
+%        str2double(get(hObject,'String')) returns contents of editLPFilt as a double
+handles = create_verg_vel_lines(handles);
+guidata(handles.figure1, handles)
+
+
+% --- Executes during object creation, after setting all properties.
+function editLPFilt_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to editLPFilt (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
