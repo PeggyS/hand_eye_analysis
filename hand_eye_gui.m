@@ -489,13 +489,22 @@ if isfield(handles, 'line_lh_velocity')
 	handles.line_lh_velocity.YData = lh_vel;
 else
 	handles.line_lh_velocity = line(t,lh_vel, 'Tag', 'line_lh', 'Color', 'r', 'LineStyle', '-.', 'Visible', 'off');
+	% context menus to add convergence/divergence start times
+	eye_m = uicontextmenu;
+	handles.line_lh_velocity.UIContextMenu = eye_m;
+	uimenu(eye_m, 'Label', 'Add Vergence Start Point', 'Callback', {@add_verge_start, handles.line_lh_velocity});
 end
 rh_vel = d2pt(rh_filt, 4, handles.eye_data.samp_freq);
 if isfield(handles, 'line_rh_velocity')
 	handles.line_rh_velocity.YData = rh_vel;
 else
 	handles.line_rh_velocity = line(t,rh_vel, 'Tag', 'line_rh', 'Color', 'g', 'LineStyle', '-.', 'Visible', 'off');
+	% context menus to add convergence/divergence start times
+	eye_m = uicontextmenu;
+	handles.line_rh_velocity.UIContextMenu = eye_m;
+	uimenu(eye_m, 'Label', 'Add Vergence Start Point', 'Callback', {@add_verge_start, handles.line_rh_velocity});
 end
+
 return
 
 % --------------
@@ -1068,49 +1077,53 @@ return
 function handles = addAxesLine(handles, time, line_type, vis_on_off)
 line_color = getLineColor(handles, line_type);
 
-% axes(handles.axes_eye)
-% ylims = get(handles.axes_eye, 'YLim');
-% 
-% h_eye = line([time, time], ylims, 'Color', line_color, 'Tag', line_type, ...
-%    'Visible', vis_on_off);
-% uistack(h_eye, 'bottom')
 
-% [hcmenu, ud] = createLineMenu(h_eye);
-% ud.line_type = line_type;
-% ud.h_all_lines = h_eye;
+if isfield(handles, 'apdm_data')
+	if ~isempty(handles.apdm_data.sensor)
 
-if ~isempty(handles.apdm_data.sensor)
-    
-   axes(handles.axes_hand)
-   ylims = get(handles.axes_hand, 'YLim');
-   h_hand = line([time, time], ylims, 'Color', line_color, 'Tag', line_type, ...
-      'Visible', vis_on_off);
-   uistack(h_hand, 'bottom')
-   [hcmenu, ud] = createLineMenu(h_hand);
-   set(h_hand, 'UIContextMenu', hcmenu, 'UserData', ud);
+	   axes(handles.axes_hand)
+	   ylims = get(handles.axes_hand, 'YLim');
+	   h_hand = line([time, time], ylims, 'Color', line_color, 'Tag', line_type, ...
+		  'Visible', vis_on_off);
+	   uistack(h_hand, 'bottom')
+	   [hcmenu, ud] = createLineMenu(h_hand);
+	   set(h_hand, 'UIContextMenu', hcmenu, 'UserData', ud);
+	end
+	if length(handles.apdm_data.sensor) > 1
+	   axes(handles.axes_head)
+	   ylims = get(handles.axes_head, 'YLim');
+	   h_head = line([time, time], ylims, 'Color', line_color, 'Tag',  line_type, ...
+		  'Visible', vis_on_off);
+	   uistack(h_head, 'bottom')
+	   [hcmenu, ud] = createLineMenu(h_head);
+	   set(h_head, 'UIContextMenu', hcmenu, 'UserData', ud);
+	   handles.linkprop_list(end+1) = linkprop([h_hand, h_head], 'XData');
+	end
+
+	if length(handles.apdm_data.sensor) > 2
+	   axes(handles.axes_sensor3)
+	   ylims = get(handles.axes_sensor3, 'YLim');
+	   h_sensor3 = line([time, time], ylims, 'Color', line_color, 'Tag',  line_type, ...
+		  'Visible', vis_on_off);
+	   uistack(h_head, 'bottom')
+	   [hcmenu, ud] = createLineMenu(h_sensor3);
+	   set(h_sensor3, 'UIContextMenu', hcmenu, 'UserData', ud);
+	   handles.linkprop_list(end+1) = linkprop([h_hand, h_sensor3], 'XData');
+	end
+else
+	axes(handles.axes_eye)
+	ylims = get(handles.axes_eye, 'YLim');
+	
+	h_eye = line([time, time], ylims, 'Color', line_color, 'Tag', line_type, ...
+		'Visible', vis_on_off);
+	uistack(h_eye, 'bottom')
+	
+	[hcmenu, ud] = createLineMenu(h_eye);
+	ud.line_type = line_type;
+	ud.h_all_lines = h_eye;
+	set(h_eye, 'UIContextMenu', hcmenu, 'UserData', ud)
+
 end
-if length(handles.apdm_data.sensor) > 1
-   axes(handles.axes_head)
-   ylims = get(handles.axes_head, 'YLim');
-   h_head = line([time, time], ylims, 'Color', line_color, 'Tag',  line_type, ...
-      'Visible', vis_on_off);
-   uistack(h_head, 'bottom')
-   [hcmenu, ud] = createLineMenu(h_head);
-   set(h_head, 'UIContextMenu', hcmenu, 'UserData', ud);
-   handles.linkprop_list(end+1) = linkprop([h_hand, h_head], 'XData');
-end
-
-if length(handles.apdm_data.sensor) > 2
-   axes(handles.axes_sensor3)
-   ylims = get(handles.axes_sensor3, 'YLim');
-   h_sensor3 = line([time, time], ylims, 'Color', line_color, 'Tag',  line_type, ...
-      'Visible', vis_on_off);
-   uistack(h_head, 'bottom')
-   [hcmenu, ud] = createLineMenu(h_sensor3);
-   set(h_sensor3, 'UIContextMenu', hcmenu, 'UserData', ud);
-   handles.linkprop_list(end+1) = linkprop([h_hand, h_sensor3], 'XData');
-end
-
 
 return
 
@@ -1121,10 +1134,10 @@ h_txt = findobj(handles.figure1, 'Tag', ['txt_' type]);
 if ~isempty(h_txt)
    line_color = h_txt.ForegroundColor;
 else
-   beg_or_end = regexp(type, '(begin)|(end)|(bp)$', 'match');
+   beg_or_end = regexp(type, '(begin)|(end)|(bp)|(start)$', 'match');
    if ~isempty(beg_or_end)
       switch beg_or_end{:}
-         case 'begin'
+         case {'begin', 'start'}
             line_color = 'g';
          case 'end'
             line_color = 'r';
@@ -1439,6 +1452,18 @@ function patchMotionFcn(h_patch)
 h_patch.UserData.h_r_line.XData = h_patch.XData(3:4);
 h_patch.UserData.h_l_line.XData = h_patch.XData(1:2);
 
+% ---------------------------------------------------------------
+function add_verge_start( source, callbackdata, h_line_velocity)
+handles = guidata(gcf);
+axes(handles.axes_eye)
+cursor_loc = get(handles.axes_eye, 'CurrentPoint');
+cursor_x = cursor_loc(1);
+
+handles = addAxesLine(handles, cursor_x, 'line_verge_start', 'on');
+
+guidata(gcf, handles);
+return
+
 
 % --- Executes on button press in pb_export.
 function pb_export_Callback(hObject, eventdata, handles)
@@ -1461,8 +1486,8 @@ h_wait = waitbar(0, 'Gathering data');
 
 % eye data
 t_eye = handles.line_rh.XData;
-rh = handles.line_rh.YData;
-lh = handles.line_lh.YData;
+rh = handles.eye_data.rh.pos';
+lh = handles.eye_data.lh.pos';
 if isfield(handles, 'line_vergence') % vergence & no vertical data
 	verge_data = handles.line_vergence.YData;
 	verg_vel_data = handles.line_vergence_velocity.YData;
@@ -1504,6 +1529,8 @@ out_tbl.Properties.VariableNames = {'t_eye', 'rh', 'lh', 'rv', 'lv', 'rh_vel', '
 if isfield(handles, 'line_vergence') % vergence
 	out_tbl.rh_vergence_calibrated = handles.line_rh.YData';
 	out_tbl.lh_vergence_calibrated = handles.line_lh.YData';
+	out_tbl.rh_vergence_calibrated_velocity = handles.line_rh_velocity.YData';
+	out_tbl.lh_vergence_calibrated_velocity = handles.line_lh_velocity.YData';
 	out_tbl.vergence = verge_data';
 	out_tbl.vergence_velocity = verg_vel_data';
 	out_tbl.conjugate = conj_data';
