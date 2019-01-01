@@ -918,13 +918,13 @@ function pbSaveCal_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-eye = handles.popupmenuEye.String{handles.popupmenuEye.Value}; % Right or Left
+eye_str= handles.popupmenuEye.String{handles.popupmenuEye.Value}; % Right or Left
 
 compute_calibration_info(handles);
 handles = guidata(handles.figure1);
 cal_info = handles.cal_info;
 
-save_fname = [eye '_verg_cal.mat'];
+save_fname = [eye_str '_verg_cal.mat'];
 if exist(save_fname, 'file')
 	disp(['Calibration file ' save_fname ' already exists. Choose where to save the calibration info.'])
 	[filename, pathname] = uiputfile(save_fname, 'Save vergence calibration info as');
@@ -941,7 +941,7 @@ return
 function compute_calibration_info(handles)
 ipd = str2double(handles.editIPD.String);
 dist = str2double(handles.editTargetDistance.String);
-
+eye_str = handles.popupmenuEye.String{handles.popupmenuEye.Value}; % Right or Left
 
 cal_info.target_angle = [];
 cal_info.eyelink_gaze_angle = [];
@@ -965,13 +965,13 @@ for h_cnt = 1:length(h_editTargetAngles)
 		
 		if abs(target_angle) < eps % zero (center) target			
 			eye_angle = atand(ipd/(2*dist));
-			if strcmpi(eye, 'right')
+			if strcmpi(eye_str, 'right')
 				eye_angle = -eye_angle;
 			end
 			cal_info.eye_in_head_angle = [cal_info.eye_in_head_angle  eye_angle];
 
 		else
-			if strcmpi(eye, 'right')
+			if strcmpi(eye_str, 'right')
 				eye_angle = atand(tand(target_angle) - ipd/(2*dist));
 			else
 				eye_angle = atand(tand(target_angle) + ipd/(2*dist));
@@ -991,7 +991,7 @@ function update_eye_angles(handles)
 ipd = str2double(handles.editIPD.String);
 dist = str2double(handles.editTargetDistance.String);
 
-eye = handles.popupmenuEye.String{handles.popupmenuEye.Value}; % Right or Left
+eye_str = handles.popupmenuEye.String{handles.popupmenuEye.Value}; % Right or Left
 h_editTargetAngles = findobj(handles.figure1, '-regexp', 'Tag', 'editTarget\d+Angle');
 for h_cnt = 1:length(h_editTargetAngles)
 
@@ -999,12 +999,12 @@ for h_cnt = 1:length(h_editTargetAngles)
 
 	if abs(target_angle) < eps % zero (center) target			
 		eye_angle = atand(ipd/(2*dist));
-		if strcmpi(eye, 'right')
+		if strcmpi(eye_str, 'right')
 			eye_angle = -eye_angle;
 		end
 
 	else
-		if strcmpi(eye, 'right')
+		if strcmpi(eye_str, 'right')
 			eye_angle = atand(tand(target_angle) - ipd/(2*dist));
 		else
 			eye_angle = atand(tand(target_angle) + ipd/(2*dist));
