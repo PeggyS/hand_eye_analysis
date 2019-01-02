@@ -488,7 +488,7 @@ lh_vel = d2pt(lh_filt, 4, handles.eye_data.samp_freq);
 if isfield(handles, 'line_lh_velocity')
 	handles.line_lh_velocity.YData = lh_vel;
 else
-	handles.line_lh_velocity = line(t,lh_vel, 'Tag', 'line_lh', 'Color', 'r', 'LineStyle', '-.', 'Visible', 'off');
+	handles.line_lh_velocity = line(t,lh_vel, 'Tag', 'line_lh_velocity', 'Color', 'r', 'LineStyle', '-.', 'Visible', 'off');
 	% context menus to add convergence/divergence start times
 	eye_m = uicontextmenu;
 	handles.line_lh_velocity.UIContextMenu = eye_m;
@@ -498,7 +498,7 @@ rh_vel = d2pt(rh_filt, 4, handles.eye_data.samp_freq);
 if isfield(handles, 'line_rh_velocity')
 	handles.line_rh_velocity.YData = rh_vel;
 else
-	handles.line_rh_velocity = line(t,rh_vel, 'Tag', 'line_rh', 'Color', 'g', 'LineStyle', '-.', 'Visible', 'off');
+	handles.line_rh_velocity = line(t,rh_vel, 'Tag', 'line_rh_velocity', 'Color', 'g', 'LineStyle', '-.', 'Visible', 'off');
 	% context menus to add convergence/divergence start times
 	eye_m = uicontextmenu;
 	handles.line_rh_velocity.UIContextMenu = eye_m;
@@ -1459,11 +1459,36 @@ axes(handles.axes_eye)
 cursor_loc = get(handles.axes_eye, 'CurrentPoint');
 cursor_x = cursor_loc(1);
 
-handles = addAxesLine(handles, cursor_x, 'line_verge_start', 'on');
+% from cursor_x, look left on h_line_velocity for a abs value < 5
+ind_cursor = find(h_line_velocity.XData>=cursor_x, 1, 'first');
+ind_lt_5 = find(abs(h_line_velocity.YData(1:ind_cursor))<5, 1, 'last');
 
-guidata(gcf, handles);
+% from this point look right for a abs value >= 5
+ind_gt_5 = find(abs(h_line_velocity.YData(ind_lt_5:end))>=5, 1, 'first') + ind_lt_5 - 1;
+
+% at this point add a marker on the velocity line and the vergence line
+tmp = regexp(h_line_velocity.Tag, '(lh)|(rh)', 'match');
+eye_str  = tmp{1};
+x = [h_line_velocity.XData(ind_gt_5) h_line_velocity.XData(ind_gt_5)];
+y = [h_line_velocity.YData(ind_gt_5) handles.line_vergence.YData(ind_gt_5)];
+h_beg_line = line(x, y, ...
+	'Tag', ['vergence_' eye_str '_begin'], 'Color', 'm', 'Marker', 'o', 'MarkerSize', 15);
+% menus for the markers to delete
+eye_m = uicontextmenu;
+h_beg_line.UIContextMenu = eye_m;
+uimenu(eye_m, 'Label', 'Delete', 'Callback', {@deleteVergenceMark, h_beg_line}, ...
+	'Tag', ['menu_vergence_' eye_str '_begin'])
+
+
+
+guidata(handles.figure1, handles);
 return
 
+% ----------------------------------------------------
+function deleteVergenceMark(hObject, eventdata, h_verge_mark)
+delete(h_verge_mark)
+delete(hObject)
+return
 
 % --- Executes on button press in pb_export.
 function pb_export_Callback(hObject, eventdata, handles)
@@ -1534,8 +1559,8 @@ if isfield(handles, 'line_vergence') % vergence
 	out_tbl.vergence = verge_data';
 	out_tbl.vergence_velocity = verg_vel_data';
 	out_tbl.conjugate = conj_data';
-	out_tbl.verg_target_right = verg_target_x_right';
-	out_tbl.verg_target_left = verg_target_x_left';
+	out_tbl.verg_target_rh_deg = verg_target_x_right';
+	out_tbl.verg_target_lh_deg = verg_target_x_left';
 end
 
 % for pic diff & reading tasks, add cols for region of interest
@@ -1925,6 +1950,17 @@ for row_cnt = 1:size(xdata,1)
 end
 %end
 
+% vergence marks
+h_verge_marks = findobj(handles.axes_eye, '-regexp', 'Tag', '^vergence_.*');
+if ~isempty(h_verge_marks)
+	out_tbl.vergence_marks = cell(height(out_tbl),1);
+	xdata = cell2mat(get(h_verge_marks, 'XData'));
+	for row_cnt = 1:size(xdata,1)
+		ind = find(out_tbl.t_eye >= xdata(row_cnt), 1, 'first');
+		out_tbl.vergence_marks(ind) = {strrep(h_verge_marks(row_cnt).Tag, 'vergence_', '')};
+	end
+end % vergence marks
+
 % saccade target info
 if isfield(handles, 'target_pos') && strcmp(handles.target_pos.type, 'sacc')
 	out_tbl.target_on_off = cell(height(out_tbl),1);
@@ -1970,6 +2006,7 @@ if isfield(handles, 'target_pos') && strcmp(handles.target_pos.type, 'smoothp')
     end
 	
 end % target_pos smoothp
+
 
 % mouse click info
 if isfield(handles, 'click_data_tbl')
@@ -2311,7 +2348,7 @@ for sacc_num = 1:num_saccs
       'Tag', ['menu_saccade_' sacc_source '_' eye_str '_#' num2str(sacc_num) '_begin']);
    uimenu(eye_m, 'Label', 'Post-Task', 'Callback',  {@labelSaccade, 'PostTask'}, ...
       'Tag', ['menu_saccade_' sacc_source '_' eye_str '_#' num2str(sacc_num) '_begin']);
-  uimenu(eye_m, 'Label', 'Catch-Up', 'Callback',  {@labelSaccade, 'CathUp'}, ...
+  uimenu(eye_m, 'Label', 'Catch-Up', 'Callback',  {@labelSaccade, 'CatchUp'}, ...
       'Tag', ['menu_saccade_' sacc_source '_' eye_str '_#' num2str(sacc_num) '_begin']);
    
    % saccade end

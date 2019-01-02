@@ -117,13 +117,13 @@ handles.led_results = load(result_fname);
 
 % target time vector is same as eye_data
 handles.target_data.t = (1:handles.eye_data.numsamps)/handles.eye_data.samp_freq;
-handles.target_data.x = nan(size(handles.target_data.t));
-handles.target_data.y = nan(size(handles.target_data.t));
+handles.target_data.right = nan(size(handles.target_data.t));
+handles.target_data.left = nan(size(handles.target_data.t));
 
 ipd = handles.led_results.testresults.ipd;
 t_start = handles.led_results.testresults.startPTB;
-r_cal_offset = atan2d(-ipd/2,550);
-l_cal_offset = -r_cal_offset;
+% r_cal_offset = atan2d(-ipd/2,550);
+% l_cal_offset = -r_cal_offset;
 
 % turn led results.tgtpos struct into target lines
 for cnt = 1:length(handles.led_results.tgtpos)
@@ -142,14 +142,14 @@ for cnt = 1:length(handles.led_results.tgtpos)
 		x_left = nan;
 	end
 	mask = handles.target_data.t >= (handles.led_results.tgtpos(cnt).when-t_start)/1000;
-	handles.target_data_right.x(mask) = x_right;
-	handles.target_data_left.x(mask) = x_left;
+	handles.target_data.right(mask) = x_right;
+	handles.target_data.left(mask) = x_left;
 end
 % draw the target lines
 axes(handles.axes_eye)
-handles.line_target_x_right = line(handles.target_data.t, handles.target_data_right.x, ...
+handles.line_target_x_right = line(handles.target_data.t, handles.target_data.right, ...
 	'Tag', 'line_target_x_right', 'Color', [0 0.8 0]);
-handles.line_target_x_left = line(handles.target_data.t, handles.target_data_left.x, ...
+handles.line_target_x_left = line(handles.target_data.t, handles.target_data.left, ...
 	'Tag', 'line_target_x_left', 'Color', [0.8 0 0]);
 
 % % draw the lh-rh (vergence) & (lh+rh)/2 (conjugate) target lines
