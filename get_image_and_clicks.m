@@ -29,10 +29,12 @@ if isempty(handles.click_data_tbl)
 			disp('no image file')
 			return
 		else
+			handles.im_filename = fullfile(pnImg,fnImg);
 			handles.im_data = imread(fullfile(pnImg,fnImg));
 		end
 	else
 		% display a gray blank image
+		handles.im_filename = 'gray.png';
 		handles.im_data = imread('gray.png');
 	end
 end
@@ -63,12 +65,15 @@ if any(strcmp(handles.click_data_tbl.Properties.VariableNames, 'trial_sequence_n
 			if isequal(fnImg,0) || isequal(pnImg,0)
 				disp('no image file')
 				% display a gray blank image
+				handles.im_filename = 'gray.png';
 				handles.im_data = imread('gray.png');
 			else
+				handles.im_filename = fullfile(pnImg,fnImg);
 				handles.im_data = imread(fullfile(pnImg,fnImg));
 			end
 		else
 			% display a gray blank image
+			handles.im_filename = 'gray.png';
 			handles.im_data = imread('gray.png');
 		end
 		found_img = true;
@@ -80,12 +85,14 @@ end
 
 if ~found_img
 	if exist(fullfile(pnSave, char(handles.click_data_tbl.image(click_tbl_row))),'file')
-		handles.im_data = imread(fullfile(pnSave, char(handles.click_data_tbl.image(click_tbl_row))));
+		handles.im_filename = fullfile(pnSave, char(handles.click_data_tbl.image(click_tbl_row)));
+		handles.im_data = imread(handles.im_filename);
 	else
 
 		% look in this folder and in parent folders
 		if exist(strrep(char(handles.click_data_tbl.image(click_tbl_row)), '_', ' '),'file')
-			handles.im_data = imread(strrep(char(handles.click_data_tbl.image(click_tbl_row)), '_', ' '));
+			handles.im_filename = fullfile(pwd,strrep(char(handles.click_data_tbl.image(click_tbl_row)), '_', ' '));
+			handles.im_data = imread(handles.im_filename);
 			found_img = true;
 		else
 			% go up 2 folders and look for the image in 'picture_diff' folder
@@ -94,10 +101,12 @@ if ~found_img
 			if exist('picture_diff','dir')
 				cd 'picture_diff'
 				if exist(strrep(char(handles.click_data_tbl.image(click_tbl_row)), '_', ' '),'file')
-					handles.im_data = imread(strrep(char(handles.click_data_tbl.image(click_tbl_row)), '_', ' '));
+					handles.im_filename = fullfile(pwd,strrep(char(handles.click_data_tbl.image(click_tbl_row)), '_', ' '));
+					handles.im_data = imread(handles.im_filename);
 					found_img = true;
 				elseif exist(char(handles.click_data_tbl.image(click_tbl_row)),'file')
-					handles.im_data = imread(char(handles.click_data_tbl.image(click_tbl_row)));
+					handles.im_filename = fullfile(pwd,char(handles.click_data_tbl.image(click_tbl_row)));
+					handles.im_data = imread(handles.im_filename);
 					found_img = true;
 				end
 			else
@@ -105,10 +114,12 @@ if ~found_img
 				if exist('picture_diff','dir')
 					cd 'picture_diff'
 					if exist(strrep(char(handles.click_data_tbl.image(click_tbl_row)), '_', ' '),'file')
-						handles.im_data = imread(strrep(char(handles.click_data_tbl.image(click_tbl_row)), '_', ' '));
+						handles.im_filename = fullfile(pwd,strrep(char(handles.click_data_tbl.image(click_tbl_row)), '_', ' '));
+						handles.im_data = imread(handles.im_filename);
 						found_img = true;
 					elseif exist(char(handles.click_data_tbl.image(click_tbl_row)),'file')
-						handles.im_data = imread(char(handles.click_data_tbl.image(click_tbl_row)));
+						handles.im_filename = fullfile(pwd,char(handles.click_data_tbl.image(click_tbl_row)));
+						handles.im_data = imread(handles.im_filename);
 						found_img = true;
 					end
 				else
@@ -119,7 +130,8 @@ if ~found_img
 						disp('no image file')
 						return
 					else
-						handles.im_data = imread(fullfile(pnImg,fnImg));
+						handles.im_filename = fullfile(pnImg,fnImg);
+						handles.im_data = imread(handles.im_filename);
 						found_img = true;
 					end
 				end
@@ -132,13 +144,18 @@ if ~found_img
 				[fnImg, pnImg] = uigetfile({'*.*'}, 'Choose image file ...');
 				if isequal(fnImg,0) || isequal(pnImg,0)
 					disp('no image file - will display gray image')
+					handles.im_filename = 'gray.png';
 					handles.im_data = imread('gray.png');
 				else
-					handles.im_data = imread(fullfile(pnImg,fnImg));
+					handles.im_filename = fullfile(pnImg,fnImg);
+					handles.im_data = imread(handles.im_filename);
 				end
 			end
 		end
 	end
+end
+if isfield(handles, 'im_filename')
+	disp(['image file: ' handles.im_filename])
 end
 
 % read in the msg file

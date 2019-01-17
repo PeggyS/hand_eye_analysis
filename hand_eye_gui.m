@@ -89,7 +89,7 @@ else % all other choices, read in *.bin file for eye data
         return
     end
     handles.bin_filename = fullfile(pnSave, fnSave); %'/Users/peggy/Desktop/pegtas2/pegtas2_1.bin'; % must be full path for rd_cli to work
-	handles.eye_data = rd(handles.bin_filename);
+	handles.eye_data = rd(handles.bin_filename, 'batch', 'nofilt');
 	handles.eye_data = enable_all_saccades(handles.eye_data);
 end
 
@@ -366,7 +366,13 @@ switch choice_num
 		set(handles.tbTargetH, 'Visible', 'on')
 		set(handles.tbTargetV, 'Visible', 'on')
 	case {7 8 9 10} % picture diff & read text
-		imshow(handles.im_data, 'Parent', handles.axes_video, 'XData', [0 1024], 'YData', [0 768] )
+		if isfield(handles, 'im_data')
+			imshow(handles.im_data, 'Parent', handles.axes_video, 'XData', [0 1024], 'YData', [0 768] )
+		else
+			save('missing_im_data.mat', handles)
+			disp('Error: im_data is missing. Handles struct is saved in the file missing_im_data.mat. Send to Peggy to troubleshoot.')
+			return
+		end
 % 		handles.axes_video.Visible = 'on';
 		obj_list = [handles.txtVergence, handles.tbConjugate, handles.tbVergence, handles.tbVergenceVelocity];
 		set(obj_list, 'Visible', 'off')
