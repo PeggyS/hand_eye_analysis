@@ -158,6 +158,7 @@ if isfield(handles, 'im_filename')
 	disp(['image file: ' handles.im_filename])
 end
 
+
 % read in the msg file
 % the msg file name
 msg_fname = strrep(handles.bin_filename, '.bin', '_msgs.asc');
