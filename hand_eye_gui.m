@@ -379,10 +379,11 @@ switch choice_num
 		% eye position overlay on pciture
 		handles.axes_video_overlay.Color = 'none';
 		handles.axes_video_overlay.Visible = 'off';
- 		xmin_max = handles.eye_data.h_pix_z / 30;
+%  		xmin_max = handles.eye_data.h_pix_z / handles.eye_data.h_pix_deg;
+%  		ymin_max = handles.eye_data.v_pix_z / handles.eye_data.v_pix_deg;
+		xmin_max = handles.eye_data.h_pix_z / 30;
  		ymin_max = handles.eye_data.v_pix_z / 30;
-% xmin_max = 640 /30;
-% ymin_max = 480 /30;
+
 		handles.axes_video_overlay.XLim = [-xmin_max xmin_max];
 		handles.axes_video_overlay.YLim = [-ymin_max ymin_max];
 		display_eye_pos_overlay(handles, 1/samp_freq)
@@ -1617,10 +1618,17 @@ for st_cnt = 1:length(sacc_type_list)
 						eye = sacc_type(end-1);
 						h_eye = [eye 'h'];
 						v_eye = [eye 'v'];
-						out_tbl.region_of_interest{beg_row} = find_roi(grid_vals, ...
-							out_tbl.(h_eye)(beg_row), out_tbl.(v_eye)(beg_row));
-						out_tbl.region_of_interest{end_row} = find_roi(grid_vals, ...
-							out_tbl.(h_eye)(end_row), out_tbl.(v_eye)(end_row));
+						if isfield(handles, 'grid_file')
+							out_tbl.region_of_interest{beg_row} = find_roi_from_file(handles, ...
+								out_tbl.(h_eye)(beg_row), out_tbl.(v_eye)(beg_row));
+							out_tbl.region_of_interest{end_row} = find_roi_from_file(handles, ...
+								out_tbl.(h_eye)(end_row), out_tbl.(v_eye)(end_row));
+						else
+							out_tbl.region_of_interest{beg_row} = find_default_roi(grid_vals, ...
+								out_tbl.(h_eye)(beg_row), out_tbl.(v_eye)(beg_row));
+							out_tbl.region_of_interest{end_row} = find_default_roi(grid_vals, ...
+								out_tbl.(h_eye)(end_row), out_tbl.(v_eye)(end_row));
+						end
 					end
 					
 					% if engbert saccades save engbert ampl & velocity info
@@ -2155,10 +2163,18 @@ for cnt = 1:length(x_lines)
 	num = str2double(tmp_cell{1});
 	grid_vals.right_pic_right_col(num) = x_lines(cnt).XData(1);
 end
+
+x_lines = findobj(h_lines, '-regexp', 'Tag', 'line_grid_right_col_.*');
+for cnt = 1:length(x_lines)
+	tmp_cell = regexp(x_lines(cnt).Tag, '\d+', 'match');
+	num = str2double(tmp_cell{1});
+	grid_vals.right_col(num) = x_lines(cnt).XData(1);
+end
+
 return
 
 % -------------------------------------
-function roi = find_roi(grid_vals, x_eye, y_eye)
+function roi = find_default_roi(grid_vals, x_eye, y_eye)
 roi = [];
 
 grid_row = find(grid_vals.bottom_row <= y_eye, 1);
