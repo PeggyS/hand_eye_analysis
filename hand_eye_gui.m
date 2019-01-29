@@ -1450,7 +1450,17 @@ h_beg_line.UIContextMenu = eye_m;
 uimenu(eye_m, 'Label', 'Delete', 'Callback', {@deleteVergenceMark, h_beg_line}, ...
 	'Tag', ['menu_vergence_' eye_str '_begin'])
 
-
+% add marker for vergence peak velocity
+h_verge_vel = findobj(handles.axes_eye, 'Tag', 'line_vergence_velocity');
+% from the begin of vergence, look in the next 0.5 sec for the max(abs(velocity))
+n_pts_to_look = 1/(h_verge_vel.XData(2)-h_verge_vel.XData(1)) * 0.5;
+[max_vel, rel_ind_max_vel] = nanmax(abs(h_verge_vel.YData(ind_gt_5:ind_gt_5+n_pts_to_look)));
+if length(rel_ind_max_vel) > 1, rel_ind_max_vel = rel_ind_max_vel(1); end % only use one (first) maximum
+ind_max_vel = ind_gt_5 + rel_ind_max_vel - 1;
+x = [h_line_velocity.XData(ind_max_vel) h_line_velocity.XData(ind_max_vel)];
+y = [h_verge_vel.YData(ind_max_vel) handles.line_vergence.YData(ind_max_vel)];
+h_peak_line = line(x, y, ...
+	'Tag', ['vergence_peak_velocity'], 'Color', 'k', 'Marker', 's', 'MarkerSize', 12);
 
 guidata(handles.figure1, handles);
 return
@@ -1460,6 +1470,7 @@ function deleteVergenceMark(hObject, eventdata, h_verge_mark)
 delete(h_verge_mark)
 delete(hObject)
 return
+
 
 % --- Executes on button press in pb_export.
 function pb_export_Callback(hObject, eventdata, handles)
@@ -1928,14 +1939,24 @@ for row_cnt = 1:size(xdata,1)
 end
 %end
 
-% vergence marks
-h_verge_marks = findobj(handles.axes_eye, '-regexp', 'Tag', '^vergence_.*');
+% vergence begin
+h_verge_marks = findobj(handles.axes_eye, '-regexp', 'Tag', '^vergence_.*begin');
 if ~isempty(h_verge_marks)
 	out_tbl.vergence_marks = cell(height(out_tbl),1);
 	xdata = cell2mat(get(h_verge_marks, 'XData'));
 	for row_cnt = 1:size(xdata,1)
 		ind = find(out_tbl.t_eye >= xdata(row_cnt), 1, 'first');
 		out_tbl.vergence_marks(ind) = {strrep(h_verge_marks(row_cnt).Tag, 'vergence_', '')};
+	end
+end % vergence marks
+% vergence peak vel
+h_verge_marks = findobj(handles.axes_eye, 'Tag', 'vergence_peak_velocity');
+if ~isempty(h_verge_marks)
+	out_tbl.vergence_peak_vel = cell(height(out_tbl),1);
+	xdata = cell2mat(get(h_verge_marks, 'XData'));
+	for row_cnt = 1:size(xdata,1)
+		ind = find(out_tbl.t_eye >= xdata(row_cnt), 1, 'first');
+		out_tbl.vergence_peak_vel(ind) = {out_tbl.vergence_velocity(ind)};
 	end
 end % vergence marks
 
@@ -2336,7 +2357,13 @@ for sacc_num = 1:num_saccs
       'Tag', ['menu_saccade_' sacc_source '_' eye_str '_#' num2str(sacc_num) '_begin']);
   uimenu(eye_m, 'Label', 'Catch-Up', 'Callback',  {@labelSaccade, 'CatchUp'}, ...
       'Tag', ['menu_saccade_' sacc_source '_' eye_str '_#' num2str(sacc_num) '_begin']);
-   
+  uimenu(eye_m, 'Label', 'Pure Vergence', 'Callback',  {@labelSaccade, 'PureVergence'}, ...
+      'Tag', ['menu_saccade_' sacc_source '_' eye_str '_#' num2str(sacc_num) '_begin']);
+   uimenu(eye_m, 'Label', 'Pure Saccade', 'Callback',  {@labelSaccade, 'PureSaccade'}, ...
+      'Tag', ['menu_saccade_' sacc_source '_' eye_str '_#' num2str(sacc_num) '_begin']);
+  uimenu(eye_m, 'Label', 'Combined Vergence-Saccade', 'Callback',  {@labelSaccade, 'CombinedVergenceSaccade'}, ...
+      'Tag', ['menu_saccade_' sacc_source '_' eye_str '_#' num2str(sacc_num) '_begin']);
+  
    % saccade end
    time2 = (h.eye_data.(eye_str).saccades(sacc_type_num).sacclist.end(sacc_num) - start_ms)/1000;
    y = eye_data(round(time2*samp_freq));
