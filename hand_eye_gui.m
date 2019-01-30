@@ -1623,6 +1623,9 @@ for st_cnt = 1:length(sacc_type_list)
 					%out_tbl.([sacc_type '_saccades_labels']){end_row} = h_menus(m_cnt).Label;
 					%end
 					%end
+					if isfield(sacclist, 'label')
+						out_tbl.([sacc_type '_saccades_labels']){beg_row} = sacclist.label{sac_num};
+					end
 					
 					% if ROI grid
 					if ~isempty(grid_vals)
@@ -2339,6 +2342,8 @@ if isfield(h.eye_data.(eye_str), 'pos_verge_cal')
 	eye_data = h.eye_data.(eye_str).pos_verge_cal;
 end
 
+
+
 for sacc_num = 1:num_saccs
    % saccade begin
    time1 = (h.eye_data.(eye_str).saccades(sacc_type_num).sacclist.start(sacc_num) - start_ms)/1000; %in seconds
@@ -2478,20 +2483,22 @@ return
 
 % return
 
-function labelSaccade(source, callbackdata, label_str)
-if strcmp(source.Checked, 'off')
-	h_other = findobj(source.Parent, 'Tag', source.Tag);
-	set(h_other, 'Checked', 'off')
-	source.Checked = 'on';
-	% make the saccade marker filled , 'markerfacecolor', beg_line_color
-	h_sacc_line = findobj(source.Parent.Parent, 'Tag', strrep(source.Tag, 'menu_', ''));
-	h_sacc_line.MarkerFaceColor = h_sacc_line.Color;
-else
-	source.Checked = 'off';
-	h_sacc_line = findobj(source.Parent.Parent, 'Tag', strrep(source.Tag, 'menu_', ''));
-	h_sacc_line.MarkerFaceColor = 'none';
-end
-return
+% function labelSaccade(source, callbackdata, h_sacc_line, label_str)
+% if strcmp(source.Checked, 'off')
+% 	h_other = findobj(source.Parent, 'Tag', source.Tag);
+% 	set(h_other, 'Checked', 'off')
+% 	source.Checked = 'on';
+% 	% make the saccade marker filled , 'markerfacecolor', beg_line_color
+% % 	h_sacc_line = findobj(source.Parent.Parent, 'Tag', strrep(source.Tag, 'menu_', ''));
+% 	h_sacc_line.MarkerFaceColor = h_sacc_line.Color;
+% 	h_sacc_line.UserData.label = label_str;
+% else
+% 	source.Checked = 'off';
+% % 	h_sacc_line = findobj(source.Parent.Parent, 'Tag', strrep(source.Tag, 'menu_', ''));
+% 	h_sacc_line.MarkerFaceColor = 'none';
+% 	h_sacc_line.UserData.label = '';
+% end
+% return
 
 
 % -------------------------------

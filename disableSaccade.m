@@ -59,7 +59,7 @@ sacc_starts = (handles.eye_data.lh.saccades(sacc_source_ind).sacclist.start-hand
 % index of matching saccade
 sacc_ind = find(abs(sacc_starts-saccade_beg_line.XData) < eps);
 
-handles.eye_data.lh.saccades(sacc_source_ind).sacclist.enabled(sacc_ind)=0;
+handles.eye_data.(eye_chan).saccades(sacc_source_ind).sacclist.enabled(sacc_ind)=0;
 
 guidata(handles.figure1, handles)
 return
