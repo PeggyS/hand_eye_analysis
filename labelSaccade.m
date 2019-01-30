@@ -61,7 +61,12 @@ if ~isfield(handles.eye_data.(eye_chan).saccades(sacc_source_ind).sacclist, 'lab
 	handles.eye_data.(eye_chan).saccades(sacc_source_ind).sacclist.label ...
 		= cell(size(handles.eye_data.(eye_chan).saccades(sacc_source_ind).sacclist.start));
 end
-handles.eye_data.(eye_chan).saccades(sacc_source_ind).sacclist.label{sacc_ind}=label_str;
+
+if strcmp(source.Checked, 'off')
+	handles.eye_data.(eye_chan).saccades(sacc_source_ind).sacclist.label{sacc_ind}='';
+else
+	handles.eye_data.(eye_chan).saccades(sacc_source_ind).sacclist.label{sacc_ind}=label_str;
+end
 
 
 guidata(handles.figure1, handles)
