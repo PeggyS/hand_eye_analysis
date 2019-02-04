@@ -1533,6 +1533,19 @@ lhv = d2pt(lh, 3, handles.eye_data.samp_freq);
 out_tbl = table(t_eye', rh', lh', rv', lv', rhv, lhv, rvv, lvv);
 out_tbl.Properties.VariableNames = {'t_eye', 'rh', 'lh', 'rv', 'lv', 'rh_vel', 'lh_vel', 'rv_vel', 'lv_vel'};
 
+% pupil data
+pupil_mat_file = strrep(handles.bin_filename, '.bin', '_pupil.mat');
+if exist(pupil_mat_file, 'file')
+	disp('reading in pupil data')
+	pupil_data = importdata(pupil_mat_file);
+	out_tbl.r_pupil = pupil_data.r;
+	out_tbl.l_pupil = pupil_data.l;
+else
+	disp('No pupil data found. If pupil data is expected, rerun edf2bin(''pupil'')')
+end
+	
+
+% vergence
 if isfield(handles, 'line_vergence') % vergence
 	out_tbl.rh_vergence_calibrated = handles.line_rh.YData';
 	out_tbl.lh_vergence_calibrated = handles.line_lh.YData';
