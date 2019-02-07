@@ -33,13 +33,13 @@ gui_State = struct('gui_Name',       mfilename, ...
    'gui_LayoutFcn',  [] , ...
    'gui_Callback',   []);
 if nargin && ischar(varargin{1})
-   gui_State.gui_Callback = str2func(varargin{1});
+	gui_State.gui_Callback = str2func(varargin{1});
 end
 
 if nargout
-   [varargout{1:nargout}] = gui_mainfcn(gui_State, varargin{:});
+	[varargout{1:nargout}] = gui_mainfcn(gui_State, varargin{:});
 else
-   gui_mainfcn(gui_State, varargin{:});
+	gui_mainfcn(gui_State, varargin{:});
 end
 % End initialization code - DO NOT EDIT
 
@@ -58,37 +58,37 @@ guidata(hObject, handles);
 
 % request what type of data/analysis
 str = {'Scenecam task with Opal', 'Scenecam task without Opal', ...
-    'Saccades with Opal', 'Saccades without Opal', ...
+	'Saccades with Opal', 'Saccades without Opal', ...
 	'Smooth Pursuit with Opal', 'Smooth Pursuit without Opal', ...
-    'Picture Difference with Opal', 'Picture Difference without Opal', ...
+	'Picture Difference with Opal', 'Picture Difference without Opal', ...
 	'Reading Text with Opal', 'Reading Text without Opal', ...
-    'Gaze Holding with Opal', 'Gaze Holding without Opal', ...
-    'Eccentric Gaze Holding with Opal', 'Eccentric Gaze Holding without Opal', ...
-    'Vergence with Opal', 'Vergence without Opal', ...
-    'Restore Previous Analysis'};
+	'Gaze Holding with Opal', 'Gaze Holding without Opal', ...
+	'Eccentric Gaze Holding with Opal', 'Eccentric Gaze Holding without Opal', ...
+	'Vergence with Opal', 'Vergence without Opal', ...
+	'Restore Previous Analysis'};
 [choice_num, ok] = listdlg('PromptString', 'Select the type of experiment', ...
-    'SelectionMode','single','ListString',str);
+	'SelectionMode','single','ListString',str);
 if ~ok
-    % user canceled - just quit
-    return
+	% user canceled - just quit
+	return
 end
 disp(['Analysis choice = ' num2str(choice_num), ' - ' str{choice_num}])
 
-if choice_num == 17 % restore data 
-    [fnSave, pnSave] = uigetfile({'*.mat'}, 'Choose *.mat file ...');
-    if isequal(fnSave,0) || isequal(pnSave,0)
-        disp('no  file chosen ... ')
-        return
-    end
-    handles = read_restore_state(handles, fullfile(pnSave, fnSave));
+if choice_num == 17 % restore data
+	[fnSave, pnSave] = uigetfile({'*.mat'}, 'Choose *.mat file ...');
+	if isequal(fnSave,0) || isequal(pnSave,0)
+		disp('no  file chosen ... ')
+		return
+	end
+	handles = read_restore_state(handles, fullfile(pnSave, fnSave));
 else % all other choices, read in *.bin file for eye data
 	disp('Choose eye data *.bin file ...')
-    [fnSave, pnSave] = uigetfile({'*.bin';'*.edf'}, 'Choose eye data *.bin file ...');
-    if isequal(fnSave,0) || isequal(pnSave,0)
-        disp('no  file chosen ... ')
-        return
-    end
-    handles.bin_filename = fullfile(pnSave, fnSave); %'/Users/peggy/Desktop/pegtas2/pegtas2_1.bin'; % must be full path for rd_cli to work
+	[fnSave, pnSave] = uigetfile({'*.bin';'*.edf'}, 'Choose eye data *.bin file ...');
+	if isequal(fnSave,0) || isequal(pnSave,0)
+		disp('no  file chosen ... ')
+		return
+	end
+	handles.bin_filename = fullfile(pnSave, fnSave); %'/Users/peggy/Desktop/pegtas2/pegtas2_1.bin'; % must be full path for rd_cli to work
 	handles.eye_data = rd(handles.bin_filename, 'batch', 'nofilt');
 	handles.eye_data = enable_all_saccades(handles.eye_data);
 end
@@ -113,57 +113,57 @@ if isfield(handles, 'restore_data')
 		updateEdTime(handles, handles.restore_data.scrub_line_eye.XData(1));
 	end
 else
-    updateEdTime(handles, 1/samp_freq);
+	updateEdTime(handles, 1/samp_freq);
 end
 
 
 if choice_num==1 || choice_num==3 || choice_num==5 || choice_num==7  || choice_num==9 ...
 		|| choice_num==11 || choice_num==13 || choice_num==15  % there is opal/apdm data to read in
-% if ~isfield(handles, 'restore_data')
-    % apdm sensor data - we can handle up to 2 sensors
-    disp('Choose APDM data *.h5 file')
-    [fnSave, pnSave] = uigetfile({'*.h5'}, 'Choose APDM data *.h5 file ...');
-    if isequal(fnSave,0) || isequal(pnSave,0)
-       disp('no  file chosen ... ')
-       handles.hdf_filename = [];
-       handles.apdm_data.sensor=[];
-    else
-       handles.hdf_filename = fullfile(pnSave, fnSave);
-       handles.apdm_data = get_apdm_data(handles.hdf_filename);
-	   % apdm_data.time begins at 0. this corresponds to eyelink data time
-	   % of approx first sample, which is t=0.004. The actual time to
-	   % synchronize is in the msg file with one of the lines:
-% 	   MSG	1243722 SCENELINK_TTL [OUT] START_TTL address=0x378 value=0x1
-%		MSG	1243723 !CMD 0 write_ioport 0x378 1
-% the !cmd 0 write_ioport is probably the actual time of the ttl signal
-% written to the port
-% start of eyelink data was
-% START	1243722 	SAMPLES	EVENTS
-% It's a 1 ms time delay for this experiment, but may matter in other
-% experiments.
-%
-% FIXME - write something to offset the apdm_data.time vector so it
-% cooincides with the eyedata t = (1:numsamps)/samp_freq; vector
-
-    end
+	% if ~isfield(handles, 'restore_data')
+	% apdm sensor data - we can handle up to 2 sensors
+	disp('Choose APDM data *.h5 file')
+	[fnSave, pnSave] = uigetfile({'*.h5'}, 'Choose APDM data *.h5 file ...');
+	if isequal(fnSave,0) || isequal(pnSave,0)
+		disp('no  file chosen ... ')
+		handles.hdf_filename = [];
+		handles.apdm_data.sensor=[];
+	else
+		handles.hdf_filename = fullfile(pnSave, fnSave);
+		handles.apdm_data = get_apdm_data(handles.hdf_filename);
+		% apdm_data.time begins at 0. this corresponds to eyelink data time
+		% of approx first sample, which is t=0.004. The actual time to
+		% synchronize is in the msg file with one of the lines:
+		% 	   MSG	1243722 SCENELINK_TTL [OUT] START_TTL address=0x378 value=0x1
+		%		MSG	1243723 !CMD 0 write_ioport 0x378 1
+		% the !cmd 0 write_ioport is probably the actual time of the ttl signal
+		% written to the port
+		% start of eyelink data was
+		% START	1243722 	SAMPLES	EVENTS
+		% It's a 1 ms time delay for this experiment, but may matter in other
+		% experiments.
+		%
+		% FIXME - write something to offset the apdm_data.time vector so it
+		% cooincides with the eyedata t = (1:numsamps)/samp_freq; vector
+		
+	end
 end
 
 switch choice_num
-    case {1 2} % scenecam: read in video data
-        handles = request_vid_reader(handles);
-    case {3 4} % saccades: read in target data
+	case {1 2} % scenecam: read in video data
+		handles = request_vid_reader(handles);
+	case {3 4} % saccades: read in target data
 		handles = parse_msg_file_for_targets(handles, 'sacc');
-
+		
 	case {5 6} % smooth pursuit
 		handles = parse_msg_file_for_targets(handles, 'smoothp');
 		
-    case {7 8} % picture diff: read in picture and mouse click data
+	case {7 8} % picture diff: read in picture and mouse click data
 		handles = get_image_and_clicks(handles);
 	case {9 10} % reading text: read in text page image
 		handles = get_page_text_image(handles);
-    case {11 12} % gaze holding: 
-% 		handles = handles;
-   case {13 14} % eccentric gaze holding
+	case {11 12} % gaze holding:
+		% 		handles = handles;
+	case {13 14} % eccentric gaze holding
 		handles = parse_msg_file_for_targets(handles, 'ecc_gaze');
 	case {15 16} % vergence: get led data
 		handles = get_led_data(handles);
@@ -171,17 +171,17 @@ switch choice_num
 		% change the choice_num corresponding to the saved .mat
 		if isfield(handles, 'vid_filename')
 			choice_num = 1;
-			 % try to reload the vid_file
-			 try
-				 handles.video_reader = VideoReader(handles.vid_filename);
-				 handles.video_reader.UserData.current_frame_num = 1;
-			 catch ME
-				 if strcmp(ME.identifier, 'MATLAB:audiovideo:VideoReader:FileNotFound')
-					 disp(['Restoring video file ' handles.vid_filename ' not found.'])
-					 handles = request_vid_reader(handles);
-					 handles.video_reader.UserData.current_frame_num = 1;
-				 end
-			 end
+			% try to reload the vid_file
+			try
+				handles.video_reader = VideoReader(handles.vid_filename);
+				handles.video_reader.UserData.current_frame_num = 1;
+			catch ME
+				if strcmp(ME.identifier, 'MATLAB:audiovideo:VideoReader:FileNotFound')
+					disp(['Restoring video file ' handles.vid_filename ' not found.'])
+					handles = request_vid_reader(handles);
+					handles.video_reader.UserData.current_frame_num = 1;
+				end
+			end
 		elseif isfield(handles, 'target_data')
 			choice_num = 3;
 		elseif isfield(handles, 'click_data_tbl')
@@ -211,73 +211,87 @@ end
 % handles.video_reader.UserData.current_frame_num = 1;
 
 % size the axes depending upon how many sensor there are to display
-handles = resizeAxes(handles); 
+handles = resizeAxes(handles);
 
 % initialize the data in the axes
 axes(handles.axes_eye)
 
 if choice_num == 15 || choice_num == 16 % vergence
-	% calibrate the data with the vergence cal_info 
-	% look for the Left & Right_verg_cal.mat files 
-	[~, rcal_fname] = system('mdfind -onlyin ../ -name Right_verg_cal.mat');
-	handles.rcal_fname = strtrim(rcal_fname);
-	if isempty(handles.rcal_fname)
-		disp('Choose right eye vergence cal mat.')
-		[fnSave, pnSave] = uigetfile({'*.mat'},'Choose right eye vergence cal mat.');
-		if isequal(fnSave,0) || isequal(pnSave,0)
-		   disp('no file chosen ... ')
-		else
-		   handles.rcal_fname = fullfile(pnSave, fnSave);
+	% calibrate the data with the vergence cal_info
+	% look for the Left & Right_verg_cal.mat files
+	if ~isempty(handles.eye_data.rh.pos)
+		[~, rcal_fname] = system('mdfind -onlyin ../ -name Right_verg_cal.mat');
+		handles.rcal_fname = strtrim(rcal_fname);
+		if isempty(handles.rcal_fname)
+			disp('Choose right eye vergence cal mat.')
+			[fnSave, pnSave] = uigetfile({'*.mat'},'Choose right eye vergence cal mat.');
+			if isequal(fnSave,0) || isequal(pnSave,0)
+				disp('no file chosen ... ')
+			else
+				handles.rcal_fname = fullfile(pnSave, fnSave);
+			end
 		end
-	end
-	if ~isempty(handles.rcal_fname)
-		load(handles.rcal_fname);
-		handles.rcal_info = cal_info;
-		handles.eye_data.rh.pos_verge_cal = apply_vergence_cal(handles.eye_data.rh.pos, handles.rcal_info, false);
-		handles.line_rh = line(t, handles.eye_data.rh.pos_verge_cal, 'Tag', 'line_rh', 'Color', 'g');
-	else
-		handles.line_rh = line(t, handles.eye_data.rh.pos, 'Tag', 'line_rh', 'Color', 'g');
-	end
-	
-	[~, lcal_fname] = system('mdfind -onlyin ../ -name Left_verg_cal.mat');
-	handles.lcal_fname = strtrim(lcal_fname);
-	if isempty(handles.lcal_fname)
-		disp('Choose left eye vergence cal mat.')
-		[fnSave, pnSave] = uigetfile({'*.mat'},'Choose left eye vergence cal mat.');
-		if isequal(fnSave,0) || isequal(pnSave,0)
-		   disp('no file chosen ... ')
-		else
-		   handles.lcal_fname = fullfile(pnSave, fnSave);
-		end
-	end
-	if ~isempty(handles.lcal_fname)
-		load(handles.lcal_fname);
-		handles.lcal_info = cal_info;
-		handles.eye_data.lh.pos_verge_cal = apply_vergence_cal(handles.eye_data.lh.pos, handles.lcal_info, false);
-		handles.line_lh = line(t, handles.eye_data.lh.pos_verge_cal, 'Tag', 'line_lh', 'Color', 'r');
-	else
-		handles.line_lh = line(t, handles.eye_data.lh.pos, 'Tag', 'line_lh', 'Color', 'r');
-	end
 		
+		if ~isempty(handles.rcal_fname)
+			load(handles.rcal_fname);
+			handles.rcal_info = cal_info;
+			handles.eye_data.rh.pos_verge_cal = apply_vergence_cal(handles.eye_data.rh.pos, handles.rcal_info, false);
+			handles.line_rh = line(t, handles.eye_data.rh.pos_verge_cal, 'Tag', 'line_rh', 'Color', 'g');
+		else
+			handles.line_rh = line(t, handles.eye_data.rh.pos, 'Tag', 'line_rh', 'Color', 'g');
+		end
+	end
 	
-	% lh-rh = vergence
-	verg = handles.line_lh.YData - handles.line_rh.YData;
+	if ~isempty(handles.eye_data.lh.pos)
+		[~, lcal_fname] = system('mdfind -onlyin ../ -name Left_verg_cal.mat');
+		handles.lcal_fname = strtrim(lcal_fname);
+		if isempty(handles.lcal_fname)
+			disp('Choose left eye vergence cal mat.')
+			[fnSave, pnSave] = uigetfile({'*.mat'},'Choose left eye vergence cal mat.');
+			if isequal(fnSave,0) || isequal(pnSave,0)
+				disp('no file chosen ... ')
+			else
+				handles.lcal_fname = fullfile(pnSave, fnSave);
+			end
+		end
+		if ~isempty(handles.lcal_fname)
+			load(handles.lcal_fname);
+			handles.lcal_info = cal_info;
+			handles.eye_data.lh.pos_verge_cal = apply_vergence_cal(handles.eye_data.lh.pos, handles.lcal_info, false);
+			handles.line_lh = line(t, handles.eye_data.lh.pos_verge_cal, 'Tag', 'line_lh', 'Color', 'r');
+		else
+			handles.line_lh = line(t, handles.eye_data.lh.pos, 'Tag', 'line_lh', 'Color', 'r');
+		end
+	end
 	
-	% (lh+rh)/2 = conjugate
-	conj = (handles.line_lh.YData + handles.line_rh.YData)/2;
-	handles.line_vergence = line(t, verg, 'Tag', 'line_vergence', 'Color', 'b');
-	handles.line_conjugate = line(t, conj, 'Tag', 'line_conjugate', 'Color', 'c');
-	
-	
+	if ~isempty(handles.eye_data.lh.pos) && ~isempty(handles.eye_data.rh.pos)
+		% lh-rh = vergence
+		verg = handles.line_lh.YData - handles.line_rh.YData;
+		
+		% (lh+rh)/2 = conjugate
+		conj = (handles.line_lh.YData + handles.line_rh.YData)/2;
+		handles.line_vergence = line(t, verg, 'Tag', 'line_vergence', 'Color', 'b');
+		handles.line_conjugate = line(t, conj, 'Tag', 'line_conjugate', 'Color', 'c');
+		
+	end
 	handles = create_verg_vel_lines(handles);
 	
 else
-	handles.line_rh = line(t, handles.eye_data.rh.pos, 'Tag', 'line_rh', 'Color', 'g');
-	handles.line_lh = line(t, handles.eye_data.lh.pos, 'Tag', 'line_lh', 'Color', 'r');
+	if ~isempty(handles.eye_data.rh.pos)
+		handles.line_rh = line(t, handles.eye_data.rh.pos, 'Tag', 'line_rh', 'Color', 'g');
+	end
+	if ~isempty(handles.eye_data.lh.pos)
+		handles.line_lh = line(t, handles.eye_data.lh.pos, 'Tag', 'line_lh', 'Color', 'r');
+	end
 	ylabel('Gaze Pos (\circ)')
 end
-handles.line_rv = line(t, handles.eye_data.rv.pos, 'Tag', 'line_rv', 'Color', 'g', 'LineStyle', '--');
-handles.line_lv = line(t, handles.eye_data.lv.pos, 'Tag', 'line_lv', 'Color', 'r', 'LineStyle', '--');
+if ~isempty(handles.eye_data.rv.pos)
+	handles.line_rv = line(t, handles.eye_data.rv.pos, 'Tag', 'line_rv', 'Color', 'g', 'LineStyle', '--');
+end
+if ~isempty(handles.eye_data.lv.pos)
+	handles.line_lv = line(t, handles.eye_data.lv.pos, 'Tag', 'line_lv', 'Color', 'r', 'LineStyle', '--');
+end
+
 % 	ylabel('Gaze Pos (\circ)')
 % end
 
@@ -476,40 +490,55 @@ return
 % -----------
 function handles = create_verg_vel_lines(handles)
 
-t = handles.line_lh.XData;
+if isfield(handles, 'line_lh')
+	t = handles.line_lh.XData;
+elseif isfield(handles, 'line_rh')
+	t = handles.line_rh.XData;
+end
 lp_filt_freq = str2double(handles.editLPFilt.String);
 
 % vergence velocity - filter the data first
-lh_filt = lpf(handles.line_lh.YData, 4, lp_filt_freq, handles.eye_data.samp_freq);
-rh_filt = lpf(handles.line_rh.YData, 4, lp_filt_freq, handles.eye_data.samp_freq);
-verg_filt = lh_filt - rh_filt;
-verg_vel = d2pt(verg_filt, 4, handles.eye_data.samp_freq);
-if isfield(handles, 'line_vergence_velocity')
-	handles.line_vergence_velocity.YData = verg_vel;
-else
-	handles.line_vergence_velocity = line(t, verg_vel, 'Tag', 'line_vergence_velocity', 'Color', 'k', 'Visible', 'off');
+if isfield(handles, 'line_lh')
+	lh_filt = lpf(handles.line_lh.YData, 4, lp_filt_freq, handles.eye_data.samp_freq);
+end
+if isfield(handles, 'line_rh')
+	rh_filt = lpf(handles.line_rh.YData, 4, lp_filt_freq, handles.eye_data.samp_freq);
+end
+if isfield(handles, 'line_rh') && isfield(handles, 'line_lh')
+	verg_filt = lh_filt - rh_filt;
+	verg_vel = d2pt(verg_filt, 4, handles.eye_data.samp_freq);
+	if isfield(handles, 'line_vergence_velocity')
+		handles.line_vergence_velocity.YData = verg_vel;
+	else
+		handles.line_vergence_velocity = line(t, verg_vel, 'Tag', 'line_vergence_velocity', 'Color', 'k', 'Visible', 'off');
+	end
 end
 
 % lh & rh velocity
-lh_vel = d2pt(lh_filt, 4, handles.eye_data.samp_freq);
-if isfield(handles, 'line_lh_velocity')
-	handles.line_lh_velocity.YData = lh_vel;
-else
-	handles.line_lh_velocity = line(t,lh_vel, 'Tag', 'line_lh_velocity', 'Color', 'r', 'LineStyle', '-.', 'Visible', 'off');
-	% context menus to add convergence/divergence start times
-	eye_m = uicontextmenu;
-	handles.line_lh_velocity.UIContextMenu = eye_m;
-	uimenu(eye_m, 'Label', 'Add Vergence Start Point', 'Callback', {@add_verge_start, handles.line_lh_velocity});
+if isfield(handles, 'line_lh')
+	lh_vel = d2pt(lh_filt, 4, handles.eye_data.samp_freq);
+	if isfield(handles, 'line_lh_velocity')
+		handles.line_lh_velocity.YData = lh_vel;
+	else
+		handles.line_lh_velocity = line(t,lh_vel, 'Tag', 'line_lh_velocity', 'Color', 'r', 'LineStyle', '-.', 'Visible', 'off');
+		% context menus to add convergence/divergence start times
+		eye_m = uicontextmenu;
+		handles.line_lh_velocity.UIContextMenu = eye_m;
+		uimenu(eye_m, 'Label', 'Add Vergence Start Point', 'Callback', {@add_verge_start, handles.line_lh_velocity});
+	end
 end
-rh_vel = d2pt(rh_filt, 4, handles.eye_data.samp_freq);
-if isfield(handles, 'line_rh_velocity')
-	handles.line_rh_velocity.YData = rh_vel;
-else
-	handles.line_rh_velocity = line(t,rh_vel, 'Tag', 'line_rh_velocity', 'Color', 'g', 'LineStyle', '-.', 'Visible', 'off');
-	% context menus to add convergence/divergence start times
-	eye_m = uicontextmenu;
-	handles.line_rh_velocity.UIContextMenu = eye_m;
-	uimenu(eye_m, 'Label', 'Add Vergence Start Point', 'Callback', {@add_verge_start, handles.line_rh_velocity});
+
+if isfield(handles, 'line_rh')
+	rh_vel = d2pt(rh_filt, 4, handles.eye_data.samp_freq);
+	if isfield(handles, 'line_rh_velocity')
+		handles.line_rh_velocity.YData = rh_vel;
+	else
+		handles.line_rh_velocity = line(t,rh_vel, 'Tag', 'line_rh_velocity', 'Color', 'g', 'LineStyle', '-.', 'Visible', 'off');
+		% context menus to add convergence/divergence start times
+		eye_m = uicontextmenu;
+		handles.line_rh_velocity.UIContextMenu = eye_m;
+		uimenu(eye_m, 'Label', 'Add Vergence Start Point', 'Callback', {@add_verge_start, handles.line_rh_velocity});
+	end
 end
 
 return
@@ -3838,10 +3867,12 @@ function tbVergence_Callback(hObject, eventdata, handles)
 % hObject    handle to tbVergence (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-if get(hObject,'Value') % returns toggle state 
-   set(handles.line_vergence, 'Visible', 'on')
-else
-   set(handles.line_vergence, 'Visible', 'off')
+if isfield(handles, 'line_vergence')
+	if get(hObject,'Value') % returns toggle state
+		set(handles.line_vergence, 'Visible', 'on')
+	else
+		set(handles.line_vergence, 'Visible', 'off')
+	end
 end
 return
 
@@ -3850,11 +3881,12 @@ function tbConjugate_Callback(hObject, eventdata, handles)
 % hObject    handle to tbConjugate (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
-if get(hObject,'Value') % returns toggle state 
-   set(handles.line_conjugate, 'Visible', 'on')
-else
-   set(handles.line_conjugate, 'Visible', 'off')
+if isfield(handles, 'line_conjugate')
+	if get(hObject,'Value') % returns toggle state
+		set(handles.line_conjugate, 'Visible', 'on')
+	else
+		set(handles.line_conjugate, 'Visible', 'off')
+	end
 end
 return
 
@@ -3863,10 +3895,12 @@ function tbVergenceVelocity_Callback(hObject, eventdata, handles)
 % hObject    handle to tbVergenceVelocity (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-if get(hObject,'Value') % returns toggle state 
-   set(handles.line_vergence_velocity, 'Visible', 'on')
-else
-   set(handles.line_vergence_velocity, 'Visible', 'off')
+if isfield(handles, 'line_vergence_velocity')
+	if get(hObject,'Value') % returns toggle state
+		set(handles.line_vergence_velocity, 'Visible', 'on')
+	else
+		set(handles.line_vergence_velocity, 'Visible', 'off')
+	end
 end
 return
 
@@ -3876,11 +3910,12 @@ function tbLHVel_Callback(hObject, eventdata, handles)
 % hObject    handle to tbLHVel (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
-if get(hObject,'Value') % returns toggle state 
-   set(handles.line_lh_velocity, 'Visible', 'on')
-else
-   set(handles.line_lh_velocity, 'Visible', 'off')
+if isfield(handles, 'line_lh_velocity')
+	if get(hObject,'Value') % returns toggle state
+		set(handles.line_lh_velocity, 'Visible', 'on')
+	else
+		set(handles.line_lh_velocity, 'Visible', 'off')
+	end
 end
 return
 
@@ -3889,11 +3924,12 @@ function tbRHVel_Callback(hObject, eventdata, handles)
 % hObject    handle to tbRHVel (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
-if get(hObject,'Value') % returns toggle state 
-   set(handles.line_rh_velocity, 'Visible', 'on')
-else
-   set(handles.line_rh_velocity, 'Visible', 'off')
+if isfield(handles, 'line_rh_velocity')
+	if get(hObject,'Value') % returns toggle state
+		set(handles.line_rh_velocity, 'Visible', 'on')
+	else
+		set(handles.line_rh_velocity, 'Visible', 'off')
+	end
 end
 return
 
