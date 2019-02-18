@@ -654,7 +654,7 @@ cal_offset = 0;
 if isfield(handles, 'head_cal') && isfield(handles.head_cal, 'center')
     cal_offset = handles.head_cal.center;
 end
-l_r_angle = atan2(mag_rel_earth(:,2), mag_rel_earth(:,1)) * 180 / pi - cal_offset; 
+l_r_angle = -atan2(mag_rel_earth(:,2), mag_rel_earth(:,1)) * 180 / pi - cal_offset; 
 
 line(apdm_data.time, l_r_angle, 'Tag', ['line_' sensor '_l_r_angle'], 'Color', [0.2 0.8 0.2], 'Linewidth', 1.5)
 

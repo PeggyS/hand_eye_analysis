@@ -84,18 +84,18 @@ assert(head_sens_num > 0, 'found no HEAD sensor in %s', handles.hdf_filename);
 axes(handles.axes_head)
 handles.line_angle = drawMagLine(handles.apdm_data, 1); % draw the L-R angle data line
 xlabel('Time (s)')
-ylabel('Angle (°)')
+ylabel('Angle (deg)')
 
 
 % horizontal lines for defining left, right, & center
 ymin = handles.axes_head.YLim(1);
 ymax = handles.axes_head.YLim(2);
 yrange = ymax - ymin;
-y_line = ymin+yrange*3/4;
+y_line = ymin+yrange*1/4;
 handles.left_cal_line = line(handles.axes_head.XLim, [y_line, y_line], ...
     'Color', 'r', 'linewidth', 2, 'Tag', 'left_cal_line');
 draggable(handles.left_cal_line, 'v')
-y_line = ymin+yrange/4;
+y_line = ymin+yrange*3/4;
 handles.right_cal_line = line(handles.axes_head.XLim, [y_line, y_line], ...
     'Color', 'g', 'linewidth', 2, 'Tag', 'right_cal_line');
 draggable(handles.right_cal_line, 'v')
@@ -104,6 +104,12 @@ handles.center_cal_line = line(handles.axes_head.XLim, [y_line, y_line], ...
     'Color', 'k', 'linewidth', 2, 'Tag', 'center_cal_line');
 draggable(handles.center_cal_line, 'v')
 
+% vertical lines at annotations
+for a_cnt = 1:length(handles.apdm_data.annot)
+	x = handles.apdm_data.annot{a_cnt}.time;
+	line([x x], [ymin ymax])
+	text(x, ymin+yrange*0.02, handles.apdm_data.annot{a_cnt}.msg,'FontSize', 16)
+end
 
 % Update handles structure
 guidata(hObject, handles);
@@ -141,7 +147,7 @@ sensor = apdm_data.sensor{sensor_num};
 
 mag_rel_earth = RotateVector(apdm_data.mag{sensor_num}', apdm_data.orient{sensor_num}');
 
-l_r_angle = atan2(mag_rel_earth(:,2), mag_rel_earth(:,1)) * 180 / pi; 
+l_r_angle = -atan2(mag_rel_earth(:,2), mag_rel_earth(:,1)) * 180 / pi; 
 
 h_line = line(apdm_data.time, l_r_angle, 'Tag', ['line_' sensor '_l_r_angle'], 'Color', [0.2 0.8 0.2], 'Linewidth', 1.5);
 
