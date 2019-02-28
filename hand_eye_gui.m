@@ -1490,12 +1490,26 @@ x = [h_line_velocity.XData(ind_max_vel) h_line_velocity.XData(ind_max_vel)];
 y = [h_verge_vel.YData(ind_max_vel) handles.line_vergence.YData(ind_max_vel)];
 h_peak_line = line(x, y, ...
 	'Tag', ['vergence_peak_velocity'], 'Color', 'k', 'Marker', 's', 'MarkerSize', 12);
+h_beg_line.UserData.h_peak_line = h_peak_line;
+
+% add marker for vergence end
+% from the peak vergence, look for the (abs(velocity)<5)
+n_pts_to_look = 1/(h_verge_vel.XData(2)-h_verge_vel.XData(1)) * 0.5;
+rel_ind_below_vel = find(abs(h_verge_vel.YData(ind_max_vel:ind_max_vel+n_pts_to_look)) < 5, 1, 'first');
+ind_below_vel = ind_max_vel + rel_ind_below_vel - 1;
+x = [h_line_velocity.XData(ind_below_vel) h_line_velocity.XData(ind_below_vel)];
+y = [h_verge_vel.YData(ind_below_vel) handles.line_vergence.YData(ind_below_vel)];
+h_end_line = line(x, y, ...
+	'Tag', ['vergence_' eye_str '_end'], 'Color', 'k', 'Marker', 'p', 'MarkerSize', 12);
+h_beg_line.UserData.h_end_line = h_end_line;
 
 guidata(handles.figure1, handles);
 return
 
 % ----------------------------------------------------
 function deleteVergenceMark(hObject, eventdata, h_verge_mark)
+delete(h_verge_mark.UserData.h_peak_line)
+delete(h_verge_mark.UserData.h_end_line)
 delete(h_verge_mark)
 delete(hObject)
 return
@@ -2002,6 +2016,16 @@ if ~isempty(h_verge_marks)
 	for row_cnt = 1:size(xdata,1)
 		ind = find(out_tbl.t_eye >= xdata(row_cnt), 1, 'first');
 		out_tbl.vergence_peak_vel(ind) = {out_tbl.vergence_velocity(ind)};
+	end
+end % vergence marks
+% vergence end
+h_verge_marks = findobj(handles.axes_eye, '-regexp', 'Tag', '^vergence_.*end');
+if ~isempty(h_verge_marks)
+	out_tbl.vergence_peak_vel = cell(height(out_tbl),1);
+	xdata = cell2mat(get(h_verge_marks, 'XData'));
+	for row_cnt = 1:size(xdata,1)
+		ind = find(out_tbl.t_eye >= xdata(row_cnt), 1, 'first');
+		out_tbl.vergence_marks(ind) = {strrep(h_verge_marks(row_cnt).Tag, 'vergence_', '')};
 	end
 end % vergence marks
 
