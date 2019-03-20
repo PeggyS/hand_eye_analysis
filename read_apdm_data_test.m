@@ -46,7 +46,7 @@ orient = data.orient{1};
 % plot(data.time, data.accel{1}(1,:),data.time, data.accel{1}(2,:),data.time, data.accel{1}(3,:))
 % hold on
 % plot(data.time, accel(1,:),data.time, accel(2,:),data.time, accel(3,:))
-title ('accel raw & filtered data')
+% title ('accel raw & filtered data')
 % accelEarth = quatrotate(orient', accel');
 
 % figure
