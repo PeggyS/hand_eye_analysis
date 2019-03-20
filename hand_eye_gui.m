@@ -648,7 +648,7 @@ return
 function drawMagLine(handles, sensor_num)
 apdm_data = handles.apdm_data;
 sensor = apdm_data.sensor{sensor_num};
-mag_rel_earth = RotateVector(apdm_data.mag{sensor_num}', apdm_data.orient{sensor_num}');
+mag_rel_earth = apdm_RotateVector(apdm_data.mag{sensor_num}', apdm_data.orient{sensor_num}');
 
 cal_offset = 0;
 if isfield(handles, 'head_cal') && isfield(handles.head_cal, 'center')
@@ -667,10 +667,10 @@ sensor = apdm_data.sensor{sensor_num};
 samp_freq = 1/mean(diff(apdm_data.time));
 
 accel = filterData(apdm_data.accel{sensor_num}, samp_freq)';
-% accelEarth = RotateVector(apdm_data.accel{sensor_num}',apdm_data.orient{sensor_num}');
-accelEarth = RotateVector(accel',apdm_data.orient{sensor_num}');
+% accelEarth = apdm_RotateVector(apdm_data.accel{sensor_num}',apdm_data.orient{sensor_num}');
+accelEarth = apdm_RotateVector(accel',apdm_data.orient{sensor_num}');
 
-gyroEarth = RotateVector(apdm_data.gyro{sensor_num}', apdm_data.orient{sensor_num}');
+gyroEarth = apdm_RotateVector(apdm_data.gyro{sensor_num}', apdm_data.orient{sensor_num}');
 norm_gyroEarth = zeros(size(gyroEarth,1),1);
 for gg = 1:size(gyroEarth,1)
    norm_gyroEarth(gg) = norm(gyroEarth(gg,:));
