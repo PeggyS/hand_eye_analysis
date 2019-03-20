@@ -52,7 +52,7 @@ accel = data.accel{1};
 % title ('accel raw & filtered data')
 
 % accel & gyro in earth ref frame
-gyroEarth = RotateVector(gyro', orient');
+gyroEarth = apdm_RotateVector(gyro', orient');
 % filter gyro data
 % gyroEarth = lpf(gyroEarth, 4, 1, 128);
 for gg = 1:size(gyroEarth,1),
@@ -60,7 +60,7 @@ for gg = 1:size(gyroEarth,1),
 end
 
 
-accelEarth = RotateVector(accel', orient');
+accelEarth = apdm_RotateVector(accel', orient');
 
 
 figure

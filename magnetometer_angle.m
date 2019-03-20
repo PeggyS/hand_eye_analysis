@@ -13,7 +13,7 @@ title('magnetometer in sensor ref frame')
 legend('x', 'y', 'z', 'norm')
 
 
-mag_rel_earth = RotateVector(mag_data', data.orient{1}');
+mag_rel_earth = apdm_RotateVector(mag_data', data.orient{1}');
 for mm = 1:size(mag_rel_earth,1)
    norm_mag(mm) = norm(mag_rel_earth(mm,:));
 end

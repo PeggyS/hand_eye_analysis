@@ -145,7 +145,7 @@ return
 function h_line = drawMagLine(apdm_data, sensor_num)
 sensor = apdm_data.sensor{sensor_num};
 
-mag_rel_earth = RotateVector(apdm_data.mag{sensor_num}', apdm_data.orient{sensor_num}');
+mag_rel_earth = apdm_RotateVector(apdm_data.mag{sensor_num}', apdm_data.orient{sensor_num}');
 
 l_r_angle = -atan2(mag_rel_earth(:,2), mag_rel_earth(:,1)) * 180 / pi; 
 

@@ -1,4 +1,4 @@
-function vr = RotateVector(v,q)
+function vr = apdm_RotateVector(v,q)
 
 if numel(q) == 4 && numel(v) == 3
     vr = MultiplyQuaternions(q,[0, v]);
