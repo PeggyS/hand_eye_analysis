@@ -45,7 +45,7 @@ end
 
 
 % --- Executes just before hand_eye_gui is made visible.
-function hand_eye_gui_OpeningFcn(hObject, eventdata, handles, varargin)
+function hand_eye_gui_OpeningFcn(hObject, ~, handles, varargin)
 % This function has no output args, see OutputFcn.
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -314,10 +314,11 @@ if isfield(handles,'apdm_data') && ~isempty(handles.apdm_data.sensor)
          else
              disp('no head calibration file')
          end
-         drawMagLine(handles, 1)
+%          drawMagLine(handles, 1)
+		 drawHeadAngleLine(handles, 1)
      end
-   drawCorrectedVelocityLine(handles.apdm_data, 1)
-   scale_norm_gyro_corrected_vel_to_axes(handles.axes_hand)
+%    drawCorrectedVelocityLine(handles.apdm_data, 1)
+%    scale_norm_gyro_corrected_vel_to_axes(handles.axes_hand)
    
    % if pursuit, add a head movement threshold line
    if choice_num == 5
@@ -585,7 +586,7 @@ end
 return
 
 % --- Outputs from this function are returned to the command line.
-function varargout = hand_eye_gui_OutputFcn(hObject, eventdata, handles)
+function varargout = hand_eye_gui_OutputFcn(~, ~, handles)
 % varargout  cell array for returning output args (see VARARGOUT);
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -659,6 +660,28 @@ l_r_angle = -atan2(mag_rel_earth(:,2), mag_rel_earth(:,1)) * 180 / pi - cal_offs
 line(apdm_data.time, l_r_angle, 'Tag', ['line_' sensor '_l_r_angle'], 'Color', [0.2 0.8 0.2], 'Linewidth', 1.5)
 
 line([0 max(apdm_data.time)],[0 0],'color','k')
+return
+
+% -------------------------------------------------------------
+function drawHeadAngleLine(handles, sensor_num)
+apdm_data = handles.apdm_data;
+sensor = apdm_data.sensor{sensor_num};
+% y vector 
+y_vec = [0 1 0];
+y_mat = repmat(y_vec, length(apdm_data.orient{sensor_num}),1);
+y_in_earth_ref = apdm_RotateVector(y_mat, apdm_data.orient{sensor_num}');
+
+% angle of unit vector in ref X-Y plane (horizontal)
+head_horiz_angle = atan2d(y_in_earth_ref(:,1), y_in_earth_ref(:,2));
+
+% cal_offset = 0;
+% if isfield(handles, 'head_cal') && isfield(handles.head_cal, 'center')
+%     cal_offset = handles.head_cal.center;
+% end
+
+line(apdm_data.time, head_horiz_angle, 'Tag', ['line_' sensor '_horiz_angle'], 'Color', [0.2 0.8 0.2], 'Linewidth', 1.5)
+ylabel('Head Angle (\circ)')
+% line([0 max(apdm_data.time)],[0 0],'color','k')
 return
 
 % -------------------------------------------------------------

@@ -1,6 +1,5 @@
 
 function data = read_apdm_data_test(varargin)
-
 if nargin > 0
     filename = varargin{1};
 else
@@ -10,23 +9,23 @@ end
 % filename = 'sensor_data-20170308-143249.h5';
 data = get_apdm_data(filename);
 
-
+sensor_num = 1;	 % 1=HEAD, 2=right, 3 = left
 figure('position',[ 680   118   650   980])
 subplot(3,1,1)
 
-plot(data.time, data.accel{1}(1,:),data.time, data.accel{1}(2,:),data.time, data.accel{1}(3,:))
+plot(data.time, data.accel{sensor_num}(1,:),data.time, data.accel{sensor_num}(2,:),data.time, data.accel{sensor_num}(3,:))
 title('accelerometer in sensor ref frame')
 
 subplot(3,1,2)
-plot(data.time, data.gyro{1}(1,:),data.time, data.gyro{1}(2,:),data.time, data.gyro{1}(3,:))
+plot(data.time, data.gyro{sensor_num}(1,:),data.time, data.gyro{sensor_num}(2,:),data.time, data.gyro{sensor_num}(3,:))
 title('gyroscope in sensor ref frame')
 
 subplot(3,1,3)
-plot(data.time, data.mag{1}(1,:),data.time, data.mag{1}(2,:),data.time, data.mag{1}(3,:))
+plot(data.time, data.mag{sensor_num}(1,:),data.time, data.mag{sensor_num}(2,:),data.time, data.mag{sensor_num}(3,:))
 title('magnetometer in sensor ref frame')
 
-for mm = 1:size(data.mag{1},2)
-   norm_mag(mm) = norm(data.mag{1}(:,mm));
+for mm = 1:size(data.mag{sensor_num},2)
+   norm_mag(mm) = norm(data.mag{sensor_num}(:,mm));
 end
 
 % figure
@@ -35,75 +34,90 @@ end
 % ylabel( '\muT')
 % xlabel('Time (s)')
 
-
-
-gyro = data.gyro{1};
-orient = data.orient{1};
-% angVelEarth = quatrotate(orient',gyro');
-
-% accel = (lpf(data.accel{1}, 4, 10, 128))';
-% figure
-% plot(data.time, data.accel{1}(1,:),data.time, data.accel{1}(2,:),data.time, data.accel{1}(3,:))
-% hold on
-% plot(data.time, accel(1,:),data.time, accel(2,:),data.time, accel(3,:))
-% title ('accel raw & filtered data')
-% accelEarth = quatrotate(orient', accel');
-
-% figure
-% subplot(2,1,1)
-% plot(data.time,accelEarth(:,1),data.time,accelEarth(:,2),data.time,accelEarth(:,3))
-% title('accel in earth coords using quatrotate') 
-
-
-% qr = data.orient{1}(1,1);
-% qi = data.orient{1}(2,1);
-% qj = data.orient{1}(3,1);
-% qk = data.orient{1}(4,1);
-% 
-% % rotation matrix from q
-% R = [1-2*qj^2-2*qk^2, 2*(qi*qj - qk*qr), 2*(qi*qk+qj*qr); ...
-%    2*(qi*qj+qk*qr), 1-2*qi^2-2*qk^2, 2*(qj*qk-qi*qr); ...
-%    2*(qi*qk-qj*qr), 2*(qj*qk+qi*qr), 1-2*qi^2-2*qj^2 ];
-% 
-% p = [0; 0; 1]
-% p_rot = R * p
-
-% R rotation agrees with apdm's RotateVector. quatrotate from Matlab's
-% Aerospace toolbox is slightly different
-gyroEarth = apdm_RotateVector(gyro', orient');
-
-% figure
-% plot(data.time, gyroEarth(:,1),data.time, gyroEarth(:,2),data.time, gyroEarth(:,3))
-% title('gyro in earth ref frame')
-
-
-% accelEarth2 = apdm_RotateVector(accel', orient');
-
-
+	
 figure
-subplot(2,1,1)
-% plot(data.time,accelEarth2(:,1),data.time,accelEarth2(:,2),data.time,accelEarth2(:,3))
-% title('accel in earth coords using RotateVector')
+for sensor_num = 1:3
+	
+	gyro = data.gyro{sensor_num};
+	orient = data.orient{sensor_num};
+	% angVelEarth = quatrotate(orient',gyro');
+	
+	% accel = (lpf(data.accel{sensor_num}, 4, 10, 128))';
+	% figure
+	% plot(data.time, data.accel{sensor_num}(1,:),data.time, data.accel{sensor_num}(2,:),data.time, data.accel{sensor_num}(3,:))
+	% hold on
+	% plot(data.time, accel(1,:),data.time, accel(2,:),data.time, accel(3,:))
+	% title ('accel raw & filtered data')
+	% accelEarth = quatrotate(orient', accel');
+	
+	% figure
+	% subplot(2,1,1)
+	% plot(data.time,accelEarth(:,1),data.time,accelEarth(:,2),data.time,accelEarth(:,3))
+	% title('accel in earth coords using quatrotate')
+	
+	
+	% qr = data.orient{sensor_num}(1,1);
+	% qi = data.orient{sensor_num}(2,1);
+	% qj = data.orient{sensor_num}(3,1);
+	% qk = data.orient{sensor_num}(4,1);
+	%
+	% % rotation matrix from q
+	% R = [1-2*qj^2-2*qk^2, 2*(qi*qj - qk*qr), 2*(qi*qk+qj*qr); ...
+	%    2*(qi*qj+qk*qr), 1-2*qi^2-2*qk^2, 2*(qj*qk-qi*qr); ...
+	%    2*(qi*qk-qj*qr), 2*(qj*qk+qi*qr), 1-2*qi^2-2*qj^2 ];
+	%
+	% p = [0; 0; 1]
+	% p_rot = R * p
+	
+	% R rotation agrees with apdm's RotateVector. quatrotate from Matlab's
+	% Aerospace toolbox is slightly different
+	gyroEarth = apdm_RotateVector(gyro', orient');
+	
+	% figure
+	% plot(data.time, gyroEarth(:,1),data.time, gyroEarth(:,2),data.time, gyroEarth(:,3))
+	% title('gyro in earth ref frame')
+	
+	
+	% accelEarth2 = apdm_RotateVector(accel', orient');
+	
 
-% y vector 
-y_vec = [0 1 0];
-y_mat = repmat(y_vec, length(orient),1);
-y_in_earth_ref = apdm_RotateVector(y_mat, orient');
-
-plot(data.time,y_in_earth_ref(:,1),data.time,y_in_earth_ref(:,2),data.time,y_in_earth_ref(:,3))
-title('sensor y-axis in earth ref')
-ylabel('Unit vector component')
-legend('X', 'Y', 'Z')
-
-% angle of unit vector in ref X-Y plane (horizontal)
-head_horiz_angle = atan2d(y_in_earth_ref(:,1), y_in_earth_ref(:,2));
-subplot(2,1,2)
-plot(data.time,head_horiz_angle)
-ylabel('angle (deg)')
-title('head horizontal angle in earth ref')
-xlabel('time (s)')
-
-
+	subplot(3,3,sensor_num)
+	% plot(data.time,accelEarth2(:,1),data.time,accelEarth2(:,2),data.time,accelEarth2(:,3))
+	% title('accel in earth coords using RotateVector')
+	
+	% y vector
+	y_vec = [0 1 0];
+	y_mat = repmat(y_vec, length(orient),1);
+	y_in_earth_ref = apdm_RotateVector(y_mat, orient');
+	
+	plot(data.time,y_in_earth_ref(:,1),data.time,y_in_earth_ref(:,2),data.time,y_in_earth_ref(:,3))
+	title([data.sensor{sensor_num} ' sensor y-axis in earth ref'])
+	ylabel('Unit vector component')
+	legend('X', 'Y', 'Z')
+	
+	% angle of unit vector in ref X-Y plane (horizontal)
+	head_horiz_angle = atan2d(y_in_earth_ref(:,1), y_in_earth_ref(:,2));
+	subplot(3,3,sensor_num+3)
+	plot(data.time,head_horiz_angle)
+	ylabel('angle (deg)')
+	title([data.sensor{sensor_num} ' horizontal angle in earth ref'])
+	% xlabel('time (s)')
+	
+	
+	% z vector
+	z_vec = [0 0 1];
+	z_mat = repmat(z_vec, length(orient), 1);
+	z_in_earth_ref = apdm_RotateVector(z_mat, orient');
+	% angle of z unit vector
+	x_off_vertical_angle = atan2d(z_in_earth_ref(:,1), z_in_earth_ref(:,3));
+	subplot(3,3,sensor_num+6)
+	plot(data.time,x_off_vertical_angle)
+	ylabel('angle (deg)')
+	title([data.sensor{sensor_num} ' vertical angle in earth ref'])
+	xlabel('time (s)')
+	
+end % sensor_num
+mtit(filename)
 
 % % euler angles
 % q = quaternion(orient);
