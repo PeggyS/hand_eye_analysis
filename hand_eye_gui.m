@@ -674,10 +674,13 @@ y_in_earth_ref = apdm_RotateVector(y_mat, apdm_data.orient{sensor_num}');
 % angle of unit vector in ref X-Y plane (horizontal)
 head_horiz_angle = atan2d(y_in_earth_ref(:,1), y_in_earth_ref(:,2));
 
-% cal_offset = 0;
-% if isfield(handles, 'head_cal') && isfield(handles.head_cal, 'center')
-%     cal_offset = handles.head_cal.center;
-% end
+% only applying calibration offset for now
+cal_offset = 0;
+if isfield(handles, 'head_cal') && isfield(handles.head_cal, 'center')
+    cal_offset = handles.head_cal.center;
+	head_horiz_angle = head_horiz_angle - handles.head_cal.center;
+end
+
 
 line(apdm_data.time, head_horiz_angle, 'Tag', ['line_' sensor '_horiz_angle'], 'Color', [0.2 0.8 0.2], 'Linewidth', 1.5)
 ylabel('Head Angle (\circ)')

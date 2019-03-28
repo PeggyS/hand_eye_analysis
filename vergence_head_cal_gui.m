@@ -143,13 +143,23 @@ return
 
 % -------------------------------------------------------------
 function h_line = drawMagLine(apdm_data, sensor_num)
+
+
 sensor = apdm_data.sensor{sensor_num};
+% y vector 
+y_vec = [0 1 0];
+y_mat = repmat(y_vec, length(apdm_data.orient{sensor_num}),1);
+y_in_earth_ref = apdm_RotateVector(y_mat, apdm_data.orient{sensor_num}');
 
-mag_rel_earth = apdm_RotateVector(apdm_data.mag{sensor_num}', apdm_data.orient{sensor_num}');
+% angle of unit vector in ref X-Y plane (horizontal)
+head_horiz_angle = atan2d(y_in_earth_ref(:,1), y_in_earth_ref(:,2));
 
-l_r_angle = -atan2(mag_rel_earth(:,2), mag_rel_earth(:,1)) * 180 / pi; 
+% mag_rel_earth = apdm_RotateVector(apdm_data.mag{sensor_num}', apdm_data.orient{sensor_num}');
 
-h_line = line(apdm_data.time, l_r_angle, 'Tag', ['line_' sensor '_l_r_angle'], 'Color', [0.2 0.8 0.2], 'Linewidth', 1.5);
+% l_r_angle = -atan2(mag_rel_earth(:,2), mag_rel_earth(:,1)) * 180 / pi; 
+
+h_line = line(apdm_data.time, head_horiz_angle, 'Tag', ['line_' sensor '_l_r_angle'], ...
+	'Color', [0.2 0.8 0.2], 'Linewidth', 1.5);
 
 return
 
