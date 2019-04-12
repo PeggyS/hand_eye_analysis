@@ -1927,7 +1927,7 @@ if ~isempty(handles.apdm_data.sensor)
 			out_tbl.([sensor '_angle']) = cell(height(out_tbl), 1);
 			% 				out_tbl.([sensor '_angle2']) = cell(height(out_tbl), 1);
 			% get the angle data line
-			h_head_ang_line = findobj(handles.(axes_str), 'Tag', 'line_HEAD_l_r_angle');
+			h_head_ang_line = findobj(handles.(axes_str), 'Tag', 'line_HEAD_horiz_angle');
 			[resamp_head_ang, resamp_t2] = resample(h_head_ang_line.YData, h_head_ang_line.XData, handles.eye_data.samp_freq);
 			resamp_head_ang = resamp_head_ang(2:end);
 			resamp_t2 = resamp_t2(2:end);
@@ -1944,23 +1944,23 @@ if ~isempty(handles.apdm_data.sensor)
 			out_tbl.([sensor '_angle']) = resamp_head_ang(1:ind_end)';
 		end
 		
-		% norm_corrected velocity line data
-		h_vel_norm_line = findobj(handles.(axes_str), '-regexp', 'Tag', 'line_.*_vel_norm');
-		out_tbl.([sensor '_gyro_corrected_velocity_norm']) = cell(height(out_tbl), 1);
-		[resamp_vel_norm, resamp_t2] = resample(h_vel_norm_line.YData, h_vel_norm_line.XData, handles.eye_data.samp_freq);
-		resamp_vel_norm = resamp_vel_norm(2:end);
-		resamp_t2 = resamp_t2(2:end);
-		ind_end = length(resamp_t2);
-		t_diff = resamp_t2(end) - t_eye(end);
-		if t_diff > eps
-			ind_end = length(t_eye);
-		elseif t_diff < eps
-			ind_end_tbl = height(out_tbl);
-			resamp_t2(ind_end+1:ind_end_tbl) = nan(ind_end_tbl-ind_end,1);
-			resamp_vel_norm(ind_end+1:ind_end_tbl) = nan(ind_end_tbl-ind_end,1);
-			ind_end = ind_end_tbl;
-		end
-		out_tbl.([sensor '_gyro_corrected_velocity_norm']) = resamp_vel_norm(1:ind_end)';
+% 		% norm_corrected velocity line data
+% 		h_vel_norm_line = findobj(handles.(axes_str), '-regexp', 'Tag', 'line_.*_vel_norm');
+% 		out_tbl.([sensor '_gyro_corrected_velocity_norm']) = cell(height(out_tbl), 1);
+% 		[resamp_vel_norm, resamp_t2] = resample(h_vel_norm_line.YData, h_vel_norm_line.XData, handles.eye_data.samp_freq);
+% 		resamp_vel_norm = resamp_vel_norm(2:end);
+% 		resamp_t2 = resamp_t2(2:end);
+% 		ind_end = length(resamp_t2);
+% 		t_diff = resamp_t2(end) - t_eye(end);
+% 		if t_diff > eps
+% 			ind_end = length(t_eye);
+% 		elseif t_diff < eps
+% 			ind_end_tbl = height(out_tbl);
+% 			resamp_t2(ind_end+1:ind_end_tbl) = nan(ind_end_tbl-ind_end,1);
+% 			resamp_vel_norm(ind_end+1:ind_end_tbl) = nan(ind_end_tbl-ind_end,1);
+% 			ind_end = ind_end_tbl;
+% 		end
+% 		out_tbl.([sensor '_gyro_corrected_velocity_norm']) = resamp_vel_norm(1:ind_end)';
 			
 		% moves for each sensor
 		move_beg_lines = findobj(handles.(axes_str), '-regexp', 'Tag', 'move_.*_begin$');
