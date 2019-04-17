@@ -1000,6 +1000,10 @@ if ~isfield(handles, 'click_data_tbl')
 end
 
 ylims = get(handles.axes_eye, 'YLim');
+
+% remove duplicate clicks in the click_data_table.
+handles.click_data_tbl(diff(handles.click_data_tbl.abs_click_time) == 0, :) = [];
+
 for click_cnt = 1:height(handles.click_data_tbl)
 	% use the abs click time and eye_data start time to display the click time
 	if any(strcmp(handles.click_data_tbl.Properties.VariableNames, 'abs_click_time'))
@@ -1064,7 +1068,7 @@ switch source.Tag
 		row = find_click_tbl_row(handles.click_data_tbl, h_line.UserData.click_coords);
 		assert(~isempty(row), 'error finding the row in click_data_tbl for %d, %d', ...
 			h_line.UserData.click_coords.x, h_line.UserData.click_coords.y)
-		handles.click_data_tbl(row,:) = [];
+% 		handles.click_data_tbl(row,:) = [];
 		guidata(gcf, handles)
 		delete(h_line.UserData.hMenuShowClick)
 		delete(h_line.UserData.hMenuDeleteClick)
@@ -1092,7 +1096,7 @@ function row = find_click_tbl_row(click_data_tbl, click_coords)
 row = [];
 for row_cnt = 1:height(click_data_tbl)
 	coords = parse_click_coords(click_data_tbl.CLICK_COORDINATES(row_cnt));
-	if coords.x == click_coords.x && coords.y == click_coords.y
+	if ~isempty(coords) && coords.x == click_coords.x && coords.y == click_coords.y
 		row = row_cnt;
 		return
 	end
@@ -1716,14 +1720,14 @@ for st_cnt = 1:length(sacc_type_list)
 						v_eye = [eye 'v'];
 						if isfield(handles, 'grid_file')
 							out_tbl.region_of_interest{beg_row} = find_roi_from_file(handles, ...
-								out_tbl.(h_eye)(beg_row), out_tbl.(v_eye)(beg_row));
+								out_tbl.(h_eye)(beg_row), out_tbl.(v_eye)(beg_row), beg_t);
 							out_tbl.region_of_interest{end_row} = find_roi_from_file(handles, ...
-								out_tbl.(h_eye)(end_row), out_tbl.(v_eye)(end_row));
+								out_tbl.(h_eye)(end_row), out_tbl.(v_eye)(end_row), end_t);
 						else
 							out_tbl.region_of_interest{beg_row} = find_default_roi(grid_vals, ...
-								out_tbl.(h_eye)(beg_row), out_tbl.(v_eye)(beg_row));
+								out_tbl.(h_eye)(beg_row), out_tbl.(v_eye)(beg_row), beg_t);
 							out_tbl.region_of_interest{end_row} = find_default_roi(grid_vals, ...
-								out_tbl.(h_eye)(end_row), out_tbl.(v_eye)(end_row));
+								out_tbl.(h_eye)(end_row), out_tbl.(v_eye)(end_row), end_t);
 						end
 					end
 					

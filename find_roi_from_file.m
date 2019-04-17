@@ -1,4 +1,4 @@
-function roi = find_roi_from_file(handles, x_eye, y_eye)
+function roi = find_roi_from_file(handles, x_eye, y_eye, t_eye)
 
 roi = [];
 
@@ -15,9 +15,9 @@ tbl_rows = tbl(tbl.left<=h_eye_pixel & tbl.right>=h_eye_pixel ...
 	& tbl.top<=v_eye_pixel & tbl.bottom>=v_eye_pixel,:);
 
 if isempty(tbl_rows)
-	beep
-	fprintf('did not find pixel (h,v) = (%g, %g) in %s\n', ...
-		h_eye_pixel, v_eye_pixel, handles.grid_file)
+	% beep
+	fprintf('t = %g: did not find pixel (h,v) = (%g, %g) in %s\n', ...
+		t_eye, h_eye_pixel, v_eye_pixel, handles.grid_file)
 	return
 end
 if height(tbl_rows) > 1
