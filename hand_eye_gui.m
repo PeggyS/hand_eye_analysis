@@ -22,7 +22,7 @@ function varargout = hand_eye_gui(varargin)
 
 % Edit the above text to modify the response to help hand_eye_gui
 
-% Last Modified by GUIDE v2.5 01-Jan-2019 12:28:24
+% Last Modified by GUIDE v2.5 18-Apr-2019 19:14:27
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 0;
@@ -4011,3 +4011,48 @@ function editLPFilt_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+% --- Executes on button press in rb_right_eye_viewing.
+function rb_right_eye_viewing_Callback(hObject, eventdata, handles)
+% hObject    handle to rb_right_eye_viewing (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of rb_right_eye_viewing
+
+
+% --- Executes on button press in rb_left_eye_viewing.
+function rb_left_eye_viewing_Callback(hObject, eventdata, handles)
+% hObject    handle to rb_left_eye_viewing (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of rb_left_eye_viewing
+
+
+% --- Executes on button press in chkbx_head.
+function chkbx_head_Callback(hObject, eventdata, handles)
+% hObject    handle to chkbx_head (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of chkbx_head
+
+
+% --- Executes on button press in chkbx_right.
+function chkbx_right_Callback(hObject, eventdata, handles)
+% hObject    handle to chkbx_right (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of chkbx_right
+
+
+% --- Executes on button press in chkbx_left_hand.
+function chkbx_left_hand_Callback(hObject, eventdata, handles)
+% hObject    handle to chkbx_left_hand (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of chkbx_left_hand
