@@ -1,4 +1,4 @@
-function sac = microsacc(x,vel,VFAC,MINDUR)
+function sac = microsacc_ps(pos,vel,VFAC,MINDUR)
 %--------------------------------------------------------------------
 %  FUNCTION microsacc.m
 %  (Version 2.0, 30 NOV 03)
@@ -9,7 +9,7 @@ function sac = microsacc(x,vel,VFAC,MINDUR)
 %  Vision Research 43, 1035-1045.
 %--------------------------------------------------------------------
 % INPUT
-%   x(:,1:2)         position vector
+%   pos(:,1:2)         position vector
 %   vel(:,1:2)       velocity vector
 %   VFAC             relative velocity threshold
 %   MINDUR           minimal saccade duration (number of samples)
@@ -39,17 +39,18 @@ indx = find(test>1);
 % 3. Building sequence
 N = length(indx); 
 sac = [];
+%sac = NaN(N,9);
 nsac = 0;
 dur = 1;
 a = 1;
 k = 1;
 while k<N
     if indx(k+1)-indx(k)==1
-        dur = dur + 1;
+        dur=dur+1;
     else
         % duration > MINDUR?
         if dur>=MINDUR
-            nsac = nsac + 1;
+            nsac = nsac+1;
             b = k;
             sac(nsac,:) = [indx(a) indx(b)];
         end
@@ -66,18 +67,18 @@ if dur>=MINDUR
 end
 
 % 4. Computing saccade parameters
-vabs = sqrt( vel(:,1).^2 + vel(:,2).^2 );
+vel_rad = sqrt( vel(:,1).^2 + vel(:,2).^2 );
 for s=1:nsac
     a = sac(s,1);   % begin
     b = sac(s,2);   % end
-    [vpeak, indvpeak] = max(vabs(a:b));  % peak velocity ; indvpeak added by PS
-	horizvpeak = vel(a+indvpeak-1, 1);		% added by PS
-	vertvpeak = vel(a+indvpeak-1, 2);		% added by PS
-    ampl = sqrt( (x(a,1)-x(b,1))^2 + (x(a,2)-x(b,2))^2 );  % amplitude
+    [vpeak, indvpeak] = max(vel_rad(a:b));  % peak velocity ; indvpeak added by PS
+	horizvpeak = vel(a+indvpeak-1, 1);	 % added by PS
+	vertvpeak = vel(a+indvpeak-1, 2);	 % added by PS
+    ampl = sqrt( (pos(a,1)-pos(b,1))^2 + (pos(a,2)-pos(b,2))^2 );  % amplitude
     sac(s,3) = vpeak;
     sac(s,4) = ampl;
-    delx = x(b,1)-x(a,1);   % horizontal component
-    dely = x(a,2)-x(b,2);   % vertical component
+    delx = pos(b,1)-pos(a,1);            % horizontal component
+    dely = pos(a,2)-pos(b,2);            % vertical component
     phi = 180/pi*atan2(dely,delx);   % angular orientation
     sac(s,5) = phi;
     sac(s,6) = delx;
