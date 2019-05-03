@@ -22,7 +22,7 @@ function varargout = hand_eye_gui(varargin)
 
 % Edit the above text to modify the response to help hand_eye_gui
 
-% Last Modified by GUIDE v2.5 18-Apr-2019 19:14:27
+% Last Modified by GUIDE v2.5 02-May-2019 19:51:23
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 0;
@@ -148,6 +148,7 @@ if choice_num==1 || choice_num==3 || choice_num==5 || choice_num==7  || choice_n
 	end
 end
 
+% get in add'l info depending on the type of analysis
 switch choice_num
 	case {1 2} % scenecam: read in video data
 		handles = request_vid_reader(handles);
@@ -278,17 +279,21 @@ if choice_num == 15 || choice_num == 16 % vergence
 	
 else
 	if ~isempty(handles.eye_data.rh.pos)
+		axes(handles.axes_eye)
 		handles.line_rh = line(t, handles.eye_data.rh.pos, 'Tag', 'line_rh', 'Color', 'g');
 	end
 	if ~isempty(handles.eye_data.lh.pos)
+		axes(handles.axes_eye)
 		handles.line_lh = line(t, handles.eye_data.lh.pos, 'Tag', 'line_lh', 'Color', 'r');
 	end
 	ylabel('Gaze Pos (\circ)')
 end
 if ~isempty(handles.eye_data.rv.pos)
+	axes(handles.axes_eye)
 	handles.line_rv = line(t, handles.eye_data.rv.pos, 'Tag', 'line_rv', 'Color', 'g', 'LineStyle', '--');
 end
 if ~isempty(handles.eye_data.lv.pos)
+	axes(handles.axes_eye)
 	handles.line_lv = line(t, handles.eye_data.lv.pos, 'Tag', 'line_lv', 'Color', 'r', 'LineStyle', '--');
 end
 
@@ -297,7 +302,7 @@ end
 
 
 if isfield(handles,'apdm_data') && ~isempty(handles.apdm_data.sensor)
-   axes(handles.axes_hand) % 1st axis is called hand no matter what the sensor is
+   axes(handles.axes_sensor1) % for head data
    %drawSensorAccelLines(handles.apdm_data, 1);
 %    drawSensorCombinedVelocityLine(handles.apdm_data, 1)
      if strcmpi(handles.apdm_data.sensor{1}, 'head')
@@ -318,22 +323,22 @@ if isfield(handles,'apdm_data') && ~isempty(handles.apdm_data.sensor)
 		 drawHeadAngleLine(handles, 1)
      end
 %    drawCorrectedVelocityLine(handles.apdm_data, 1)
-%    scale_norm_gyro_corrected_vel_to_axes(handles.axes_hand)
+%    scale_norm_gyro_corrected_vel_to_axes(handles.axes_sensor1)
    
    % if pursuit, add a head movement threshold line
    if choice_num == 5
-	   add_head_vel_threshold_line(handles.axes_hand)
+	   add_head_vel_threshold_line(handles.axes_sensor1)
    end
      
-   handles.linkprop_list(1) = linkprop([handles.axes_eye, handles.axes_hand ], 'XLim');
+   handles.linkprop_list(1) = linkprop([handles.axes_eye, handles.axes_sensor1 ], 'XLim');
 
 	if length(handles.apdm_data.sensor) > 1
-	   axes(handles.axes_head) % 2nd axis is called head no matter what the sensor is
+	   axes(handles.axes_sensor2) % axes are for right hand data
 	   drawCorrectedVelocityLine(handles.apdm_data, 2);
-	   handles.linkprop_list(end+1) = linkprop([handles.axes_eye, handles.axes_head ], 'XLim');
+	   handles.linkprop_list(end+1) = linkprop([handles.axes_eye, handles.axes_sensor2 ], 'XLim');
 	end
 	if length(handles.apdm_data.sensor) > 2
-	   axes(handles.axes_sensor3) % 3rd axis is called sensor3 no matter what the sensor is
+	   axes(handles.axes_sensor3) % axes are for left hand data
 	   drawCorrectedVelocityLine(handles.apdm_data, 3);
 	   handles.linkprop_list(end+1) = linkprop([handles.axes_eye, handles.axes_sensor3 ], 'XLim');
 	end
@@ -344,6 +349,7 @@ handles = show_annot_lines(handles);
 % annotations of apdm data
 % handles = show_annot_symbols(handles);
 
+% adjust axes for displaying or not displaying picture or video
 switch choice_num
 	case {1 2}
 
@@ -458,14 +464,14 @@ uimenu(eye_m, 'Label', 'Analyze Data 3', 'Callback', {@createBox, [], 'analysis_
 if isfield(handles, 'apdm_data')
 	if ~isempty(handles.apdm_data.sensor)
 		hand_m = uicontextmenu;
-		handles.axes_hand.UIContextMenu = hand_m;
-	% 	uimenu(hand_m, 'Label', 'Add Move', 'Callback', {@addMove, handles.axes_hand})
+		handles.axes_sensor1.UIContextMenu = hand_m;
+	% 	uimenu(hand_m, 'Label', 'Add Move', 'Callback', {@addMove, handles.axes_sensor1})
 		uimenu(hand_m, 'Label', 'Add Mistake', 'Callback', {@addLine, 'annotation_mistake'})
 	end
 	if length(handles.apdm_data.sensor) > 1
 		head_m = uicontextmenu;
-		handles.axes_head.UIContextMenu = head_m;
-	% 	uimenu(head_m, 'Label', 'Add Move', 'Callback', {@addMove, handles.axes_head})
+		handles.axes_sensor2.UIContextMenu = head_m;
+	% 	uimenu(head_m, 'Label', 'Add Move', 'Callback', {@addMove, handles.axes_sensor2})
 		uimenu(head_m, 'Label', 'Add Mistake', 'Callback', {@addLine, 'annotation_mistake'})
 	end
 	if length(handles.apdm_data.sensor) > 2
@@ -546,7 +552,7 @@ return
 
 % --------------
 function handles = widen_axes(handles)
-ax_list = {'axes_eye', 'axes_hand', 'axes_head', 'axes_sensor3'};
+ax_list = {'axes_eye', 'axes_sensor1', 'axes_sensor2', 'axes_sensor3'};
 for ax = ax_list
 	handles.(ax{1}).Position(3) = 0.9;
 end
@@ -562,15 +568,15 @@ draggable(handles.scrub_line_eye,'h', @scrubLineMotionFcn)
 
 if isfield(handles, 'apdm_data')
 	if ~isempty(handles.apdm_data.sensor)
-	   axes(handles.axes_hand)
-	   handles.scrub_line_hand = line( [x_scrub_line, x_scrub_line], handles.axes_hand.YLim, ...
+	   axes(handles.axes_sensor1)
+	   handles.scrub_line_hand = line( [x_scrub_line, x_scrub_line], handles.axes_sensor1.YLim, ...
 		  'Color', 'b', 'linewidth', 2, 'Tag', 'scrub_line_hand');
 	   draggable(handles.scrub_line_hand,'h', @scrubLineMotionFcn)
 	   handles.linkprop_list(end+1) = linkprop([handles.scrub_line_hand, handles.scrub_line_eye], 'XData');
 	end
 	if length(handles.apdm_data.sensor) > 1
-	   axes(handles.axes_head)
-	   handles.scrub_line_head = line( [x_scrub_line, x_scrub_line], handles.axes_head.YLim, ...
+	   axes(handles.axes_sensor2)
+	   handles.scrub_line_head = line( [x_scrub_line, x_scrub_line], handles.axes_sensor2.YLim, ...
 		  'Color', 'b', 'linewidth', 2, 'Tag', 'scrub_line_head');
 	   draggable(handles.scrub_line_head,'h', @scrubLineMotionFcn)
 	   handles.linkprop_list(end+1) = linkprop([handles.scrub_line_head, handles.scrub_line_eye], 'XData');
@@ -682,7 +688,10 @@ if isfield(handles, 'head_cal') && isfield(handles.head_cal, 'center')
 end
 
 
-line(apdm_data.time, head_horiz_angle, 'Tag', ['line_' sensor '_horiz_angle'], 'Color', [0.2 0.8 0.2], 'Linewidth', 1.5)
+hl = line(apdm_data.time, head_horiz_angle, 'Tag', ['line_' sensor '_horiz_angle'], ...
+	'Color', [0.2 0.8 0.2], 'Linewidth', 1.5, 'Parent', handles.axes_sensor1);
+hl.Visible = handles.axes_sensor1.Visible;
+hl.UserData.vis_link = linkprop([hl, handles.axes_sensor1], 'Visible');
 ylabel('Head Angle (\circ)')
 % line([0 max(apdm_data.time)],[0 0],'color','k')
 return
@@ -755,7 +764,10 @@ end
 % line(apdm_data.time, gyro_corrected_vel(:,1), 'Tag', ['line_' sensor '_vel_x']);
 % line(apdm_data.time, gyro_corrected_vel(:,2), 'Tag', ['line_' sensor '_vel_y'], 'Color', [0.8 0.1 0]);
 % line(apdm_data.time, gyro_corrected_vel(:,3), 'Tag', ['line_' sensor '_vel_z'], 'Color', [0.1 0.8 0.2]);
-h_line = line(apdm_data.time, norm_gyro_corrected_vel, 'Tag', ['line_' sensor '_vel_norm'], 'Color', [0.8 0.0 0.7], 'Linewidth', 1.5);
+h_line = line(apdm_data.time, norm_gyro_corrected_vel, 'Tag', ['line_' sensor '_vel_norm'], ...
+	'Color', [0.8 0.0 0.7], 'Linewidth', 1.5);
+h_line.Visible = h_line.Parent.Visible;
+h_line.UserData.vis_link = linkprop([h_line, h_line.Parent], 'Visible');
 
 % add context menu to the line
 h_menu = uicontextmenu;
@@ -810,42 +822,107 @@ return
 
 % -------------------------------------------------------------
 function handles = resizeAxes(handles)
+% are the sensors off or on? 
+head = handles.chkbx_head.Value;
+right = handles.chkbx_right_hand.Value;
+left = handles.chkbx_left_hand.Value;
+num_sensors = head + right + left; % num sensors to display
+
+% if there is no sensor data
 if ~isfield(handles, 'apdm_data') || ~isfield(handles.apdm_data, 'sensor')
 	num_sensors = 0;
-else
-	num_sensors = length(handles.apdm_data.sensor);
 end
 switch num_sensors
    case 0
-      handles.axes_eye.Position = [0.067 0.24 0.40 0.628];
+%       handles.axes_eye.Position = [0.067 0.24 0.40 0.628];
+		handles.axes_eye.Position(2) = 0.24;
+		handles.axes_eye.Position(4) = 0.628;
       handles.axes_eye.XLabel.String = 'Time (sec)';
-      handles.axes_hand.Visible = 'Off';
-      handles.axes_head.Visible = 'Off';
+      handles.axes_sensor1.Visible = 'Off';
+      handles.axes_sensor2.Visible = 'Off';
 	  handles.axes_sensor3.Visible = 'Off';
    case 1
-      handles.axes_eye.Position = [0.067 0.539 0.40 0.329];
+%       handles.axes_eye.Position = [0.067 0.539 0.40 0.329];
+		handles.axes_eye.Position(2) = 0.539;
+		handles.axes_eye.Position(4) = 0.329;
       handles.axes_eye.XTickLabel = {};
-      handles.axes_hand.Position = [0.067 0.252 0.40 0.261];
-      handles.axes_hand.XLabel.String = 'Time (sec)';
-      handles.axes_head.Visible = 'Off';
-	  handles.axes_sensor3.Visible = 'Off';
+	  if head
+		  vis_axes = 'axes_sensor1';
+		  non_vis_axes1 = 'axes_sensor2';
+		  non_vis_axes2 = 'axes_sensor3';
+	  elseif right
+		  vis_axes = 'axes_sensor2';
+		  non_vis_axes1 = 'axes_sensor1';
+		  non_vis_axes2 = 'axes_sensor3';
+	  elseif left
+		  vis_axes = 'axes_sensor3';
+		  non_vis_axes1 = 'axes_sensor1';
+		  non_vis_axes2 = 'axes_sensor2';
+	  end
+%       handles.axes_sensor1.Position = [0.067 0.252 0.40 0.261];
+		handles.(vis_axes).Position(2) = 0.252;
+		handles.(vis_axes).Position(4) = 0.261;
+		handles.(vis_axes).Visible = 'on';
+%       handles.axes_sensor1.XLabel.String = 'Time (sec)';
+		handles.(vis_axes).XLabel.String = 'Time (sec)';
+		handles.(vis_axes).XTickLabel = arrayfun(@num2str, handles.(vis_axes).XTick, 'uniformoutput', false)';
+%       handles.axes_sensor2.Visible = 'Off';
+		handles.(non_vis_axes1).Visible = 'Off';
+%		handles.axes_sensor3.Visible = 'Off';
+		handles.(non_vis_axes2).Visible = 'Off';
    case 2
-      handles.axes_eye.Position = [0.067 0.641 0.40 0.227];
-      handles.axes_eye.XTickLabel = {};
-      handles.axes_hand.Position = [0.067 0.439 0.40 0.187];
-      handles.axes_hand.XTickLabel = {};
-      handles.axes_head.Position = [0.067 0.239 0.40 0.187];
-      handles.axes_head.XLabel.String = 'Time (sec)';
-	  handles.axes_sensor3.Visible = 'Off';
+%       handles.axes_eye.Position = [0.067 0.641 0.40 0.227];
+		handles.axes_eye.Position(2) = 0.641;
+		handles.axes_eye.Position(4) = 0.227;
+		handles.axes_eye.XTickLabel = {};
+		if head && right
+		  vis_axes1 = 'axes_sensor1';
+		  vis_axes2 = 'axes_sensor2';
+		  non_vis_axes = 'axes_sensor3';
+	  elseif head && left
+		  vis_axes1 = 'axes_sensor1';
+		  vis_axes2 = 'axes_sensor3';
+		  non_vis_axes = 'axes_sensor2';
+	  elseif right && left
+		  vis_axes1 = 'axes_sensor2';
+		  vis_axes2 = 'axes_sensor3';
+		  non_vis_axes = 'axes_sensor1';
+	  end
+%       handles.axes_sensor1.Position = [0.067 0.439 0.40 0.187];
+		handles.(vis_axes1).Position(2) = 0.439;
+		handles.(vis_axes1).Position(4) = 0.187;
+		handles.(vis_axes1).Visible = 'on';
+		handles.(vis_axes1).XTickLabel = {};
+%       handles.axes_sensor1.XTickLabel = {};
+%       handles.axes_sensor2.Position = [0.067 0.239 0.40 0.187];
+		handles.(vis_axes2).Position(2) = 0.239;
+		handles.(vis_axes2).Position(4) = 0.187;
+		handles.(vis_axes2).Visible = 'on';
+		handles.(vis_axes2).XTickLabel = arrayfun(@num2str, handles.(vis_axes2).XTick, 'uniformoutput', false)';
+		handles.(vis_axes2).XLabel.String = 'Time (sec)';
+% 	  handles.axes_sensor3.Visible = 'Off';
+		handles.(non_vis_axes).Visible = 'Off';
 	case 3
-      handles.axes_eye.Position = [0.067 0.7 0.40 0.17];
+%       handles.axes_eye.Position = [0.067 0.7 0.40 0.17];
+		handles.axes_eye.Position(2) = 0.7;
+		handles.axes_eye.Position(4) = 0.17;
       handles.axes_eye.XTickLabel = {};
-      handles.axes_hand.Position = [0.067 0.535 0.40 0.14];
-      handles.axes_hand.XTickLabel = {};
-      handles.axes_head.Position = [0.067 0.387 0.40 0.14];
-	  handles.axes_head.XTickLabel = {};
-      handles.axes_sensor3.Position = [0.067 0.24 0.40 0.14];
+%       handles.axes_sensor1.Position = [0.067 0.535 0.40 0.14];
+	  handles.axes_sensor1.Position(2) = 0.535;
+	  handles.axes_sensor1.Position(4) = 0.14;
+      handles.axes_sensor1.XTickLabel = {};
+	  handles.axes_sensor1.Visible = 'on';
+%       handles.axes_sensor2.Position = [0.067 0.387 0.40 0.14];
+	  handles.axes_sensor2.Position(2) = 0.387;
+	  handles.axes_sensor2.Position(4) = 0.14;
+	  handles.axes_sensor2.XTickLabel = {};
+	  handles.axes_sensor2.Visible = 'on';
+%       handles.axes_sensor3.Position = [0.067 0.24 0.40 0.14];
+		handles.axes_sensor3.Position(2) = 0.24;
+		handles.axes_sensor3.Position(4) = 0.14;
+		handles.axes_sensor3.Visible = 'on';
       handles.axes_sensor3.XLabel.String = 'Time (sec)';
+	  handles.axes_sensor3.XTickLabel = arrayfun(@num2str, handles.axes_sensor3.XTick, 'uniformoutput', false)';
     otherwise
       error('more than 3 sensors of data')
 end
@@ -900,8 +977,8 @@ h_patch.UserData.h_l_line = h_left_line;
 % matching patch in other axes
 if isfield(handles, 'apdm_data')
 	if ~isempty(handles.apdm_data.sensor)
-	   axes(handles.axes_hand)
-	   ylims = get(handles.axes_hand, 'YLim');
+	   axes(handles.axes_sensor1)
+	   ylims = get(handles.axes_sensor1, 'YLim');
 	   h_patch2 = patch([xlims(1) xlims(1) xlims(2) xlims(2)], ...
 		  [ylims(1) ylims(2) ylims(2) ylims(1)], p_color);
 	   set(h_patch2, 'FaceAlpha', 0.5, 'Tag', [tag_str '_id#' num2str(patch_id) '_patch'])
@@ -909,8 +986,8 @@ if isfield(handles, 'apdm_data')
 	   handles.linkprop_list(end+1) = linkprop([h_patch, h_patch2], 'XData');
 	end
 	if length(handles.apdm_data.sensor) > 1
-	   axes(handles.axes_head)
-	   ylims = get(handles.axes_head, 'YLim');
+	   axes(handles.axes_sensor2)
+	   ylims = get(handles.axes_sensor2, 'YLim');
 	   h_patch2 = patch([xlims(1) xlims(1) xlims(2) xlims(2)], ...
 		  [ylims(1) ylims(2) ylims(2) ylims(1)], p_color);
 	   set(h_patch2, 'FaceAlpha', 0.5, 'Tag', [tag_str '_id#' num2str(patch_id) '_patch'])
@@ -1111,8 +1188,8 @@ line_color = getLineColor(handles, line_type);
 if isfield(handles, 'apdm_data')
 	if ~isempty(handles.apdm_data.sensor)
 
-	   axes(handles.axes_hand)
-	   ylims = get(handles.axes_hand, 'YLim');
+	   axes(handles.axes_sensor1)
+	   ylims = get(handles.axes_sensor1, 'YLim');
 	   h_hand = line([time, time], ylims, 'Color', line_color, 'Tag', line_type, ...
 		  'Visible', vis_on_off);
 	   uistack(h_hand, 'bottom')
@@ -1120,8 +1197,8 @@ if isfield(handles, 'apdm_data')
 	   set(h_hand, 'UIContextMenu', hcmenu, 'UserData', ud);
 	end
 	if length(handles.apdm_data.sensor) > 1
-	   axes(handles.axes_head)
-	   ylims = get(handles.axes_head, 'YLim');
+	   axes(handles.axes_sensor2)
+	   ylims = get(handles.axes_sensor2, 'YLim');
 	   h_head = line([time, time], ylims, 'Color', line_color, 'Tag',  line_type, ...
 		  'Visible', vis_on_off);
 	   uistack(h_head, 'bottom')
@@ -1914,13 +1991,13 @@ if ~isempty(handles.apdm_data.sensor)
 		out_tbl.([sensor '_orient_3']) = resamp_orient_3(1:ind_end)';
 		out_tbl.([sensor '_orient_4']) = resamp_orient_4(1:ind_end)';
 		
-		% the string at the end of the axes tag (ie handles.axes_hand or
-		% axes_head)
+		% the string at the end of the axes tag (ie handles.axes_sensor1 or
+		% axes_sensor2)
 		switch sens_num
 			case 1
 				axes_str = 'axes_hand';
 			case 2
-				axes_str = 'axes_head';
+				axes_str = 'axes_sensor2';
 			case 3
 				axes_str = 'axes_sensor3';
 		end
@@ -2098,7 +2175,7 @@ if isfield(handles, 'target_pos') && strcmp(handles.target_pos.type, 'smoothp')
 	out_tbl.target_yvel_deg_s = lpf(y_vel, 4, 1, handles.eye_data.samp_freq);
 	
 	% head velocity threshold line
-	thresh_line = findobj(handles.axes_hand, 'Tag', 'head_vel_threshold_line');
+	thresh_line = findobj(handles.axes_sensor1, 'Tag', 'head_vel_threshold_line');
     if ~isempty(thresh_line)
         out_tbl.HEAD_below_threshold = out_tbl.HEAD_gyro_corrected_velocity_norm < thresh_line.YData(1);
     end
@@ -3520,7 +3597,7 @@ end
 % annotations 
 state.annots = [];
 if isfield(handles, 'axes_hand')
-	annots = findobj(handles.axes_hand, 'Tag', 'annotation_mistake');
+	annots = findobj(handles.axes_sensor1, 'Tag', 'annotation_mistake');
 	for a_cnt = 1:length(annots)
 		state.annots(a_cnt).xdata = annots(a_cnt).XData(1);
 		state.annots(a_cnt).txt = annots(a_cnt).Tag;
@@ -4036,23 +4113,21 @@ function chkbx_head_Callback(hObject, eventdata, handles)
 % hObject    handle to chkbx_head (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+handles = resizeAxes(handles);
+guidata(handles.figure1, handles)
 
-% Hint: get(hObject,'Value') returns toggle state of chkbx_head
-
-
-% --- Executes on button press in chkbx_right.
-function chkbx_right_Callback(hObject, eventdata, handles)
-% hObject    handle to chkbx_right (see GCBO)
+% --- Executes on button press in chkbx_right_hand.
+function chkbx_right_hand_Callback(hObject, eventdata, handles)
+% hObject    handle to chkbx_right_hand (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of chkbx_right
-
+handles = resizeAxes(handles);
+guidata(handles.figure1, handles)
 
 % --- Executes on button press in chkbx_left_hand.
 function chkbx_left_hand_Callback(hObject, eventdata, handles)
 % hObject    handle to chkbx_left_hand (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of chkbx_left_hand
+handles = resizeAxes(handles);
+guidata(handles.figure1, handles)
