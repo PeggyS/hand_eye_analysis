@@ -569,24 +569,28 @@ draggable(handles.scrub_line_eye,'h', @scrubLineMotionFcn)
 if isfield(handles, 'apdm_data')
 	if ~isempty(handles.apdm_data.sensor)
 	   axes(handles.axes_sensor1)
-	   handles.scrub_line_hand = line( [x_scrub_line, x_scrub_line], handles.axes_sensor1.YLim, ...
-		  'Color', 'b', 'linewidth', 2, 'Tag', 'scrub_line_hand');
+% 	   handles.scrub_line_hand = line( [x_scrub_line, x_scrub_line], handles.axes_sensor1.YLim, ...
+		handles.scrub_line_hand = line( [x_scrub_line, x_scrub_line], [-inf inf], ...
+		  'Color', 'b', 'linewidth', 2, 'Tag', 'scrub_line_hand', 'Visible', handles.axes_sensor1.Visible);
 	   draggable(handles.scrub_line_hand,'h', @scrubLineMotionFcn)
 	   handles.linkprop_list(end+1) = linkprop([handles.scrub_line_hand, handles.scrub_line_eye], 'XData');
+	   handles.linkprop_list(end+1) = linkprop([handles.scrub_line_hand, handles.axes_sensor1], 'Visible');
 	end
 	if length(handles.apdm_data.sensor) > 1
 	   axes(handles.axes_sensor2)
 	   handles.scrub_line_head = line( [x_scrub_line, x_scrub_line], handles.axes_sensor2.YLim, ...
-		  'Color', 'b', 'linewidth', 2, 'Tag', 'scrub_line_head');
+		  'Color', 'b', 'linewidth', 2, 'Tag', 'scrub_line_head', 'Visible', handles.axes_sensor2.Visible);
 	   draggable(handles.scrub_line_head,'h', @scrubLineMotionFcn)
 	   handles.linkprop_list(end+1) = linkprop([handles.scrub_line_head, handles.scrub_line_eye], 'XData');
+	   handles.linkprop_list(end+1) = linkprop([handles.scrub_line_head, handles.axes_sensor2], 'Visible');
 	end
 	if length(handles.apdm_data.sensor) > 2
 	   axes(handles.axes_sensor3)
 	   handles.scrub_line_sensor3 = line( [x_scrub_line, x_scrub_line], handles.axes_sensor3.YLim, ...
-		  'Color', 'b', 'linewidth', 2, 'Tag', 'scrub_line_sensor3');
+		  'Color', 'b', 'linewidth', 2, 'Tag', 'scrub_line_sensor3', 'Visible', handles.axes_sensor3.Visible);
 	   draggable(handles.scrub_line_sensor3,'h', @scrubLineMotionFcn)
 	   handles.linkprop_list(end+1) = linkprop([handles.scrub_line_sensor3, handles.scrub_line_eye], 'XData');
+	   handles.linkprop_list(end+1) = linkprop([handles.scrub_line_sensor3, handles.axes_sensor3], 'Visible');
 	end
 end
 return
@@ -829,7 +833,8 @@ left = handles.chkbx_left_hand.Value;
 num_sensors = head + right + left; % num sensors to display
 
 % if there is no sensor data
-if ~isfield(handles, 'apdm_data') || ~isfield(handles.apdm_data, 'sensor')
+if ~isfield(handles, 'apdm_data') || ~isfield(handles.apdm_data, 'sensor') ...
+		|| isempty(handles.apdm_data.sensor(1))
 	num_sensors = 0;
 end
 switch num_sensors
@@ -838,6 +843,7 @@ switch num_sensors
 		handles.axes_eye.Position(2) = 0.24;
 		handles.axes_eye.Position(4) = 0.628;
       handles.axes_eye.XLabel.String = 'Time (sec)';
+	  handles.axes_eye.XTickLabel = arrayfun(@num2str, handles.axes_eye.XTick, 'uniformoutput', false)';
       handles.axes_sensor1.Visible = 'Off';
       handles.axes_sensor2.Visible = 'Off';
 	  handles.axes_sensor3.Visible = 'Off';
@@ -846,6 +852,7 @@ switch num_sensors
 		handles.axes_eye.Position(2) = 0.539;
 		handles.axes_eye.Position(4) = 0.329;
       handles.axes_eye.XTickLabel = {};
+	  handles.axes_eye.XLabel.String = '';
 	  if head
 		  vis_axes = 'axes_sensor1';
 		  non_vis_axes1 = 'axes_sensor2';
@@ -981,27 +988,33 @@ if isfield(handles, 'apdm_data')
 	   ylims = get(handles.axes_sensor1, 'YLim');
 	   h_patch2 = patch([xlims(1) xlims(1) xlims(2) xlims(2)], ...
 		  [ylims(1) ylims(2) ylims(2) ylims(1)], p_color);
-	   set(h_patch2, 'FaceAlpha', 0.5, 'Tag', [tag_str '_id#' num2str(patch_id) '_patch'])
+	   set(h_patch2, 'FaceAlpha', 0.5, 'Tag', [tag_str '_id#' num2str(patch_id) '_patch'], ...
+		   'Visible', handles.axes_sensor1.Visible)
 	   uistack(h_patch2, 'bottom')
 	   handles.linkprop_list(end+1) = linkprop([h_patch, h_patch2], 'XData');
+	   handles.linkprop_list(end+1) = linkprop([h_patch2, handles.axes_sensor1], 'Visible');
 	end
 	if length(handles.apdm_data.sensor) > 1
 	   axes(handles.axes_sensor2)
 	   ylims = get(handles.axes_sensor2, 'YLim');
 	   h_patch2 = patch([xlims(1) xlims(1) xlims(2) xlims(2)], ...
 		  [ylims(1) ylims(2) ylims(2) ylims(1)], p_color);
-	   set(h_patch2, 'FaceAlpha', 0.5, 'Tag', [tag_str '_id#' num2str(patch_id) '_patch'])
+	   set(h_patch2, 'FaceAlpha', 0.5, 'Tag', [tag_str '_id#' num2str(patch_id) '_patch'], ...
+		   'Visible', handles.axes_sensor2.Visible)
 	   uistack(h_patch2, 'bottom')
 	   handles.linkprop_list(end+1) = linkprop([h_patch, h_patch2], 'XData');
+	   handles.linkprop_list(end+1) = linkprop([h_patch2, handles.axes_sensor2], 'Visible');
 	end
 	if length(handles.apdm_data.sensor) > 2
 	   axes(handles.axes_sensor3)
 	   ylims = get(handles.axes_sensor3, 'YLim');
 	   h_patch2 = patch([xlims(1) xlims(1) xlims(2) xlims(2)], ...
 		  [ylims(1) ylims(2) ylims(2) ylims(1)], p_color);
-	   set(h_patch2, 'FaceAlpha', 0.5, 'Tag', [tag_str '_id#' num2str(patch_id) '_patch'])
+	   set(h_patch2, 'FaceAlpha', 0.5, 'Tag', [tag_str '_id#' num2str(patch_id) '_patch'], ...
+		   'Visible', handles.axes_sensor3.Visible)
 	   uistack(h_patch2, 'bottom')
 	   handles.linkprop_list(end+1) = linkprop([h_patch, h_patch2], 'XData');
+	   handles.linkprop_list(end+1) = linkprop([h_patch2, handles.axes_sensor3], 'Visible');
 	end
 end
 
