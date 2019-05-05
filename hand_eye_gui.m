@@ -22,7 +22,7 @@ function varargout = hand_eye_gui(varargin)
 
 % Edit the above text to modify the response to help hand_eye_gui
 
-% Last Modified by GUIDE v2.5 02-May-2019 19:51:23
+% Last Modified by GUIDE v2.5 05-May-2019 19:16:19
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 0;
@@ -211,8 +211,6 @@ end
 % % used to syncronize the video start time to the data start time
 % handles.video_reader.UserData.current_frame_num = 1;
 
-% size the axes depending upon how many sensor there are to display
-handles = resizeAxes(handles);
 
 % initialize the data in the axes
 axes(handles.axes_eye)
@@ -330,17 +328,19 @@ if isfield(handles,'apdm_data') && ~isempty(handles.apdm_data.sensor)
 	   add_head_vel_threshold_line(handles.axes_sensor1)
    end
      
-   handles.linkprop_list(1) = linkprop([handles.axes_eye, handles.axes_sensor1 ], 'XLim');
+   handles.linkprop_axes_xlims = linkprop([handles.axes_eye, handles.axes_sensor1 ], 'XLim');
 
 	if length(handles.apdm_data.sensor) > 1
 	   axes(handles.axes_sensor2) % axes are for right hand data
 	   drawCorrectedVelocityLine(handles.apdm_data, 2);
-	   handles.linkprop_list(end+1) = linkprop([handles.axes_eye, handles.axes_sensor2 ], 'XLim');
+% 	   handles.linkprop_list(end+1) = linkprop([handles.axes_eye, handles.axes_sensor2 ], 'XLim');
+		addtarget(handles.linkprop_axes_xlims, handles.axes_sensor2);
 	end
 	if length(handles.apdm_data.sensor) > 2
 	   axes(handles.axes_sensor3) % axes are for left hand data
 	   drawCorrectedVelocityLine(handles.apdm_data, 3);
-	   handles.linkprop_list(end+1) = linkprop([handles.axes_eye, handles.axes_sensor3 ], 'XLim');
+% 	   handles.linkprop_list(end+1) = linkprop([handles.axes_eye, handles.axes_sensor3 ], 'XLim');
+		addtarget(handles.linkprop_axes_xlims, handles.axes_sensor3);
 	end
 end
 % lines
@@ -348,6 +348,10 @@ handles = show_annot_lines(handles);
 
 % annotations of apdm data
 % handles = show_annot_symbols(handles);
+
+% size the axes depending upon how many sensor there are to display
+handles = resizeAxes(handles);
+drawnow
 
 % adjust axes for displaying or not displaying picture or video
 switch choice_num
@@ -570,27 +574,33 @@ if isfield(handles, 'apdm_data')
 	if ~isempty(handles.apdm_data.sensor)
 	   axes(handles.axes_sensor1)
 % 	   handles.scrub_line_hand = line( [x_scrub_line, x_scrub_line], handles.axes_sensor1.YLim, ...
-		handles.scrub_line_hand = line( [x_scrub_line, x_scrub_line], [-inf inf], ...
+		handles.scrub_line_hand = line( [x_scrub_line, x_scrub_line], handles.axes_sensor1.YLim, ...
 		  'Color', 'b', 'linewidth', 2, 'Tag', 'scrub_line_hand', 'Visible', handles.axes_sensor1.Visible);
 	   draggable(handles.scrub_line_hand,'h', @scrubLineMotionFcn)
-	   handles.linkprop_list(end+1) = linkprop([handles.scrub_line_hand, handles.scrub_line_eye], 'XData');
-	   handles.linkprop_list(end+1) = linkprop([handles.scrub_line_hand, handles.axes_sensor1], 'Visible');
+	   handles.linkprop_scrubline = linkprop([handles.scrub_line_hand, handles.scrub_line_eye], 'XData');
+	   
+% 	   handles.linkprop_list(end+1) = linkprop([handles.scrub_line_hand, handles.axes_sensor1], 'Visible');
+		handles.axes_sensor1.UserData.linkprop_visible = linkprop([handles.axes_sensor1, handles.scrub_line_hand], 'Visible');
 	end
 	if length(handles.apdm_data.sensor) > 1
 	   axes(handles.axes_sensor2)
 	   handles.scrub_line_head = line( [x_scrub_line, x_scrub_line], handles.axes_sensor2.YLim, ...
 		  'Color', 'b', 'linewidth', 2, 'Tag', 'scrub_line_head', 'Visible', handles.axes_sensor2.Visible);
 	   draggable(handles.scrub_line_head,'h', @scrubLineMotionFcn)
-	   handles.linkprop_list(end+1) = linkprop([handles.scrub_line_head, handles.scrub_line_eye], 'XData');
-	   handles.linkprop_list(end+1) = linkprop([handles.scrub_line_head, handles.axes_sensor2], 'Visible');
+% 	   handles.linkprop_list(end+1) = linkprop([handles.scrub_line_head, handles.scrub_line_eye], 'XData');
+% 	   handles.linkprop_list(end+1) = linkprop([handles.scrub_line_head, handles.axes_sensor2], 'Visible');
+		addtarget(handles.linkprop_scrubline, handles.scrub_line_head);
+		handles.axes_sensor2.UserData.linkprop_visible = linkprop([handles.axes_sensor2, handles.scrub_line_head], 'Visible');
 	end
 	if length(handles.apdm_data.sensor) > 2
 	   axes(handles.axes_sensor3)
 	   handles.scrub_line_sensor3 = line( [x_scrub_line, x_scrub_line], handles.axes_sensor3.YLim, ...
 		  'Color', 'b', 'linewidth', 2, 'Tag', 'scrub_line_sensor3', 'Visible', handles.axes_sensor3.Visible);
 	   draggable(handles.scrub_line_sensor3,'h', @scrubLineMotionFcn)
-	   handles.linkprop_list(end+1) = linkprop([handles.scrub_line_sensor3, handles.scrub_line_eye], 'XData');
-	   handles.linkprop_list(end+1) = linkprop([handles.scrub_line_sensor3, handles.axes_sensor3], 'Visible');
+% 	   handles.linkprop_list(end+1) = linkprop([handles.scrub_line_sensor3, handles.scrub_line_eye], 'XData');
+% 	   handles.linkprop_list(end+1) = linkprop([handles.scrub_line_sensor3, handles.axes_sensor3], 'Visible');
+		addtarget(handles.linkprop_scrubline, handles.scrub_line_sensor3);
+		handles.axes_sensor2.UserData.linkprop_visible = linkprop([handles.axes_sensor3, handles.scrub_line_sensor3], 'Visible');
 	end
 end
 return
@@ -900,6 +910,7 @@ switch num_sensors
 		handles.(vis_axes1).Position(4) = 0.187;
 		handles.(vis_axes1).Visible = 'on';
 		handles.(vis_axes1).XTickLabel = {};
+		handles.(vis_axes1).XLabel.String = '';
 %       handles.axes_sensor1.XTickLabel = {};
 %       handles.axes_sensor2.Position = [0.067 0.239 0.40 0.187];
 		handles.(vis_axes2).Position(2) = 0.239;
@@ -914,15 +925,18 @@ switch num_sensors
 		handles.axes_eye.Position(2) = 0.7;
 		handles.axes_eye.Position(4) = 0.17;
       handles.axes_eye.XTickLabel = {};
+	  handles.axes_eye.XLabel.String = '';
 %       handles.axes_sensor1.Position = [0.067 0.535 0.40 0.14];
 	  handles.axes_sensor1.Position(2) = 0.535;
 	  handles.axes_sensor1.Position(4) = 0.14;
       handles.axes_sensor1.XTickLabel = {};
+	  handles.axes_sensor1.XLabel.String = '';
 	  handles.axes_sensor1.Visible = 'on';
 %       handles.axes_sensor2.Position = [0.067 0.387 0.40 0.14];
 	  handles.axes_sensor2.Position(2) = 0.387;
 	  handles.axes_sensor2.Position(4) = 0.14;
 	  handles.axes_sensor2.XTickLabel = {};
+	  handles.axes_sensor1.XLabel.String = '';
 	  handles.axes_sensor2.Visible = 'on';
 %       handles.axes_sensor3.Position = [0.067 0.24 0.40 0.14];
 		handles.axes_sensor3.Position(2) = 0.24;
@@ -1139,9 +1153,9 @@ switch source.Tag
 	case 'menuShowClick'
 		if strcmp(source.Checked, 'on')
 			source.Checked = 'off';
-			h_line.UserData.h_click_on_pic.Color = 'k';
+			h_line.UserData.h_click_on_pic.Color = 'y';
 			h_line.UserData.h_click_on_pic.MarkerSize = 10;
-			h_line.UserData.h_click_on_pic_text.Color = 'k';
+			h_line.UserData.h_click_on_pic_text.Color = 'y';
 			h_line.UserData.h_click_on_pic_text.FontSize = 15;
 % 			h_line.UserData.h_click_on_pic.Visible = 'off';
 		else
@@ -1203,21 +1217,24 @@ if isfield(handles, 'apdm_data')
 
 	   axes(handles.axes_sensor1)
 	   ylims = get(handles.axes_sensor1, 'YLim');
-	   h_hand = line([time, time], ylims, 'Color', line_color, 'Tag', line_type, ...
+	   h_sensor1 = line([time, time], ylims, 'Color', line_color, 'Tag', line_type, ...
 		  'Visible', vis_on_off);
-	   uistack(h_hand, 'bottom')
-	   [hcmenu, ud] = createLineMenu(h_hand);
-	   set(h_hand, 'UIContextMenu', hcmenu, 'UserData', ud);
+	   uistack(h_sensor1, 'bottom')
+	   [hcmenu, ud] = createLineMenu(h_sensor1);
+	   set(h_sensor1, 'UIContextMenu', hcmenu, 'UserData', ud);
 	end
 	if length(handles.apdm_data.sensor) > 1
 	   axes(handles.axes_sensor2)
 	   ylims = get(handles.axes_sensor2, 'YLim');
-	   h_head = line([time, time], ylims, 'Color', line_color, 'Tag',  line_type, ...
+	   h_sensor2 = line([time, time], ylims, 'Color', line_color, 'Tag',  line_type, ...
 		  'Visible', vis_on_off);
-	   uistack(h_head, 'bottom')
-	   [hcmenu, ud] = createLineMenu(h_head);
-	   set(h_head, 'UIContextMenu', hcmenu, 'UserData', ud);
-	   handles.linkprop_list(end+1) = linkprop([h_hand, h_head], 'XData');
+	   uistack(h_sensor2, 'bottom')
+	   [hcmenu, ud] = createLineMenu(h_sensor2);
+	   set(h_sensor2, 'UIContextMenu', hcmenu, 'UserData', ud);
+% 	   handles.linkprop_list(end+1) = linkprop([h_hand, h_head], 'XData');
+		% put xdata linkprop in the line user data in axes_sensor1
+		h_sensor1.UserData.linkprop_xdata = linkprop([h_sensor1, h_sensor2], 'XData');
+		% FIXME - also link visible property to axes
 	end
 
 	if length(handles.apdm_data.sensor) > 2
@@ -1225,10 +1242,11 @@ if isfield(handles, 'apdm_data')
 	   ylims = get(handles.axes_sensor3, 'YLim');
 	   h_sensor3 = line([time, time], ylims, 'Color', line_color, 'Tag',  line_type, ...
 		  'Visible', vis_on_off);
-	   uistack(h_head, 'bottom')
+	   uistack(h_sensor2, 'bottom')
 	   [hcmenu, ud] = createLineMenu(h_sensor3);
 	   set(h_sensor3, 'UIContextMenu', hcmenu, 'UserData', ud);
-	   handles.linkprop_list(end+1) = linkprop([h_hand, h_sensor3], 'XData');
+% 	   handles.linkprop_list(end+1) = linkprop([h_sensor1, h_sensor3], 'XData');
+		addtarget(h_sensor1.UserData.linkprop_xdata, h_sensor3);
 	end
 else
 	axes(handles.axes_eye)
