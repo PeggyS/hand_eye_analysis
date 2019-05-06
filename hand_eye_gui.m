@@ -600,7 +600,7 @@ if isfield(handles, 'apdm_data')
 % 	   handles.linkprop_list(end+1) = linkprop([handles.scrub_line_sensor3, handles.scrub_line_eye], 'XData');
 % 	   handles.linkprop_list(end+1) = linkprop([handles.scrub_line_sensor3, handles.axes_sensor3], 'Visible');
 		addtarget(handles.linkprop_scrubline, handles.scrub_line_sensor3);
-		handles.axes_sensor2.UserData.linkprop_visible = linkprop([handles.axes_sensor3, handles.scrub_line_sensor3], 'Visible');
+		handles.axes_sensor3.UserData.linkprop_visible = linkprop([handles.axes_sensor3, handles.scrub_line_sensor3], 'Visible');
 	end
 end
 return
@@ -1005,8 +1005,10 @@ if isfield(handles, 'apdm_data')
 	   set(h_patch2, 'FaceAlpha', 0.5, 'Tag', [tag_str '_id#' num2str(patch_id) '_patch'], ...
 		   'Visible', handles.axes_sensor1.Visible)
 	   uistack(h_patch2, 'bottom')
-	   handles.linkprop_list(end+1) = linkprop([h_patch, h_patch2], 'XData');
-	   handles.linkprop_list(end+1) = linkprop([h_patch2, handles.axes_sensor1], 'Visible');
+% 	   handles.linkprop_list(end+1) = linkprop([h_patch, h_patch2], 'XData');
+% 	   handles.linkprop_list(end+1) = linkprop([h_patch2, handles.axes_sensor1], 'Visible');
+		h_patch.UserData.linkprop_xdata = linkprop([h_patch, h_patch2], 'XData');
+		addtarget(handles.axes_sensor1.UserData.linkprop_visible, h_patch2)
 	end
 	if length(handles.apdm_data.sensor) > 1
 	   axes(handles.axes_sensor2)
@@ -1016,8 +1018,10 @@ if isfield(handles, 'apdm_data')
 	   set(h_patch2, 'FaceAlpha', 0.5, 'Tag', [tag_str '_id#' num2str(patch_id) '_patch'], ...
 		   'Visible', handles.axes_sensor2.Visible)
 	   uistack(h_patch2, 'bottom')
-	   handles.linkprop_list(end+1) = linkprop([h_patch, h_patch2], 'XData');
-	   handles.linkprop_list(end+1) = linkprop([h_patch2, handles.axes_sensor2], 'Visible');
+% 	   handles.linkprop_list(end+1) = linkprop([h_patch, h_patch2], 'XData');
+% 	   handles.linkprop_list(end+1) = linkprop([h_patch2, handles.axes_sensor2], 'Visible');
+		addtarget(h_patch.UserData.linkprop_xdata, h_patch2)
+		addtarget(handles.axes_sensor2.UserData.linkprop_visible, h_patch2)
 	end
 	if length(handles.apdm_data.sensor) > 2
 	   axes(handles.axes_sensor3)
@@ -1027,8 +1031,10 @@ if isfield(handles, 'apdm_data')
 	   set(h_patch2, 'FaceAlpha', 0.5, 'Tag', [tag_str '_id#' num2str(patch_id) '_patch'], ...
 		   'Visible', handles.axes_sensor3.Visible)
 	   uistack(h_patch2, 'bottom')
-	   handles.linkprop_list(end+1) = linkprop([h_patch, h_patch2], 'XData');
-	   handles.linkprop_list(end+1) = linkprop([h_patch2, handles.axes_sensor3], 'Visible');
+% 	   handles.linkprop_list(end+1) = linkprop([h_patch, h_patch2], 'XData');
+% 	   handles.linkprop_list(end+1) = linkprop([h_patch2, handles.axes_sensor3], 'Visible');
+		addtarget(h_patch.UserData.linkprop_xdata, h_patch2)
+		addtarget(handles.axes_sensor3.UserData.linkprop_visible, h_patch2)
 	end
 end
 
