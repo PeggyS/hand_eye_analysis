@@ -1673,8 +1673,9 @@ if isequal(fnSave,0) || isequal(pnSave,0)
 end
 export_filename = fullfile(pnSave, fnSave);
 
-% this takes a while, so displa a wait box
+% this takes a while, so display a wait box
 h_wait = waitbar(0, 'Gathering data');
+
 
 % format data
 
@@ -2032,7 +2033,7 @@ if ~isempty(handles.apdm_data.sensor)
 		% axes_sensor2)
 		switch sens_num
 			case 1
-				axes_str = 'axes_hand';
+				axes_str = 'axes_sensor1';
 			case 2
 				axes_str = 'axes_sensor2';
 			case 3
@@ -2362,6 +2363,20 @@ if ~isempty(analyze_out_tbl)
 	out_tbl = analyze_out_tbl;
 end
 
+waitbar(0.8, h_wait, 'Adding Viewing Eye & Non-Viewing Eye');
+% get the viewing eye
+if handles.rb_right_eye_viewing.Value
+	ve = 'r';
+	nve = 'l';
+else
+	ve = 'l';
+	nve = 'r';
+end
+out_tbl.Properties.VariableNames = strrep(out_tbl.Properties.VariableNames, [ve 'h'], ['ve_' ve 'h']);
+out_tbl.Properties.VariableNames = strrep(out_tbl.Properties.VariableNames, [nve 'h'], ['nve_' nve 'h']);
+out_tbl.Properties.VariableNames = strrep(out_tbl.Properties.VariableNames, [ve 'v'], ['ve_' ve 'v']);
+out_tbl.Properties.VariableNames = strrep(out_tbl.Properties.VariableNames, [nve 'v'], ['nve_' nve 'v']);
+
 
 % write data
 waitbar(0.85, h_wait, 'Writing data');
@@ -2408,11 +2423,17 @@ end
 return
 
 % -------------------------------------
-function roi = find_default_roi(grid_vals, x_eye, y_eye)
+function roi = find_default_roi(grid_vals, x_eye, y_eye, t_eye)
 roi = [];
 
 grid_row = find(grid_vals.bottom_row <= y_eye, 1);
 
+if isempty(grid_row)
+	% beep
+	fprintf('t = %g: did not find (h,v) = (%g, %g) in default grid\n', ...
+		t_eye, x_eye, y_eye)
+	return
+end
 if isfield(grid_vals, 'left_pic_right_col')
 	if x_eye < 0
 		left_grid_col = find(grid_vals.left_pic_right_col >= x_eye, 1);
