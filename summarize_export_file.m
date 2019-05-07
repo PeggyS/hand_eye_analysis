@@ -60,6 +60,11 @@ end
 out_fname = strrep(fname, '.txt', '_summary.txt');
 
 fid = fopen(out_fname, 'w');
+if strcmp(ve, 'r')
+	fprintf(fid, 'viewing eye = right\n');
+else
+	fprintf(fid, 'viewing eye = left\n');
+end
 fprintf(fid, 'total time  = %g\n', time_in_file);
 fprintf(fid, 'excluded time = %g\n', excluded_time_total);
 
