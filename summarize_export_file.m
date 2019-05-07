@@ -14,6 +14,17 @@ end
 
 tbl = readtable(fname, 'delimiter', '\t');
 
+% determine viewing eye from table column names
+tmp = strfind(tbl.Properties.VariableNames, 'nve'); % cell array with cell of 1 if nve is in col name
+tmp2 = find(~cellfun(@isempty, tmp)); % indices of tbl.Properties.VariableNames with 'nve'
+first_var = tbl.Properties.VariableNames{tmp2(1)};
+nveh = strrep(first_var, 'nve_', '');
+nve = strrep(nveh, 'h', '');
+if strcmp(nve, 'r')
+	ve = 'l';
+else
+	ve = 'r';
+end
 
 time_in_file = tbl.t_eye(end) - tbl.t_eye(1);
 
