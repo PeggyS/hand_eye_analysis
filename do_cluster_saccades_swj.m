@@ -20,5 +20,34 @@ recording = ClusterDetection.EyeMovRecording.Create(folder, session, samples, bl
 [saccades stats] = recording.FindSaccades();
 
 % save saccades in eye_data.(eye).saccades
+eye_list = {'rh' 'rv' 'lh' 'lv'};
+for ee = 1:length(eye_list)
+	eye_str = eye_list{ee};
+	
+	h.eye_data.(eye_str).saccades.sacclist.start_ind = saccades(:,1)';
+	h.eye_data.(eye_str).saccades.sacclist.end_ind = saccades(:,2)';
+
+	h.eye_data.(eye_str).saccades.sacclist.start = saccades(:,1)' / h.eye_data.samp_freq * 1000 + h.eye_data.start_times; % time in ms
+	h.eye_data.(eye_str).saccades.sacclist.end = saccades(:,2)' / h.eye_data.samp_freq * 1000 + h.eye_data.start_times;
+%         sacclist.end = sac(:,2)' / samp_freq * 1000;
+% 		sacclist.peak_vel = sac(:,3)'/60;	% converting from minutes to degrees
+% 		sacclist.sacc_ampl = sac(:,4)'/60;
+% 		sacclist.sacc_horiz_component = sac(:,6)'/60;
+% 		sacclist.sacc_vert_component = sac(:,7)'/60;
+% 		sacclist.peak_vel_horiz_component = sac(:,8)'/60;
+% 		sacclist.peak_vel_vert_component = sac(:,9)'/60;
+% 		
+% 
+% 		sacclist = compute_diff_vel_peaks(sacclist, h.eye_data.(h_str).pos, h.eye_data.(v_str).pos, samp_freq);
+% 		sacclist = compute_drift(sacclist, h.eye_data.(h_str).pos, h.eye_data.(v_str).pos, samp_freq);
+		
+		sac_type_num = 1;
+		if isfield(h.eye_data.(eye_str), 'saccades')
+			sac_type_num = length(h.eye_data.(eye_str).saccades) +1; % (index of the next type of saccades to store)
+		end
+				
+		h.eye_data.(eye_str).saccades(sac_type_num).paramtype = 'cluster';
+
+end % save saccades to handles
 
 % do figures

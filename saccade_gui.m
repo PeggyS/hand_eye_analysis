@@ -361,6 +361,11 @@ switch sacc_source
 		guidata(h.figure1, h)
 		
 		sacc_marker = 'd';
+			
+	case 'cluster'
+		start_ms = h.eye_data.start_times;
+		sacclist = h.eye_data.(eye_str).saccades.sacclist; % eyelink data
+		sacc_marker = '^';
 end
 		
 for sacc_num = 1:length(sacclist.start)
@@ -1056,6 +1061,7 @@ function tbDataRightHoriz_Callback(hObject, eventdata, handles)
 % data & saccade lines
 line_list = findobj(handles.figure1,'-regexp', 'Tag', '^.*rh.*');
 tb_list = findobj(handles.figure1, '-regexp', 'Tag', 'tb.*RightHoriz.*');
+tb_list(end+1) = findobj(handles.figure1, 'Tag', 'tbCluster');
 
 visible = get(hObject,'Value');
 if visible
@@ -1087,6 +1093,7 @@ function tbDataLeftHoriz_Callback(hObject, eventdata, handles)
 % data & saccade lines
 line_list = findobj(handles.figure1,'-regexp', 'Tag', '^.*lh.*');
 tb_list = findobj(handles.figure1, '-regexp', 'Tag', 'tb.*LeftHoriz.*');
+tb_list(end+1) = findobj(handles.figure1, 'Tag', 'tbCluster');
 
 visible = get(hObject,'Value');
 if visible
@@ -1116,6 +1123,7 @@ function tbDataRightVert_Callback(hObject, eventdata, handles)
 % data & saccade lines
 line_list = findobj(handles.figure1,'-regexp', 'Tag', '^.*rv.*');
 tb_list = findobj(handles.figure1, '-regexp', 'Tag', 'tb.*RightVert.*');
+tb_list(end+1) = findobj(handles.figure1, 'Tag', 'tbCluster');
 
 visible = get(hObject,'Value');
 if visible
@@ -1145,6 +1153,7 @@ function tbDataLeftVert_Callback(hObject, eventdata, handles)
 % data & saccade lines
 line_list = findobj(handles.figure1,'-regexp', 'Tag', '^.*lv.*');
 tb_list = findobj(handles.figure1, '-regexp', 'Tag', 'tb.*LeftVert.*');
+tb_list(end+1) = findobj(handles.figure1, 'Tag', 'tbCluster');
 
 visible = get(hObject,'Value');
 if visible
@@ -1249,7 +1258,9 @@ function tbCluster_Callback(hObject, eventdata, handles)
 % hObject    handle to tbCluster (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-if isempty(hObject.UserData)
+
+% so we only need to compute these saccades once,
+if isempty(hObject.UserData) % if user data is empty, then saccades have not been computed yet
 	handles = do_cluster_saccades_swj(handles); % find the saccades
 	hObject.UserData = 1;
 	guidata(handles.figure1, handles)
@@ -1259,8 +1270,14 @@ end
 % display the saccades on all the lines
 if get(hObject,'Value') 
    showSaccades(handles, 'right','vertical', 'cluster');
-   hObject.UserData = 'cluster';
+   showSaccades(handles, 'left','vertical', 'cluster');
+   showSaccades(handles, 'right','horizontal', 'cluster');
+   showSaccades(handles, 'left','horizontal', 'cluster');
+   hObject.UserData = 'cluster'; % i don't know why this is saved here
 else
    hideSaccades(handles, 'right','vertical', 'cluster');
+   hideSaccades(handles, 'left','vertical', 'cluster');
+   hideSaccades(handles, 'right','horizontal', 'cluster');
+   hideSaccades(handles, 'left','horizontal', 'cluster');
 end
 return
