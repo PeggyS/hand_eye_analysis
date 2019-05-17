@@ -22,7 +22,7 @@ function varargout = saccade_gui(varargin)
 
 % Edit the above text to modify the response to help saccade_gui
 
-% Last Modified by GUIDE v2.5 15-Jun-2018 17:59:54
+% Last Modified by GUIDE v2.5 16-May-2019 19:28:31
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 0;
@@ -1242,3 +1242,25 @@ function chbxBinocular_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of chbxBinocular
+
+
+% --- Executes on button press in tbCluster.
+function tbCluster_Callback(hObject, eventdata, handles)
+% hObject    handle to tbCluster (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+if isempty(hObject.UserData)
+	handles = do_cluster_saccades_swj(handles); % find the saccades
+	hObject.UserData = 1;
+	guidata(handles.figure1, handles)
+end
+	
+
+% display the saccades on all the lines
+if get(hObject,'Value') 
+   showSaccades(handles, 'right','vertical', 'cluster');
+   hObject.UserData = 'cluster';
+else
+   hideSaccades(handles, 'right','vertical', 'cluster');
+end
+return
