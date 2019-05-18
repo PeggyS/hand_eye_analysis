@@ -4,7 +4,7 @@ function h = do_cluster_saccades_swj(h)
 
 % input params for cluster detection
 folder = fpath; % location to store files created by cluster detection
-session = ['cluster_saccades_' fname]; % subfolder name for stored files
+session = [fname '_cluster_saccades']; % subfolder name for stored files
 % matrix with cols = index (1:length), lh, lv, rh, rv (eyepos in deg)
 
 samples = [(1:length(h.eye_data.rh.pos))' h.eye_data.lh.pos h.eye_data.lv.pos h.eye_data.rh.pos h.eye_data.rv.pos];

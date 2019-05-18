@@ -40,7 +40,7 @@ catch
 end
 
 % source of saccades
-tmp = regexp(saccade_tag, '(engbert)|(findsaccs)|(eyelink)', 'match');
+tmp = regexp(saccade_tag, '(engbert)|(findsaccs)|(eyelink)|(cluster)', 'match');
 sacc_source = tmp{1};
 if strcmp(sacc_source, 'eyelink')
 	sacc_source = 'EDF_PARSER';

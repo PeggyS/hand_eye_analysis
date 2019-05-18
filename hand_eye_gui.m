@@ -1774,6 +1774,18 @@ for st_cnt = 1:length(sacc_type_list)
 	for ss_cnt = 1:length(handles.eye_data.(st).saccades)
 		sacc_source = handles.eye_data.(st).saccades(ss_cnt).paramtype;
 		
+		% if cluster saccades, get the saccade table
+		if ~exist('cluster_sac_tbl', 'var') && strcmp(sacc_source, 'cluster')
+			% read in saccade table, saved as sac_tbl
+			load(strrep(handles.bin_filename, '.bin', '_cluster_saccades/saccade_table.mat'), 'sac_tbl');
+			cluster_sac_tbl = sac_tbl;
+			clear sac_tbl
+			% add columns for start & end times and enabled/disabled
+			cluster_sac_tbl.startTime = nan(height(cluster_sac_tbl),1);
+			cluster_sac_tbl.endTime = nan(height(cluster_sac_tbl),1);
+			cluster_sac_tbl.enabled = ones(height(cluster_sac_tbl),1);
+		end 
+		
 		%sacc_type = [sacc_source_list{ss_cnt} '_' sacc_type_list{st_cnt}];
 		sacc_type = [sacc_source '_' st];
 		
@@ -1898,7 +1910,25 @@ for st_cnt = 1:length(sacc_type_list)
 						warning on
 					end
 					
+					% cluster saccades
+					if strcmp(sacc_source, 'cluster')
+						% find the saccade in cluster_sac_tbl
+						row = find(cluster_sac_tbl.startIndex == sacclist.start_ind(sac_num));
+						
+						% add start & end times
+						cluster_sac_tbl(row, 'startTime') = {beg_t};
+						cluster_sac_tbl(row, 'endTime') = {end_t};
+					end % cluster saccades
+				else
+					% cluster saccades
+					if strcmp(sacc_source, 'cluster')
+						% find the saccade in cluster_sac_tbl
+% 						row = find(cluster_sac_tbl.startIndex == sacclist.start_ind(sac_num));
+						% make it disnabled
+						cluster_sac_tbl(cluster_sac_tbl.startIndex == sacclist.start_ind(sac_num), 'enabled') = {0};	
+					end % cluster saccades
 				end % if enabled
+				
 			end % each saccade
 			% save the summary table
 			if sacc_summary_cnt > 0
@@ -1912,7 +1942,9 @@ for st_cnt = 1:length(sacc_type_list)
 		end % if there are saccades of this type for this source
 	end % sacc source
 end % st_cnt rh, lh, rv, lv
-%end % ss_cnt
+
+
+
 % fixations
 fix_type_list = {'lh' 'lv' 'rh' 'rv'};
 for fix_cnt = 1:length(fix_type_list)
@@ -2376,6 +2408,20 @@ out_tbl.Properties.VariableNames = strrep(out_tbl.Properties.VariableNames, [ve 
 out_tbl.Properties.VariableNames = strrep(out_tbl.Properties.VariableNames, [nve 'h'], ['nve_' nve 'h']);
 out_tbl.Properties.VariableNames = strrep(out_tbl.Properties.VariableNames, [ve 'v'], ['ve_' ve 'v']);
 out_tbl.Properties.VariableNames = strrep(out_tbl.Properties.VariableNames, [nve 'v'], ['nve_' nve 'v']);
+
+% if there is a cluster_sac_tbl save it to a file
+if exist('cluster_sac_tbl', 'var')
+	% change columns names with left & right to VE (viewing eye) and NVE (non viewing eye)
+	if handles.rb_right_eye_viewing.Value
+		cluster_sac_tbl.Properties.VariableNames = strrep(cluster_sac_tbl.Properties.VariableNames, 'right', 'VEr');
+		cluster_sac_tbl.Properties.VariableNames = strrep(cluster_sac_tbl.Properties.VariableNames, 'left', 'NVEl');
+	else
+		cluster_sac_tbl.Properties.VariableNames = strrep(cluster_sac_tbl.Properties.VariableNames, 'left', 'VEl');
+		cluster_sac_tbl.Properties.VariableNames = strrep(cluster_sac_tbl.Properties.VariableNames, 'right', 'NVEr');
+	end
+	cluster_sac_fname = strrep(export_filename, '.txt', '_cluster_swj.txt');
+	writetable(cluster_sac_tbl, cluster_sac_fname, 'delimiter', '\t');
+end
 
 
 % write data
