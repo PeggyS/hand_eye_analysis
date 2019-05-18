@@ -22,7 +22,7 @@ function varargout = saccade_gui(varargin)
 
 % Edit the above text to modify the response to help saccade_gui
 
-% Last Modified by GUIDE v2.5 16-May-2019 19:28:31
+% Last Modified by GUIDE v2.5 18-May-2019 17:26:06
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 0;
@@ -217,7 +217,7 @@ switch sacc_source
 																		+ h.eye_data.start_times;
 		h.eye_data.(eye_str).saccades(sac_type_num).paramtype = 'findsaccs';
 
-
+		h.eye_data.(eye_str).saccades(sac_type_num).foundsaccs = foundsaccs;
 	
 	% do the same thing for engbert saccades
 
@@ -1264,16 +1264,40 @@ if isempty(hObject.UserData) % if user data is empty, then saccades have not bee
 	handles = do_cluster_saccades_swj(handles); % find the saccades
 	hObject.UserData = 1;
 	guidata(handles.figure1, handles)
+	% save the info to a mat file
+	fname = strrep(handles.bin_filename, '.bin', '_cluster_swj.mat');
+	eye_list = {'lh', 'rh', 'lv', 'rv'};
+	for e_cnt = 1:length(eye_list)
+		eye_str = eye_list{e_cnt};
+		if isfield(handles.eye_data.(eye_str), 'saccades')
+			for s_cnt = 1:length(handles.eye_data.(eye_str).saccades)
+				if strcmp(handles.eye_data.(eye_str).saccades(s_cnt).paramtype, 'cluster')
+					data.(eye_str).sacclist = handles.eye_data.(eye_str).saccades(s_cnt).sacclist;
+				end
+			end
+		end
+	end
+	if exist('data','var')
+		save(fname, 'data')
+	end
 end
 	
 
-% display the saccades on all the lines
+% display the saccades on all the lines that are visible
 if get(hObject,'Value') 
-   showSaccades(handles, 'right','vertical', 'cluster');
-   showSaccades(handles, 'left','vertical', 'cluster');
-   showSaccades(handles, 'right','horizontal', 'cluster');
-   showSaccades(handles, 'left','horizontal', 'cluster');
-   hObject.UserData = 'cluster'; % i don't know why this is saved here
+	if strcmp(handles.line_rv.Visible, 'on')
+		showSaccades(handles, 'right','vertical', 'cluster');
+	end
+	if strcmp(handles.line_lv.Visible, 'on')
+	   showSaccades(handles, 'left','vertical', 'cluster');
+	end
+	if strcmp(handles.line_rh.Visible, 'on')
+	   showSaccades(handles, 'right','horizontal', 'cluster');
+	end
+	if strcmp(handles.line_lh.Visible, 'on')
+	   showSaccades(handles, 'left','horizontal', 'cluster');
+	end
+   hObject.UserData = 'cluster'; % may not be necessary to save this here. Other tb's for saccades save the source of saccade here for showing & hiding lines when the data line is shown/hidden.
 else
    hideSaccades(handles, 'right','vertical', 'cluster');
    hideSaccades(handles, 'left','vertical', 'cluster');
@@ -1281,3 +1305,12 @@ else
    hideSaccades(handles, 'left','horizontal', 'cluster');
 end
 return
+
+
+% --- Executes on button press in pbFindSaccsSWJ.
+function pbFindSaccsSWJ_Callback(hObject, eventdata, handles)
+% hObject    handle to pbFindSaccsSWJ (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% swj = find_swj(found, data, samp_freq)
