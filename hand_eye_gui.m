@@ -1759,7 +1759,7 @@ end
 
 % saccades
 sacc_type_list = {'lh' 'lv' 'rh' 'rv'};
-sacc_source_list = {'eyelink', 'findsaccs', 'engbert'};
+% sacc_source_list = {'eyelink', 'findsaccs', 'engbert', 'cluster'};
 
 % handles.eye_data.lh.saccades(2).sacclist.enabled(1:5)
 

@@ -1265,7 +1265,7 @@ if isempty(hObject.UserData) % if user data is empty, then saccades have not bee
 	hObject.UserData = 1;
 	guidata(handles.figure1, handles)
 	% save the info to a mat file
-	fname = strrep(handles.bin_filename, '.bin', '_cluster_swj.mat');
+	fname = strrep(handles.bin_filename, '.bin', '_cluster.mat');
 	eye_list = {'lh', 'rh', 'lv', 'rv'};
 	for e_cnt = 1:length(eye_list)
 		eye_str = eye_list{e_cnt};
@@ -1277,8 +1277,9 @@ if isempty(hObject.UserData) % if user data is empty, then saccades have not bee
 			end
 		end
 	end
+	params = [];
 	if exist('data','var')
-		save(fname, 'data')
+		save(fname, 'data', 'params')
 	end
 end
 	

@@ -19,6 +19,13 @@ recording = ClusterDetection.EyeMovRecording.Create(folder, session, samples, bl
 % Runs the saccade detection
 [saccades stats] = recording.FindSaccades();
 
+% get the column names of saccades matrix
+col_struct = ClusterDetection.SaccadeDetector.GetEnum;
+col_names = fieldnames(col_struct);
+% save saccades as a table so there are column names
+sac_tbl = array2table(saccades, 'VariableNames', col_names);
+save(fullfile(folder, session, 'saccade_table'), 'sac_tbl')
+
 % save saccades in eye_data.(eye).saccades
 eye_list = {'rh' 'rv' 'lh' 'lv'};
 
