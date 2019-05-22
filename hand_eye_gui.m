@@ -91,6 +91,7 @@ else % all other choices, read in *.bin file for eye data
 	handles.bin_filename = fullfile(pnSave, fnSave); %'/Users/peggy/Desktop/pegtas2/pegtas2_1.bin'; % must be full path for rd_cli to work
 	handles.eye_data = rd(handles.bin_filename, 'batch', 'nofilt');
 	handles.eye_data = enable_all_saccades(handles.eye_data);
+ 	handles.eye_data = square_wave_jerk_detect(handles.eye_data);
 end
 
 
