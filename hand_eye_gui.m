@@ -854,7 +854,8 @@ switch num_sensors
 		handles.axes_eye.Position(2) = 0.24;
 		handles.axes_eye.Position(4) = 0.628;
       handles.axes_eye.XLabel.String = 'Time (sec)';
-	  handles.axes_eye.XTickLabel = arrayfun(@num2str, handles.axes_eye.XTick, 'uniformoutput', false)';
+% 	  handles.axes_eye.XTickLabel = arrayfun(@num2str, handles.axes_eye.XTick, 'uniformoutput', false)';
+		handles.axes_eye.XTickLabelMode = 'auto';
       handles.axes_sensor1.Visible = 'Off';
       handles.axes_sensor2.Visible = 'Off';
 	  handles.axes_sensor3.Visible = 'Off';
@@ -883,7 +884,8 @@ switch num_sensors
 		handles.(vis_axes).Visible = 'on';
 %       handles.axes_sensor1.XLabel.String = 'Time (sec)';
 		handles.(vis_axes).XLabel.String = 'Time (sec)';
-		handles.(vis_axes).XTickLabel = arrayfun(@num2str, handles.(vis_axes).XTick, 'uniformoutput', false)';
+% 		handles.(vis_axes).XTickLabel = arrayfun(@num2str, handles.(vis_axes).XTick, 'uniformoutput', false)';
+		handles.(vis_axes).XTickLabelMode = 'auto';
 %       handles.axes_sensor2.Visible = 'Off';
 		handles.(non_vis_axes1).Visible = 'Off';
 %		handles.axes_sensor3.Visible = 'Off';
@@ -917,7 +919,8 @@ switch num_sensors
 		handles.(vis_axes2).Position(2) = 0.239;
 		handles.(vis_axes2).Position(4) = 0.187;
 		handles.(vis_axes2).Visible = 'on';
-		handles.(vis_axes2).XTickLabel = arrayfun(@num2str, handles.(vis_axes2).XTick, 'uniformoutput', false)';
+% 		handles.(vis_axes2).XTickLabel = arrayfun(@num2str, handles.(vis_axes2).XTick, 'uniformoutput', false)';
+		handles.(vis_axes2).XTickLabelMode = 'auto';
 		handles.(vis_axes2).XLabel.String = 'Time (sec)';
 % 	  handles.axes_sensor3.Visible = 'Off';
 		handles.(non_vis_axes).Visible = 'Off';
@@ -944,7 +947,8 @@ switch num_sensors
 		handles.axes_sensor3.Position(4) = 0.14;
 		handles.axes_sensor3.Visible = 'on';
       handles.axes_sensor3.XLabel.String = 'Time (sec)';
-	  handles.axes_sensor3.XTickLabel = arrayfun(@num2str, handles.axes_sensor3.XTick, 'uniformoutput', false)';
+% 	  handles.axes_sensor3.XTickLabel = arrayfun(@num2str, handles.axes_sensor3.XTick, 'uniformoutput', false)';
+	  handles.axes_sensor3.XTickLabelMode = 'auto';
     otherwise
       error('more than 3 sensors of data')
 end
