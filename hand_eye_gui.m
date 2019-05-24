@@ -2650,6 +2650,14 @@ for sacc_num = 1:num_saccs
       'Tag', ['menu_saccade_' sacc_source '_' eye_str '_#' num2str(sacc_num) '_begin']);
   uimenu(eye_m, 'Label', 'Combined Vergence-Saccade', 'Callback',  {@labelSaccade, 'CombinedVergenceSaccade'}, ...
       'Tag', ['menu_saccade_' sacc_source '_' eye_str '_#' num2str(sacc_num) '_begin']);
+  if isfield(h.eye_data.(eye_str).saccades(sacc_type_num).sacclist, 'swj')
+	  swj_num = h.eye_data.(eye_str).saccades(sacc_type_num).sacclist.swj(sacc_num);
+	  if ~isnan(swj_num)
+		  % add menu label with swj number
+		  uimenu(eye_m, 'Label', ['SWJ #' num2str(swj_num)], 'Callback',  {@labelSaccade, 'SWJ'}, ...
+			'Tag', ['menu_saccade_' sacc_source '_' eye_str '_#' num2str(sacc_num) '_begin']);
+	  end % swj is not nan
+  end % swj is a field of sacclist struct
   
    % saccade end
    time2 = (h.eye_data.(eye_str).saccades(sacc_type_num).sacclist.end(sacc_num) - start_ms)/1000;
