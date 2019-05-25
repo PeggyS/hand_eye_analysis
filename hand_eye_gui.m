@@ -2656,6 +2656,7 @@ for sacc_num = 1:num_saccs
 		  % add menu label with swj number
 		  uimenu(eye_m, 'Label', ['SWJ #' num2str(swj_num)], 'Callback',  {@labelSaccade, 'SWJ'}, ...
 			'Tag', ['menu_saccade_' sacc_source '_' eye_str '_#' num2str(sacc_num) '_begin']);
+		  h_beg_line.Marker = 's';
 	  end % swj is not nan
   end % swj is a field of sacclist struct
   

@@ -25,12 +25,17 @@ for e_cnt = 1:length(e_list)
 		% add this new type
 		handles.eye_data.(eye_str).saccades(num_sacc_types+1).paramtype = sacc_type_str;
 		handles.eye_data.(eye_str).saccades(num_sacc_types+1).params = sacc.params;
-		handles.eye_data.(eye_str).saccades(num_sacc_types+1).sacclist = sacc.data.(eye_str).sacclist;
-		if ~isfield(handles.eye_data.(eye_str).saccades(num_sacc_types+1).sacclist, 'swj')
-			% swj is not a field, add it
-			handles.eye_data = square_wave_jerk_detect(handles.eye_data);
-		end % swj is not a field
+		handles.eye_data.(eye_str).saccades(num_sacc_types+1).sacclist = sacc.data.(eye_str).sacclist;		
 	end
 end % each type of eye data present
 
+for e_cnt = 1:length(e_list)
+	eye_str = e_list{e_cnt};
+	if isfield(sacc.data, eye_str)
+		if ~isfield(handles.eye_data.(eye_str).saccades(num_sacc_types+1).sacclist, 'swj')
+				% swj is not a field, add it
+				handles.eye_data = square_wave_jerk_detect(handles.eye_data);
+		end % swj is not a field
+	end
+end
 return % get_saccades

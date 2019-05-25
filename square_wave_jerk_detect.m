@@ -19,15 +19,25 @@ for eye_cnt = 1:length(eye_list)
 				endIndex = round((eye_data.(eye).saccades(source_num).sacclist.end - eye_data.start_times) / 1000 * eye_data.samp_freq);
 				if ~isfield(eye_data.(eye).saccades(source_num).sacclist, 'endpos') 
 					% endpos is not a field, calculate it
+					eye_data.(eye).saccades(source_num).sacclist.endpos = eye_data.(eye).pos(endIndex);
+					if ~isfield(eye_data.(eye_other_direction).saccades(source_num).sacclist, 'endpos')
+						eye_data.(eye_other_direction).saccades(source_num).sacclist.endpos = eye_data.(eye).pos(endIndex);
+					end
 				end
 				if ~isfield(eye_data.(eye).saccades(source_num).sacclist, 'startpos') 
 					% startpos is not a field, calculate it
+					eye_data.(eye).saccades(source_num).sacclist.startpos = eye_data.(eye).pos(startIndex);
+					if ~isfield(eye_data.(eye_other_direction).saccades(source_num).sacclist, 'startpos')
+						eye_data.(eye_other_direction).saccades(source_num).sacclist.startpos = eye_data.(eye).pos(startIndex);
+					end
 				end
-				amplitude = abs(eye_data.(eye).saccades(source_num).sacclist.endpos ...
-					- eye_data.(eye).saccades.sacclist(source_num).startpos);
+				
+				
 				% direction = angle betw 0 & 360, pure vertical = 0, 180,
 				% horizontal = 90, 270
-				if strcmp(eye_data.(eye).saccades.paramtype, 'findsaccs')
+				if strcmp(eye_data.(eye).saccades(source_num).paramtype, 'findsaccs')
+					amplitude = abs(eye_data.(eye).saccades(source_num).sacclist.endpos ...
+						- eye_data.(eye).saccades(source_num).sacclist.startpos);
 					if contains(eye, 'h')
 						direction = sign(eye_data.(eye).saccades(source_num).sacclist.endpos ...
 							- eye_data.(eye).saccades(source_num).sacclist.startpos);
@@ -39,18 +49,21 @@ for eye_cnt = 1:length(eye_list)
 						direction(direction==1) = 0; % pos vert = 0
 						direction(direction==-1) = 180; % neg vert = 180
 					end
-				else % for eyelink & engbert saccades use h & v eyes together to determine direction
+				else % for eyelink & engbert saccades use h & v eyes together to determine amplitude & direction
+					% if engbert saccades are only in h but not v, then
+					% this code is in error - FIXME
 					if strcmp(eye, 'h')
 						dx = eye_data.(eye).saccades(source_num).sacclist.endpos ...
-							- eye_data.(eye).saccades.sacclist.startpos;
+							- eye_data.(eye).saccades(source_num).sacclist.startpos;
 						dy = eye_data.(eye_other_direction).saccades(source_num).sacclist.endpos ...
-							- eye_data.(eye_other_direction).saccades.sacclist.startpos;
+							- eye_data.(eye_other_direction).saccades(source_num).sacclist.startpos;
 					else
 						dy = eye_data.(eye).saccades(source_num).sacclist.endpos ...
-							- eye_data.(eye).saccades.sacclist.startpos;
+							- eye_data.(eye).saccades(source_num).sacclist.startpos;
 						dx = eye_data.(eye_other_direction).saccades(source_num).sacclist.endpos ...
-							- eye_data.(eye_other_direction).saccades.sacclist.startpos;
+							- eye_data.(eye_other_direction).saccades(source_num).sacclist.startpos;
 					end
+					amplitude = sqrt(dx.^2 + dy.^2);
 					directions	= atan2( dx, dy );
 					direction = mod( (directions * (180 / pi)) + 360, 360);
 				end
