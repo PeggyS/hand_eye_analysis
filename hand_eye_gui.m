@@ -1714,13 +1714,6 @@ end
 % and velocities
 rhv = d2pt(rh, 3, handles.eye_data.samp_freq);
 lhv = d2pt(lh, 3, handles.eye_data.samp_freq);
-% if isfield(handles, 'line_vergence') % vergence & no vertical data
-% 	rvv = rv';
-% 	lvv = lv';
-% else
-% 	rvv = d2pt(rv, 3, handles.eye_data.samp_freq);
-% 	lvv = d2pt(lv, 3, handles.eye_data.samp_freq);
-% end
 
 
 out_tbl = table(t_eye', rh', lh', rv', lv', rhv, lhv, rvv, lvv);
@@ -1737,6 +1730,14 @@ else
 	disp('No pupil data found. If pupil data is expected, rerun edf2bin(''pupil'')')
 end
 	
+% get the viewing eye
+if handles.rb_right_eye_viewing.Value
+	ve = 'r';
+	nve = 'l';
+else
+	ve = 'l';
+	nve = 'r';
+end
 
 % vergence
 if isfield(handles, 'line_vergence') % vergence
@@ -1773,7 +1774,6 @@ summ_filename = {}; % array to contain filenames if saccade summary file is crea
 % need to remove blinks and excluded data from the files)
 summ_fname_cnt = 0;
 
-%for ss_cnt = 1:length(sacc_source_list)
 for st_cnt = 1:length(sacc_type_list)
 	st = sacc_type_list{st_cnt};
 	for ss_cnt = 1:length(handles.eye_data.(st).saccades)
@@ -1791,11 +1791,8 @@ for st_cnt = 1:length(sacc_type_list)
 			cluster_sac_tbl.enabled = ones(height(cluster_sac_tbl),1);
 		end 
 		
-		%sacc_type = [sacc_source_list{ss_cnt} '_' sacc_type_list{st_cnt}];
 		sacc_type = [sacc_source '_' st];
 		
-		%sacc_beg_lines = findobj(handles.axes_eye, '-regexp', 'Tag', ['saccade_' sacc_type '.*_begin$']);
-		%if ~isempty(sacc_beg_lines)
 		sacclist = handles.eye_data.(st).saccades(ss_cnt).sacclist;
 		if ~isempty(sacclist.start)
 			
@@ -1807,28 +1804,22 @@ for st_cnt = 1:length(sacc_type_list)
 			% to a summary file
 			sacc_summary_tbl = table();
 			sacc_summary_cnt = 0;
-
-			
-			%for sac_num = 1:length(sacc_beg_lines)
+			eng_summmary_tbl_ve = table();
+			eng_summmary_tbl_ve_cnt = 0;
+			eng_summmary_tbl_nve = table();
+			eng_summmary_tbl_nve_cnt = 0;
+		
 			for sac_num = 1:length(sacclist.start)
-				%waitbar(sac_num/length(sacc_beg_lines), h_wait, ['Getting ' strrep(sacc_type, '_', ' ') ' saccades'])
 				waitbar(sac_num/length(sacclist.start), h_wait, ['Getting ' strrep(sacc_type, '_', ' ') ' saccades'])
-				%if strcmp(sacc_beg_lines(sac_num).Marker, 'o') % it's enabled 'o', disabled 'x'
+				
 				if sacclist.enabled(sac_num)
-					%beg_t = sacc_beg_lines(sac_num).XData;
 					beg_t = (sacclist.start(sac_num)-handles.eye_data.start_times)/1000;
-					%beg_line_tag = sacc_beg_lines(sac_num).Tag;
-					%end_line_tag = strrep(beg_line_tag, 'begin', 'end');
-					%end_line = findobj(handles.axes_eye, 'Tag', end_line_tag);
-					%end_t = end_line.XData;
 					end_t = (sacclist.end(sac_num)-handles.eye_data.start_times)/1000;
 					% put the line tag into the table
-					beg_row = find(out_tbl.t_eye >= beg_t, 1, 'first');
-					%out_tbl.([sacc_type '_saccades']){beg_row} = beg_line_tag;
+					beg_row = find(out_tbl.t_eye >= beg_t, 1, 'first');					
 					out_tbl.([sacc_type '_saccades']){beg_row} = [sacc_type '_' num2str(sac_num) '_start'];
 					
-					end_row = find(out_tbl.t_eye >= end_t, 1, 'first');
-					%out_tbl.([sacc_type '_saccades']){end_row} = end_line_tag;
+					end_row = find(out_tbl.t_eye >= end_t, 1, 'first');					
 					out_tbl.([sacc_type '_saccades']){end_row} = [sacc_type '_' num2str(sac_num) '_end'];
 					
 					% find the label menus for this beg_saccade & add a the label if checked
@@ -1865,51 +1856,101 @@ for st_cnt = 1:length(sacc_type_list)
 					
 					% if engbert saccades save engbert ampl & velocity info
 					% to a summary file
-					if strcmp(sacc_source, 'engbert')
+					if strcmp(sacc_source, 'engbert')  && strcmp(st, [ve 'h']) % only do for viewing eye horizontal
 						warning off
-						engbert_summary_sacc_file_flg = true;
-						sacc_summary_cnt = sacc_summary_cnt + 1;
-						sacc_summary_tbl.startTime(sacc_summary_cnt) = beg_t;
-						sacc_summary_tbl.endTime(sacc_summary_cnt) = end_t;
-						sacc_summary_tbl.hAmpl(sacc_summary_cnt) = sacclist.sacc_horiz_component(sac_num);
-						sacc_summary_tbl.vAmpl(sacc_summary_cnt) = sacclist.sacc_vert_component(sac_num);
-						sacc_summary_tbl.Ampl(sacc_summary_cnt) = sacclist.sacc_ampl(sac_num);
-						sacc_summary_tbl.peakVel(sacc_summary_cnt) = sacclist.peak_vel(sac_num);
-						sacc_summary_tbl.hPeakVelComponent(sacc_summary_cnt) = sacclist.peak_vel_horiz_component(sac_num);
-						sacc_summary_tbl.vPeakVelComponent(sacc_summary_cnt) = sacclist.peak_vel_vert_component(sac_num);
+						eng_summmary_tbl_ve_cnt = eng_summmary_tbl_ve_cnt + 1;
+						eng_summmary_tbl_ve.startTime(eng_summmary_tbl_ve_cnt) = beg_t;
+						eng_summmary_tbl_ve.endTime(eng_summmary_tbl_ve_cnt) = end_t;
+						eng_summmary_tbl_ve.hAmpl(eng_summmary_tbl_ve_cnt) = sacclist.sacc_horiz_component(sac_num);
+						eng_summmary_tbl_ve.vAmpl(eng_summmary_tbl_ve_cnt) = sacclist.sacc_vert_component(sac_num);
+						eng_summmary_tbl_ve.Ampl(eng_summmary_tbl_ve_cnt) = sacclist.sacc_ampl(sac_num);
+						eng_summmary_tbl_ve.swj(eng_summmary_tbl_ve_cnt) = sacclist.swj(sac_num);
 						
-						sacc_summary_tbl.asAmplH(sacc_summary_cnt) = sacclist.as_ampl_horiz(sac_num);
-						sacc_summary_tbl.asAmplV(sacc_summary_cnt) = sacclist.as_ampl_vert(sac_num);
-						sacc_summary_tbl.asPeakVelH(sacc_summary_cnt) = sacclist.as_peak_vel_horiz(sac_num);
-						sacc_summary_tbl.asPeakVelV(sacc_summary_cnt) = sacclist.as_peak_vel_vert(sac_num);
-						sacc_summary_tbl.asPeakVelHtime(sacc_summary_cnt) = (sacclist.as_peak_vel_horiz_time(sac_num)-handles.eye_data.start_times/1000);
-						sacc_summary_tbl.asPeakVelVtime(sacc_summary_cnt) = (sacclist.as_peak_vel_vert_time(sac_num)-handles.eye_data.start_times/1000);
+						eng_summmary_tbl_ve.peakVel(eng_summmary_tbl_ve_cnt) = sacclist.peak_vel(sac_num);
+						eng_summmary_tbl_ve.hPeakVelComponent(eng_summmary_tbl_ve_cnt) = sacclist.peak_vel_horiz_component(sac_num);
+						eng_summmary_tbl_ve.vPeakVelComponent(eng_summmary_tbl_ve_cnt) = sacclist.peak_vel_vert_component(sac_num);
+						
+						eng_summmary_tbl_ve.asAmplH(eng_summmary_tbl_ve_cnt) = sacclist.as_ampl_horiz(sac_num);
+						eng_summmary_tbl_ve.asAmplV(eng_summmary_tbl_ve_cnt) = sacclist.as_ampl_vert(sac_num);
+						eng_summmary_tbl_ve.asPeakVelH(eng_summmary_tbl_ve_cnt) = sacclist.as_peak_vel_horiz(sac_num);
+						eng_summmary_tbl_ve.asPeakVelV(eng_summmary_tbl_ve_cnt) = sacclist.as_peak_vel_vert(sac_num);
+						eng_summmary_tbl_ve.asPeakVelHtime(eng_summmary_tbl_ve_cnt) = (sacclist.as_peak_vel_horiz_time(sac_num)-handles.eye_data.start_times/1000);
+						eng_summmary_tbl_ve.asPeakVelVtime(eng_summmary_tbl_ve_cnt) = (sacclist.as_peak_vel_vert_time(sac_num)-handles.eye_data.start_times/1000);
 
-						sacc_summary_tbl.DriftMeanTime(sacc_summary_cnt) = (sacclist.as_drift_mean_time(sac_num)-handles.eye_data.start_times/1000);
-						sacc_summary_tbl.DriftMedianVelHor(sacc_summary_cnt)	 = sacclist.as_median_horiz(sac_num);
-						sacc_summary_tbl.DriftMeanVelHor(sacc_summary_cnt)	 = sacclist.as_mean_horiz(sac_num);
-						sacc_summary_tbl.DriftVarVelHor(sacc_summary_cnt)	 = sacclist.as_var_horiz(sac_num);
-						sacc_summary_tbl.DriftstdVelHor(sacc_summary_cnt)	 = sacclist.as_std_horiz(sac_num);
-						sacc_summary_tbl.DriftMedianVelVert(sacc_summary_cnt)	 = sacclist.as_median_vert(sac_num);
-						sacc_summary_tbl.DriftMeanVelVert(sacc_summary_cnt)	 = sacclist.as_mean_vert(sac_num);
-						sacc_summary_tbl.DriftvarVelVert(sacc_summary_cnt)	 = sacclist.as_var_vert(sac_num);
-						sacc_summary_tbl.DriftstdVelVert(sacc_summary_cnt)	 = sacclist.as_std_vert(sac_num);
-						sacc_summary_tbl.DriftMedianVel(sacc_summary_cnt)	 = sacclist.as_median_norm_vel(sac_num);
-						sacc_summary_tbl.DriftMeanVel(sacc_summary_cnt)	 = sacclist.as_mean_norm_vel(sac_num);
-						sacc_summary_tbl.DriftvarVel(sacc_summary_cnt)	 = sacclist.as_var_norm_vel(sac_num);
-						sacc_summary_tbl.DriftstdVel(sacc_summary_cnt)	 = sacclist.as_std_norm_vel(sac_num);
-						sacc_summary_tbl.DriftMedianPos(sacc_summary_cnt)	 = sacclist.as_median_norm_pos(sac_num);
-						sacc_summary_tbl.DriftMeanPos(sacc_summary_cnt)	 = sacclist.as_mean_norm_pos(sac_num);
-						sacc_summary_tbl.DriftvarPos(sacc_summary_cnt)	 = sacclist.as_var_norm_pos(sac_num);
-						sacc_summary_tbl.DriftstdPos(sacc_summary_cnt)	 = sacclist.as_std_norm_pos(sac_num);
+						eng_summmary_tbl_ve.DriftMeanTime(eng_summmary_tbl_ve_cnt) = (sacclist.as_drift_mean_time(sac_num)-handles.eye_data.start_times/1000);
+						eng_summmary_tbl_ve.DriftMedianVelHor(eng_summmary_tbl_ve_cnt)	 = sacclist.as_median_horiz(sac_num);
+						eng_summmary_tbl_ve.DriftMeanVelHor(eng_summmary_tbl_ve_cnt)	 = sacclist.as_mean_horiz(sac_num);
+						eng_summmary_tbl_ve.DriftVarVelHor(eng_summmary_tbl_ve_cnt)	 = sacclist.as_var_horiz(sac_num);
+						eng_summmary_tbl_ve.DriftstdVelHor(eng_summmary_tbl_ve_cnt)	 = sacclist.as_std_horiz(sac_num);
+						eng_summmary_tbl_ve.DriftMedianVelVert(eng_summmary_tbl_ve_cnt)	 = sacclist.as_median_vert(sac_num);
+						eng_summmary_tbl_ve.DriftMeanVelVert(eng_summmary_tbl_ve_cnt)	 = sacclist.as_mean_vert(sac_num);
+						eng_summmary_tbl_ve.DriftvarVelVert(eng_summmary_tbl_ve_cnt)	 = sacclist.as_var_vert(sac_num);
+						eng_summmary_tbl_ve.DriftstdVelVert(eng_summmary_tbl_ve_cnt)	 = sacclist.as_std_vert(sac_num);
+						eng_summmary_tbl_ve.DriftMedianVel(eng_summmary_tbl_ve_cnt)	 = sacclist.as_median_norm_vel(sac_num);
+						eng_summmary_tbl_ve.DriftMeanVel(eng_summmary_tbl_ve_cnt)	 = sacclist.as_mean_norm_vel(sac_num);
+						eng_summmary_tbl_ve.DriftvarVel(eng_summmary_tbl_ve_cnt)	 = sacclist.as_var_norm_vel(sac_num);
+						eng_summmary_tbl_ve.DriftstdVel(eng_summmary_tbl_ve_cnt)	 = sacclist.as_std_norm_vel(sac_num);
+						eng_summmary_tbl_ve.DriftMedianPos(eng_summmary_tbl_ve_cnt)	 = sacclist.as_median_norm_pos(sac_num);
+						eng_summmary_tbl_ve.DriftMeanPos(eng_summmary_tbl_ve_cnt)	 = sacclist.as_mean_norm_pos(sac_num);
+						eng_summmary_tbl_ve.DriftvarPos(eng_summmary_tbl_ve_cnt)	 = sacclist.as_var_norm_pos(sac_num);
+						eng_summmary_tbl_ve.DriftstdPos(eng_summmary_tbl_ve_cnt)	 = sacclist.as_std_norm_pos(sac_num);
 
 
 						if ~isempty(grid_vals)
 							if ~isempty(out_tbl.region_of_interest{beg_row})
-								sacc_summary_tbl.region_of_interest_start(sacc_summary_cnt) = out_tbl.region_of_interest{beg_row};
+								eng_summmary_tbl_ve.region_of_interest_start(eng_summmary_tbl_ve_cnt) = out_tbl.region_of_interest{beg_row};
 							end
 							if ~isempty(out_tbl.region_of_interest{end_row})
-								sacc_summary_tbl.region_of_interest_end(sacc_summary_cnt) = out_tbl.region_of_interest{end_row};
+								eng_summmary_tbl_ve.region_of_interest_end(eng_summmary_tbl_ve_cnt) = out_tbl.region_of_interest{end_row};
+							end
+						end
+						warning on
+					elseif strcmp(sacc_source, 'engbert')  && strcmp(st, [nve 'h']) %  do for non viewing eye horizontal
+						warning off
+						eng_summmary_tbl_nve_cnt = eng_summmary_tbl_nve_cnt + 1;
+						eng_summmary_tbl_nve.startTime(eng_summmary_tbl_nve_cnt) = beg_t;
+						eng_summmary_tbl_nve.endTime(eng_summmary_tbl_nve_cnt) = end_t;
+						eng_summmary_tbl_nve.hAmpl(eng_summmary_tbl_nve_cnt) = sacclist.sacc_horiz_component(sac_num);
+						eng_summmary_tbl_nve.vAmpl(eng_summmary_tbl_nve_cnt) = sacclist.sacc_vert_component(sac_num);
+						eng_summmary_tbl_nve.swj(eng_summmary_tbl_nve_cnt) = sacclist.swj(sac_num);
+						
+						eng_summmary_tbl_nve.Ampl(eng_summmary_tbl_nve_cnt) = sacclist.sacc_ampl(sac_num);
+						eng_summmary_tbl_nve.peakVel(eng_summmary_tbl_nve_cnt) = sacclist.peak_vel(sac_num);
+						eng_summmary_tbl_nve.hPeakVelComponent(eng_summmary_tbl_nve_cnt) = sacclist.peak_vel_horiz_component(sac_num);
+						eng_summmary_tbl_nve.vPeakVelComponent(eng_summmary_tbl_nve_cnt) = sacclist.peak_vel_vert_component(sac_num);
+						
+						eng_summmary_tbl_nve.asAmplH(eng_summmary_tbl_nve_cnt) = sacclist.as_ampl_horiz(sac_num);
+						eng_summmary_tbl_nve.asAmplV(eng_summmary_tbl_nve_cnt) = sacclist.as_ampl_vert(sac_num);
+						eng_summmary_tbl_nve.asPeakVelH(eng_summmary_tbl_nve_cnt) = sacclist.as_peak_vel_horiz(sac_num);
+						eng_summmary_tbl_nve.asPeakVelV(eng_summmary_tbl_nve_cnt) = sacclist.as_peak_vel_vert(sac_num);
+						eng_summmary_tbl_nve.asPeakVelHtime(eng_summmary_tbl_nve_cnt) = (sacclist.as_peak_vel_horiz_time(sac_num)-handles.eye_data.start_times/1000);
+						eng_summmary_tbl_nve.asPeakVelVtime(eng_summmary_tbl_nve_cnt) = (sacclist.as_peak_vel_vert_time(sac_num)-handles.eye_data.start_times/1000);
+
+						eng_summmary_tbl_nve.DriftMeanTime(eng_summmary_tbl_nve_cnt) = (sacclist.as_drift_mean_time(sac_num)-handles.eye_data.start_times/1000);
+						eng_summmary_tbl_nve.DriftMedianVelHor(eng_summmary_tbl_nve_cnt)	 = sacclist.as_median_horiz(sac_num);
+						eng_summmary_tbl_nve.DriftMeanVelHor(eng_summmary_tbl_nve_cnt)	 = sacclist.as_mean_horiz(sac_num);
+						eng_summmary_tbl_nve.DriftVarVelHor(eng_summmary_tbl_nve_cnt)	 = sacclist.as_var_horiz(sac_num);
+						eng_summmary_tbl_nve.DriftstdVelHor(eng_summmary_tbl_nve_cnt)	 = sacclist.as_std_horiz(sac_num);
+						eng_summmary_tbl_nve.DriftMedianVelVert(eng_summmary_tbl_nve_cnt)	 = sacclist.as_median_vert(sac_num);
+						eng_summmary_tbl_nve.DriftMeanVelVert(eng_summmary_tbl_nve_cnt)	 = sacclist.as_mean_vert(sac_num);
+						eng_summmary_tbl_nve.DriftvarVelVert(eng_summmary_tbl_nve_cnt)	 = sacclist.as_var_vert(sac_num);
+						eng_summmary_tbl_nve.DriftstdVelVert(eng_summmary_tbl_nve_cnt)	 = sacclist.as_std_vert(sac_num);
+						eng_summmary_tbl_nve.DriftMedianVel(eng_summmary_tbl_nve_cnt)	 = sacclist.as_median_norm_vel(sac_num);
+						eng_summmary_tbl_nve.DriftMeanVel(eng_summmary_tbl_nve_cnt)	 = sacclist.as_mean_norm_vel(sac_num);
+						eng_summmary_tbl_nve.DriftvarVel(eng_summmary_tbl_nve_cnt)	 = sacclist.as_var_norm_vel(sac_num);
+						eng_summmary_tbl_nve.DriftstdVel(eng_summmary_tbl_nve_cnt)	 = sacclist.as_std_norm_vel(sac_num);
+						eng_summmary_tbl_nve.DriftMedianPos(eng_summmary_tbl_nve_cnt)	 = sacclist.as_median_norm_pos(sac_num);
+						eng_summmary_tbl_nve.DriftMeanPos(eng_summmary_tbl_nve_cnt)	 = sacclist.as_mean_norm_pos(sac_num);
+						eng_summmary_tbl_nve.DriftvarPos(eng_summmary_tbl_nve_cnt)	 = sacclist.as_var_norm_pos(sac_num);
+						eng_summmary_tbl_nve.DriftstdPos(eng_summmary_tbl_nve_cnt)	 = sacclist.as_std_norm_pos(sac_num);
+
+
+						if ~isempty(grid_vals)
+							if ~isempty(out_tbl.region_of_interest{beg_row})
+								eng_summmary_tbl_nve.region_of_interest_start(eng_summmary_tbl_nve_cnt) = out_tbl.region_of_interest{beg_row};
+							end
+							if ~isempty(out_tbl.region_of_interest{end_row})
+								eng_summmary_tbl_nve.region_of_interest_end(eng_summmary_tbl_nve_cnt) = out_tbl.region_of_interest{end_row};
 							end
 						end
 						warning on
@@ -1936,13 +1977,21 @@ for st_cnt = 1:length(sacc_type_list)
 				
 			end % each saccade
 			% save the summary table
-			if sacc_summary_cnt > 0
+			if eng_summmary_tbl_ve_cnt > 0
 				% add 1 more column
-				sacc_summary_tbl.asPeakVelCombined = sqrt(sacc_summary_tbl.asPeakVelH .^2 + ...
-															sacc_summary_tbl.asPeakVelV .^2);
+				eng_summmary_tbl_ve.asPeakVelCombined = sqrt(eng_summmary_tbl_ve.asPeakVelH .^2 + ...
+															eng_summmary_tbl_ve.asPeakVelV .^2);
 				summ_fname_cnt = summ_fname_cnt + 1;
-				summ_filename{summ_fname_cnt} = strrep(export_filename, '.txt', ['_' sacc_type '.txt']);
-				writetable(sacc_summary_tbl, summ_filename{summ_fname_cnt}, 'delimiter', '\t');
+				summ_filename{summ_fname_cnt} = strrep(export_filename, '.txt', ['_' sacc_type '_ve.txt']);
+				writetable(eng_summmary_tbl_ve, summ_filename{summ_fname_cnt}, 'delimiter', '\t');
+			end
+			if eng_summmary_tbl_nve_cnt > 0
+				% add 1 more column
+				eng_summmary_tbl_nve.asPeakVelCombined = sqrt(eng_summmary_tbl_nve.asPeakVelH .^2 + ...
+															eng_summmary_tbl_nve.asPeakVelV .^2);
+				summ_fname_cnt = summ_fname_cnt + 1;
+				summ_filename{summ_fname_cnt} = strrep(export_filename, '.txt', ['_' sacc_type '_nve.txt']);
+				writetable(eng_summmary_tbl_nve, summ_filename{summ_fname_cnt}, 'delimiter', '\t');
 			end
 		end % if there are saccades of this type for this source
 	end % sacc source
@@ -2401,14 +2450,6 @@ if ~isempty(analyze_out_tbl)
 end
 
 waitbar(0.8, h_wait, 'Adding Viewing Eye & Non-Viewing Eye');
-% get the viewing eye
-if handles.rb_right_eye_viewing.Value
-	ve = 'r';
-	nve = 'l';
-else
-	ve = 'l';
-	nve = 'r';
-end
 out_tbl.Properties.VariableNames = strrep(out_tbl.Properties.VariableNames, [ve 'h'], ['ve_' ve 'h']);
 out_tbl.Properties.VariableNames = strrep(out_tbl.Properties.VariableNames, [nve 'h'], ['nve_' nve 'h']);
 out_tbl.Properties.VariableNames = strrep(out_tbl.Properties.VariableNames, [ve 'v'], ['ve_' ve 'v']);

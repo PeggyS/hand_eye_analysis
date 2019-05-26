@@ -22,8 +22,10 @@ nveh = strrep(first_var, 'nve_', '');
 nve = strrep(nveh, 'h', '');
 if strcmp(nve, 'r')
 	ve = 'l';
+	nve = 'r';
 else
 	ve = 'r';
+	nve = 'l';
 end
 
 time_in_file = tbl.t_eye(end) - tbl.t_eye(1);
@@ -79,7 +81,7 @@ sacc_source_list = unique(tmp2); %% {'EDF_PARSER', 'findsaccs', 'engbert'};
 
 for eye_cnt = 1:length(sacc_type_list)
 	for source_cnt = 1:length(sacc_source_list)
-		sacc_fname = strrep(fname, '.txt', ['_', sacc_source_list{source_cnt} '_' sacc_type_list{eye_cnt} '.txt']);
+		sacc_fname = strrep(fname, '.txt', ['_', sacc_source_list{source_cnt} '_' sacc_type_list{eye_cnt} '_ve.txt']);
 		if exist(sacc_fname, 'file')
 % 			keyboard
 			sacc_tbl = readtable(sacc_fname);
@@ -96,43 +98,110 @@ for eye_cnt = 1:length(sacc_type_list)
 				sacc_type_list{eye_cnt}, length(small_sacc_inds));
 			
 			% number of >= 1° saccades
-			large_sacc_inds = find(sacc_tbl.Ampl >= 1);
+			large_sacc_inds = find(sacc_tbl.swj >= 1);
 			fprintf(fid, '%s %s number of >= 1 deg saccades = %d\n', sacc_source_list{source_cnt}, ...
 				sacc_type_list{eye_cnt}, length(large_sacc_inds));
 			
+			% number of square wave jerks
+			swj_uniques = unique(sacc_tbl.swj);
+			num_swj = sum(~isnan(swj_uniques));
+			fprintf(fid, '%s %s number of swjs = %d\n', sacc_source_list{source_cnt}, ...
+				sacc_type_list{eye_cnt}, num_swj);
+			
 			% examine saccades for the other eye
-			switch sacc_type_list{eye_cnt}(1)
-				case 'r'
-					other_eye = strrep(sacc_type_list{eye_cnt}, 'r', 'l');
-				case 'l'
-					other_eye = strrep(sacc_type_list{eye_cnt}, 'l', 'r');
-				otherwise
-					error('unknown sacc_type: %s', sacc_type_list{eye_cnt})
-			end
-			other_sacc_fname = strrep(fname, '.txt', ['_', sacc_source_list{source_cnt} '_' other_eye '.txt']);
+% 			switch sacc_type_list{eye_cnt}(1)
+% 				case 'r'
+% 					other_eye = strrep(sacc_type_list{eye_cnt}, 'r', 'l');
+% 				case 'l'
+% 					other_eye = strrep(sacc_type_list{eye_cnt}, 'l', 'r');
+% 				otherwise
+% 					error('unknown sacc_type: %s', sacc_type_list{eye_cnt})
+% 			end
+% 			other_sacc_fname = strrep(fname, '.txt', ['_', sacc_source_list{source_cnt} '_' other_eye '.txt']);
+			other_sacc_fname = strrep(sacc_fname, [ve 'h_ve'], [nve 'h_nve']);
 			if exist(other_sacc_fname, 'file')
 				other_sacc_tbl = readtable(other_sacc_fname);
 				% remove exluded time segments
 				for ex_seg_cnt = 1:excluded_segments_count
-				other_sacc_tbl(other_sacc_tbl.startTime >= exclude_beg_time(ex_seg_cnt) & ...
+					other_sacc_tbl(other_sacc_tbl.startTime >= exclude_beg_time(ex_seg_cnt) & ...
 						 other_sacc_tbl.startTime <= exclude_end_time(ex_seg_cnt), :) = [];
 				end % excluded segments
-% 				keyboard
-				% look for nonoverlapping saccades of the other eye
-				nonoverlap_inds = find_nonoverlapping_saccades(sacc_tbl, other_sacc_tbl);
-				% if no overlapping saccade, get the other eye's info during the saccade
 
-				if ~isempty(nonoverlap_inds)
-					sacc_start = sacc_tbl.startTime(nonoverlap_inds);
-					sacc_end =  sacc_tbl.endTime(nonoverlap_inds);
-					other_eye_info_tbl = get_other_eye_info(tbl, sacc_start, sacc_end, other_eye);
-					
-					new_sacc_tbl = outerjoin(sacc_tbl, other_eye_info_tbl, 'MergeKeys', true);
-					new_filename = strrep(sacc_fname, '.txt', '_plus_other_eye_non_sacc_info.txt');
-					writetable(new_sacc_tbl, new_filename, 'delimiter', '\t');
-				else
-					disp('no monocular saccades detected')
- 				end % non overlapping saccade
+% 				% look for nonoverlapping saccades of the other eye
+% 				nonoverlap_inds = find_nonoverlapping_saccades(sacc_tbl, other_sacc_tbl);
+% 				% if no overlapping saccade, get the other eye's info during the saccade
+% 
+% 				if ~isempty(nonoverlap_inds)
+% 					sacc_start = sacc_tbl.startTime(nonoverlap_inds);
+% 					sacc_end =  sacc_tbl.endTime(nonoverlap_inds);
+% 					other_eye_info_tbl = get_other_eye_info(tbl, sacc_start, sacc_end, other_eye);
+% 					
+% 					new_sacc_tbl = outerjoin(sacc_tbl, other_eye_info_tbl, 'MergeKeys', true);
+% 					new_filename = strrep(sacc_fname, '.txt', '_plus_other_eye_non_sacc_info.txt');
+% 					writetable(new_sacc_tbl, new_filename, 'delimiter', '\t');
+% 				else
+% 					disp('no monocular saccades detected')
+%  				end % non overlapping saccade
+
+				% merge ve saccade info with non ve saccade info - save in a
+				% single file
+				comb_sacc_tbl = sacc_tbl;
+				comb_sacc_tbl.Properties.VariableNames = strcat(comb_sacc_tbl.Properties.VariableNames, ['_' ve '_ve']);
+
+				empty_tbl = array2table(nan(height(comb_sacc_tbl), width(other_sacc_tbl)), ...
+					'VariableNames', strcat(other_sacc_tbl.Properties.VariableNames, ['_' nve '_nve']));
+				comb_sacc_tbl = horzcat(comb_sacc_tbl, empty_tbl); %#ok<AGROW>
+				nve_inds = width(sacc_tbl) + (1 : width(other_sacc_tbl));
+				comb_sacc_tbl.ve_nve_overlap = ones(height(comb_sacc_tbl),1); % 0 or 1 overlaping ve & nve saccades
+				comb_sacc_tbl.nve_non_sacc_startpos_h = nan(height(comb_sacc_tbl),1);
+				comb_sacc_tbl.nve_non_sacc_endpos_h = nan(height(comb_sacc_tbl),1);
+				comb_sacc_tbl.nve_non_sacc_variancepos_h = nan(height(comb_sacc_tbl),1);
+				comb_sacc_tbl.nve_non_sacc_medianpos_h = nan(height(comb_sacc_tbl),1);
+				comb_sacc_tbl.nve_non_sacc_meanpos_h = nan(height(comb_sacc_tbl),1);
+				comb_sacc_tbl.nve_non_sacc_variancevel_h = nan(height(comb_sacc_tbl),1);
+				comb_sacc_tbl.nve_non_sacc_medianvel_h = nan(height(comb_sacc_tbl),1);
+				comb_sacc_tbl.nve_non_sacc_meanvel_h = nan(height(comb_sacc_tbl),1);
+				comb_sacc_tbl.nve_non_sacc_startpos_v = nan(height(comb_sacc_tbl),1);
+				comb_sacc_tbl.nve_non_sacc_endpos_v = nan(height(comb_sacc_tbl),1);
+				comb_sacc_tbl.nve_non_sacc_variancepos_v = nan(height(comb_sacc_tbl),1);
+				comb_sacc_tbl.nve_non_sacc_medianpos_v = nan(height(comb_sacc_tbl),1);
+				comb_sacc_tbl.nve_non_sacc_meanpos_v = nan(height(comb_sacc_tbl),1);
+				comb_sacc_tbl.nve_non_sacc_variancevel_v = nan(height(comb_sacc_tbl),1);
+				comb_sacc_tbl.nve_non_sacc_medianvel_v = nan(height(comb_sacc_tbl),1);
+				comb_sacc_tbl.nve_non_sacc_meanvel_v = nan(height(comb_sacc_tbl),1);
+				for row = 1:height(sacc_tbl)
+					overlap_ind = find((other_sacc_tbl.startTime >= sacc_tbl.startTime(row) & other_sacc_tbl.endTime <= sacc_tbl.endTime(row)) | ...
+						(other_sacc_tbl.endTime > sacc_tbl.startTime(row) & other_sacc_tbl.endTime <= sacc_tbl.endTime(row)) | ...
+						(other_sacc_tbl.startTime >= sacc_tbl.startTime(row) & other_sacc_tbl.startTime < sacc_tbl.endTime(row)) | ...
+						(other_sacc_tbl.startTime <= sacc_tbl.startTime(row) & other_sacc_tbl.endTime >= sacc_tbl.endTime(row)));
+					assert(length(overlap_ind) <= 1, 'found more than 1 overlapping saccade')
+					if ~isempty(overlap_ind)
+						comb_sacc_tbl(row, nve_inds) = other_sacc_tbl(overlap_ind,:);
+					else 
+						% other eye info when there is no overlapping saccade
+						comb_sacc_tbl.ve_nve_overlap(row) = 0;
+						non_sacc_data = tbl(tbl.t_eye >= sacc_tbl.startTime(row) & tbl.t_eye <= sacc_tbl.endTime(row), ...
+							{['nve_' nve 'h'], ['nve_' nve 'v'], ['nve_' nve 'h_vel'], ['nve_' nve 'v_vel']});
+						comb_sacc_tbl.nve_non_sacc_startpos_h(row) = table2array(non_sacc_data(1,1));
+						comb_sacc_tbl.nve_non_sacc_endpos_h(row) = table2array(non_sacc_data(height(non_sacc_data),1));
+						comb_sacc_tbl.nve_non_sacc_variancepos_h(row) = var(table2array(non_sacc_data(:,1)));
+						comb_sacc_tbl.nve_non_sacc_medianpos_h(row) = median(table2array(non_sacc_data(:,1)));
+						comb_sacc_tbl.nve_non_sacc_meanpos_h(row) = mean(table2array(non_sacc_data(:,1)));
+						comb_sacc_tbl.nve_non_sacc_variancevel_h(row) = var(table2array(non_sacc_data(:,3)));
+						comb_sacc_tbl.nve_non_sacc_medianvel_h(row) = median(table2array(non_sacc_data(:,3)));
+						comb_sacc_tbl.nve_non_sacc_meanvel_h(row) = mean(table2array(non_sacc_data(:,3)));
+						
+						comb_sacc_tbl.nve_non_sacc_startpos_v(row) = table2array(non_sacc_data(1,2));
+						comb_sacc_tbl.nve_non_sacc_endpos_v(row) = table2array(non_sacc_data(height(non_sacc_data),2));
+						comb_sacc_tbl.nve_non_sacc_variancepos_v(row) = var(table2array(non_sacc_data(:,2)));
+						comb_sacc_tbl.nve_non_sacc_medianpos_v(row) = median(table2array(non_sacc_data(:,2)));
+						comb_sacc_tbl.nve_non_sacc_meanpos_v(row) = mean(table2array(non_sacc_data(:,2)));
+						comb_sacc_tbl.nve_non_sacc_variancevel_v(row) = var(table2array(non_sacc_data(:,4)));
+						comb_sacc_tbl.nve_non_sacc_medianvel_v(row) = median(table2array(non_sacc_data(:,4)));
+						comb_sacc_tbl.nve_non_sacc_meanvel_v(row) = mean(table2array(non_sacc_data(:,4)));
+					end
+				end
+				writetable(comb_sacc_tbl, strrep(sacc_fname, '.txt', '_comb.txt'), 'Delimiter', '\t' )
 			end
 		end %sacc_source & type file exists
 	end % sacc_source

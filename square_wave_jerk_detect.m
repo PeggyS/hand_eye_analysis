@@ -51,7 +51,7 @@ for eye_cnt = 1:length(eye_list)
 					end
 				else % for eyelink & engbert saccades use h & v eyes together to determine amplitude & direction
 					% if engbert saccades are only in h but not v, then
-					% this code is in error - FIXME
+					% this code will throw an error (index out of bounds) - FIXME
 					if strcmp(eye, 'h')
 						dx = eye_data.(eye).saccades(source_num).sacclist.endpos ...
 							- eye_data.(eye).saccades(source_num).sacclist.startpos;
