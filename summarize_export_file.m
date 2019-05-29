@@ -78,6 +78,21 @@ if ~isempty(head_ang_col)
 	fprintf(fid, 'head angle movement = %g\n', table2array(tbl(end,head_ang_col))-table2array(tbl(1,head_ang_col)));
 end
 
+% right or left hand movements
+tmp = regexpi(tbl.Properties.VariableNames, '_moves', 'match');
+move_col = find(~cellfun(@isempty, tmp));
+for mm = 1:length(move_col)
+	col = move_col(mm);
+	move_list = table2cell(tbl(:,col));
+	rows = find(~cellfun(@isempty, move_list));
+	
+	for rr = 1:length(rows)
+		tbl_row = rows(rr);
+		val = table2cell(tbl(tbl_row,col));
+		fprintf(fid, 't = %g; %s - %s\n', table2array(tbl(tbl_row,1)), tbl.Properties.VariableNames{col}, val{1});
+	end
+end
+
 
 % saccade summary
 sacc_type_list = {'lh' 'lv' 'rh' 'rv'};
