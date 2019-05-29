@@ -70,6 +70,14 @@ end
 fprintf(fid, 'total time  = %g\n', time_in_file);
 fprintf(fid, 'excluded time = %g\n', excluded_time_total);
 
+% head angle at begin & end
+head_ang_col = find(strcmpi(tbl.Properties.VariableNames, 'HEAD_angle'));
+if ~isempty(head_ang_col)
+	fprintf(fid, 'begin head angle = %g\n', table2array(tbl(1,head_ang_col)));
+	fprintf(fid, 'end head angle = %g\n', table2array(tbl(end,head_ang_col)));
+	fprintf(fid, 'head angle movement = %g\n', table2array(tbl(end,head_ang_col))-table2array(tbl(1,head_ang_col)));
+end
+
 
 % saccade summary
 sacc_type_list = {'lh' 'lv' 'rh' 'rv'};

@@ -476,13 +476,15 @@ if isfield(handles, 'apdm_data')
 	if length(handles.apdm_data.sensor) > 1
 		head_m = uicontextmenu;
 		handles.axes_sensor2.UIContextMenu = head_m;
-	% 	uimenu(head_m, 'Label', 'Add Move', 'Callback', {@addMove, handles.axes_sensor2})
+% 	 	uimenu(head_m, 'Label', 'Add Begin Move', 'Callback', {@addLine, 'annotation_begin_move_right'})
+% 		uimenu(head_m, 'Label', 'Add End Move', 'Callback', {@addLine, 'annotation_end_move_right'})
 		uimenu(head_m, 'Label', 'Add Mistake', 'Callback', {@addLine, 'annotation_mistake'})
 	end
 	if length(handles.apdm_data.sensor) > 2
 		sensor3_m = uicontextmenu;
 		handles.axes_sensor3.UIContextMenu = sensor3_m;
-	% 	uimenu(sensor3_m, 'Label', 'Add Move', 'Callback', {@addMove, handles.axes_sensor3})
+% 		uimenu(sensor3_m, 'Label', 'Add Begin Move', 'Callback', {@addLine, 'annotation_begin_move_left'})
+% 		uimenu(sensor3_m, 'Label', 'Add End Move', 'Callback', {@addLine, 'annotation_end_move_left'})
 		uimenu(sensor3_m, 'Label', 'Add Mistake', 'Callback', {@addLine, 'annotation_mistake'})
 	end
 end
@@ -1072,7 +1074,7 @@ return
 % -------------------------------------------------------------
 function addLine(source, callbackdata, line_type)
 % function called by menu to add a new line line_type is a string with the
-% type (reach, grasp, transfer, mistake)
+% type (reach, grasp, transfer, mistake, begin_move, end_move)
 handles = guidata(gcf);
 axes(handles.axes_eye)
 cursor_loc = get(handles.axes_eye, 'CurrentPoint');
