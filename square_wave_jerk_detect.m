@@ -67,7 +67,7 @@ for eye_cnt = 1:length(eye_list)
 					directions	= atan2( dx, dy );
 					direction = mod( (directions * (180 / pi)) + 360, 360);
 				end
-				
+				blinks = filtfilt(ones(1,100), 1, double(isnan(eye_data.(eye).pos))); % extend blink (non-analyzed) data beyond nans - per script supplied by Fatema
 				[swj1, swj2] = SWJDetection.swjs(  startIndex, endIndex, amplitude, direction, ...
 					isnan(eye_data.(eye).pos), eye_data.samp_freq );
 				new_eye_data.(eye).saccades(source_num).sacclist.swj(1,:) = nan(1,length(new_eye_data.(eye).saccades(source_num).sacclist.start));
