@@ -105,10 +105,12 @@ handles.center_cal_line = line(handles.axes_head.XLim, [y_line, y_line], ...
 draggable(handles.center_cal_line, 'v')
 
 % vertical lines at annotations
-for a_cnt = 1:length(handles.apdm_data.annot)
-	x = handles.apdm_data.annot{a_cnt}.time;
-	line([x x], [ymin ymax])
-	text(x, ymin+yrange*0.02, handles.apdm_data.annot{a_cnt}.msg,'FontSize', 16)
+if isfield(handles.apdm_data, 'annot')
+	for a_cnt = 1:length(handles.apdm_data.annot)
+		x = handles.apdm_data.annot{a_cnt}.time;
+		line([x x], [ymin ymax])
+		text(x, ymin+yrange*0.02, handles.apdm_data.annot{a_cnt}.msg,'FontSize', 16)
+	end
 end
 
 % Update handles structure

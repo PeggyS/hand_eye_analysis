@@ -125,6 +125,17 @@ t_start = handles.led_results.testresults.startPTB;
 % r_cal_offset = atan2d(-ipd/2,550);
 % l_cal_offset = -r_cal_offset;
 
+previous_led_dist_away = [];
+previous_led_horiz_from_center = [];
+led_dist_away = [];
+led_horiz_from_center = [];
+tgt_type = [];
+incl_sacc = [];
+conv_diverg_cnt = 0;
+yrange = [-10 10];
+
+axes(handles.axes_eye)
+
 % turn led results.tgtpos struct into target lines
 for cnt = 1:length(handles.led_results.tgtpos)
 	% if led is on, determine the target eye angle to display
@@ -137,20 +148,62 @@ for cnt = 1:length(handles.led_results.tgtpos)
 		led_rel_left = led_horiz_from_center + ipd/2;
 		x_right = atan2d(led_rel_right,led_dist_away);
 		x_left = atan2d(led_rel_left,led_dist_away);
+		
 	else % led is off don't show any number
 		x_right = nan;
 		x_left = nan;
+		previous_led_dist_away = [];
+		previous_led_horiz_from_center = [];
 	end
 	mask = handles.target_data.t >= (handles.led_results.tgtpos(cnt).when-t_start)/1000;
 	handles.target_data.right(mask) = x_right;
 	handles.target_data.left(mask) = x_left;
-end
+	
+	% determine if this was convergence, diveregence, & if included saccade
+	if ~isempty(previous_led_dist_away)
+		if led_dist_away - previous_led_dist_away > 0
+			tgt_type = 'divergence';
+		else
+			tgt_type = 'convergence';
+			yrange = [min([x_right, x_left]), max([x_right, x_left])];
+		end
+		if abs(led_horiz_from_center - previous_led_horiz_from_center) < eps
+			incl_sacc = 0;
+		else
+			incl_sacc = 1;
+		end
+	else
+		tgt_type = [];
+		incl_sacc = [];
+	end
+	previous_led_dist_away = led_dist_away;
+	previous_led_horiz_from_center = led_horiz_from_center;
+	
+	% create vertical lines when the target changes value & label & number them
+	% convergence or divergence
+	if ~isempty(tgt_type)
+		x = handles.target_data.t(find(mask, 1, 'first'));
+		conv_diverg_cnt = conv_diverg_cnt + 1;
+		tag_str = [tgt_type '_' num2str(conv_diverg_cnt)];
+		if incl_sacc
+			tag_str = strcat(tag_str, '_plus_saccade');
+		end
+		h_line = line([x x], yrange, 'Tag', tag_str);
+		eye_m = uicontextmenu;
+		h_line.UIContextMenu = eye_m;
+		uimenu(eye_m, 'Label', tag_str);
+	end
+	
+end % each led in tgtpos struct
+
+
 % draw the target lines
-axes(handles.axes_eye)
 handles.line_target_x_right = line(handles.target_data.t, handles.target_data.right, ...
 	'Tag', 'line_target_x_right', 'Color', [0 0.8 0]);
 handles.line_target_x_left = line(handles.target_data.t, handles.target_data.left, ...
 	'Tag', 'line_target_x_left', 'Color', [0.8 0 0]);
+uistack([handles.line_target_x_right, handles.line_target_x_left], 'bottom')
+
 
 % % draw the lh-rh (vergence) & (lh+rh)/2 (conjugate) target lines
 % axes(handles.axes_eye)
