@@ -1,15 +1,38 @@
 function labelSaccade(source, callbackdata, label_str)
 handles = guidata(gcf);
 axes(handles.axes_eye)
+h_ax = gca;
 
 % find the saccade lines for the corresponding tag 
 h_sacc_line = findobj(source.Parent.Parent, 'Tag', strrep(source.Tag, 'menu_', ''));
 % update the menu
 if strcmp(source.Checked, 'off')
-	h_other = findobj(source.Parent, 'Tag', source.Tag);
-	set(h_other, 'Checked', 'off')
+	h_other_menus = findobj(source.Parent, 'Tag', source.Tag);
+	set(h_other_menus, 'Checked', 'off')
 	source.Checked = 'on';
-	% make the saccade marker filled , 'markerfacecolor', beg_line_color
+	
+	% if it's a vergence saccade, get the corresponding vergence target
+	% number and add it to the label
+	if strcmp(label_str, 'PureVergence') || strcmp(label_str, 'PureSaccade') || ...
+			strcmp(label_str, 'CombinedVergenceSaccade')
+		% find vergence lines
+		h_verg_lines = findobj(h_ax, '-regexp', 'Tag', '(converge.*)|(diverge.*)');
+		line_xdata = get(h_verg_lines, 'XData');
+		% find the lines with xdata less than h_sacc_line's xdata
+		lines_left_of_sacc_mask = cellfun(@(y)(y(1)< h_sacc_line.XData(1)), line_xdata);
+		h_left_verg_lines = h_verg_lines(lines_left_of_sacc_mask);
+		line_left_of_sacc_xdata = line_xdata(lines_left_of_sacc_mask);
+		% find the line with the largest xdata in h_left_verg_lines
+		x_data = cellfun(@(x)(x(1)), line_left_of_sacc_xdata);
+		[~, ind]= max(x_data);
+		h_verg_before_sacc_line = h_left_verg_lines(ind);
+		
+		% append the vergence line tag to the saccade label
+		label_str = strcat(label_str, ['_' h_verg_before_sacc_line.Tag]);
+		
+		source.Text = strcat(source.Text, [' ' h_verg_before_sacc_line.Tag]);
+		
+	end
 	
 	h_sacc_line.MarkerFaceColor = h_sacc_line.Color;
 else
