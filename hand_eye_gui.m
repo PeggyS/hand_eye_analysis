@@ -1787,7 +1787,6 @@ sacc_type_list = {'lh' 'lv' 'rh' 'rv'};
 summ_filename = {}; % array to contain filenames if saccade summary file is created  (will
 % need to remove blinks and excluded data from the files)
 summ_fname_cnt = 0;
-
 for st_cnt = 1:length(sacc_type_list)
 	st = sacc_type_list{st_cnt};
 	for ss_cnt = 1:length(handles.eye_data.(st).saccades)
@@ -1806,6 +1805,9 @@ for st_cnt = 1:length(sacc_type_list)
 		end 
 		
 		sacc_type = [sacc_source '_' st];
+		if strcmp(sacc_type, 'engbert_rh')
+% 			keyboard
+		end
 		
 		sacclist = handles.eye_data.(st).saccades(ss_cnt).sacclist;
 		if ~isempty(sacclist.start)

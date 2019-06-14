@@ -57,7 +57,9 @@ end
 sacc_starts = (handles.eye_data.lh.saccades(sacc_source_ind).sacclist.start-handles.eye_data.start_times)/1000;
 
 % index of matching saccade
-sacc_ind = find(abs(sacc_starts-saccade_beg_line.XData) < eps);
+[~, sacc_ind] = min(abs(sacc_starts-saccade_beg_line.XData));
+
+assert(~isempty(sacc_ind), 'did not find index of saccade to disable')
 
 handles.eye_data.(eye_chan).saccades(sacc_source_ind).sacclist.enabled(sacc_ind)=0;
 
