@@ -54,7 +54,7 @@ for cnt = 1:length(handles.eye_data.(eye_chan).saccades)
 	end
 end
 
-sacc_starts = (handles.eye_data.lh.saccades(sacc_source_ind).sacclist.start-handles.eye_data.start_times)/1000;
+sacc_starts = (handles.eye_data.(eye_chan).saccades(sacc_source_ind).sacclist.start-handles.eye_data.start_times)/1000;
 
 % index of matching saccade
 [~, sacc_ind] = min(abs(sacc_starts-saccade_beg_line.XData));
