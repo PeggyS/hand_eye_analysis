@@ -221,14 +221,52 @@ for eye_cnt = 1:length(sacc_type_list)
 				other_eye_nonoverlap_inds = find_other_eye_nonoverlapping_saccades(sacc_tbl, other_sacc_tbl);
 				if ~isempty(other_eye_nonoverlap_inds)
 					% add these other eye saccades to the comb_sacc_tbl
+					% with more columns for ve info during nve saccade
+					comb_sacc_tbl.ve_non_sacc_startpos_h = nan(height(comb_sacc_tbl),1);
+					comb_sacc_tbl.ve_non_sacc_endpos_h = nan(height(comb_sacc_tbl),1);
+					comb_sacc_tbl.ve_non_sacc_variancepos_h = nan(height(comb_sacc_tbl),1);
+					comb_sacc_tbl.ve_non_sacc_medianpos_h = nan(height(comb_sacc_tbl),1);
+					comb_sacc_tbl.ve_non_sacc_meanpos_h = nan(height(comb_sacc_tbl),1);
+					comb_sacc_tbl.ve_non_sacc_variancevel_h = nan(height(comb_sacc_tbl),1);
+					comb_sacc_tbl.ve_non_sacc_medianvel_h = nan(height(comb_sacc_tbl),1);
+					comb_sacc_tbl.ve_non_sacc_meanvel_h = nan(height(comb_sacc_tbl),1);
+					comb_sacc_tbl.ve_non_sacc_startpos_v = nan(height(comb_sacc_tbl),1);
+					comb_sacc_tbl.ve_non_sacc_endpos_v = nan(height(comb_sacc_tbl),1);
+					comb_sacc_tbl.ve_non_sacc_variancepos_v = nan(height(comb_sacc_tbl),1);
+					comb_sacc_tbl.ve_non_sacc_medianpos_v = nan(height(comb_sacc_tbl),1);
+					comb_sacc_tbl.ve_non_sacc_meanpos_v = nan(height(comb_sacc_tbl),1);
+					comb_sacc_tbl.ve_non_sacc_variancevel_v = nan(height(comb_sacc_tbl),1);
+					comb_sacc_tbl.ve_non_sacc_medianvel_v = nan(height(comb_sacc_tbl),1);
+					comb_sacc_tbl.ve_non_sacc_meanvel_v = nan(height(comb_sacc_tbl),1);
 					for scnt = 1:length(other_eye_nonoverlap_inds)
 						other_ind = other_eye_nonoverlap_inds(scnt);
 						msk = comb_sacc_tbl{:,34} < other_sacc_tbl{other_ind,1};
-						new_row = [nan(1,33) other_sacc_tbl{other_ind,:}  0 nan(1,16)];
+						new_row = [nan(1,33) other_sacc_tbl{other_ind,:}  0 nan(1,32)];
 						new_row_tbl = array2table(new_row, 'VariableNames', comb_sacc_tbl.Properties.VariableNames);
+						new_row_num = sum(msk)+1;
 
 						tmp1 = [comb_sacc_tbl(msk,:);  new_row_tbl; comb_sacc_tbl(~msk,:)];
 						comb_sacc_tbl = tmp1;	
+						
+						non_sacc_data = tbl(tbl.t_eye >= other_sacc_tbl.startTime(other_ind) & tbl.t_eye <= other_sacc_tbl.endTime(other_ind), ...
+							{['ve_' ve 'h'], ['ve_' ve 'v'], ['ve_' ve 'h_vel'], ['ve_' ve 'v_vel']});
+						comb_sacc_tbl.ve_non_sacc_startpos_h(new_row_num) = table2array(non_sacc_data(1,1));
+						comb_sacc_tbl.ve_non_sacc_endpos_h(new_row_num) = table2array(non_sacc_data(height(non_sacc_data),1));
+						comb_sacc_tbl.ve_non_sacc_variancepos_h(new_row_num) = var(table2array(non_sacc_data(:,1)));
+						comb_sacc_tbl.ve_non_sacc_medianpos_h(new_row_num) = median(table2array(non_sacc_data(:,1)));
+						comb_sacc_tbl.ve_non_sacc_meanpos_h(new_row_num) = mean(table2array(non_sacc_data(:,1)));
+						comb_sacc_tbl.ve_non_sacc_variancevel_h(new_row_num) = var(table2array(non_sacc_data(:,3)));
+						comb_sacc_tbl.ve_non_sacc_medianvel_h(new_row_num) = median(table2array(non_sacc_data(:,3)));
+						comb_sacc_tbl.ve_non_sacc_meanvel_h(new_row_num) = mean(table2array(non_sacc_data(:,3)));
+						
+						comb_sacc_tbl.ve_non_sacc_startpos_v(new_row_num) = table2array(non_sacc_data(1,2));
+						comb_sacc_tbl.ve_non_sacc_endpos_v(new_row_num) = table2array(non_sacc_data(height(non_sacc_data),2));
+						comb_sacc_tbl.ve_non_sacc_variancepos_v(new_row_num) = var(table2array(non_sacc_data(:,2)));
+						comb_sacc_tbl.ve_non_sacc_medianpos_v(new_row_num) = median(table2array(non_sacc_data(:,2)));
+						comb_sacc_tbl.ve_non_sacc_meanpos_v(new_row_num) = mean(table2array(non_sacc_data(:,2)));
+						comb_sacc_tbl.ve_non_sacc_variancevel_v(new_row_num) = var(table2array(non_sacc_data(:,4)));
+						comb_sacc_tbl.ve_non_sacc_medianvel_v(new_row_num) = median(table2array(non_sacc_data(:,4)));
+						comb_sacc_tbl.ve_non_sacc_meanvel_v(new_row_num) = mean(table2array(non_sacc_data(:,4)));
 					end
 				end
 
