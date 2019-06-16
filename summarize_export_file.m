@@ -150,22 +150,6 @@ for eye_cnt = 1:length(sacc_type_list)
 						 other_sacc_tbl.startTime <= exclude_end_time(ex_seg_cnt), :) = [];
 				end % excluded segments
 
-% 				% look for nonoverlapping saccades of the other eye
-% 				nonoverlap_inds = find_nonoverlapping_saccades(sacc_tbl, other_sacc_tbl);
-% 				% if no overlapping saccade, get the other eye's info during the saccade
-% 
-% 				if ~isempty(nonoverlap_inds)
-% 					sacc_start = sacc_tbl.startTime(nonoverlap_inds);
-% 					sacc_end =  sacc_tbl.endTime(nonoverlap_inds);
-% 					other_eye_info_tbl = get_other_eye_info(tbl, sacc_start, sacc_end, other_eye);
-% 					
-% 					new_sacc_tbl = outerjoin(sacc_tbl, other_eye_info_tbl, 'MergeKeys', true);
-% 					new_filename = strrep(sacc_fname, '.txt', '_plus_other_eye_non_sacc_info.txt');
-% 					writetable(new_sacc_tbl, new_filename, 'delimiter', '\t');
-% 				else
-% 					disp('no monocular saccades detected')
-%  				end % non overlapping saccade
-
 				% merge ve saccade info with non ve saccade info - save in a
 				% single file
 				comb_sacc_tbl = sacc_tbl;
@@ -197,7 +181,16 @@ for eye_cnt = 1:length(sacc_type_list)
 						(other_sacc_tbl.endTime > sacc_tbl.startTime(row) & other_sacc_tbl.endTime <= sacc_tbl.endTime(row)) | ...
 						(other_sacc_tbl.startTime >= sacc_tbl.startTime(row) & other_sacc_tbl.startTime < sacc_tbl.endTime(row)) | ...
 						(other_sacc_tbl.startTime <= sacc_tbl.startTime(row) & other_sacc_tbl.endTime >= sacc_tbl.endTime(row)));
-					assert(length(overlap_ind) <= 1, 'found more than 1 overlapping saccade')
+					if length(overlap_ind) > 1
+						msg_str = sprintf('found more than 1 overlapping saccade at %s_ve saccade start time = %g\n %s_nve saccade start times t =', ...
+							ve, sacc_tbl.endTime(row), nve);
+						for ii = 1:length(overlap_ind)
+							msg_str = [msg_str  '  ' num2str(other_sacc_tbl.startTime(overlap_ind(ii))) ]; %#ok<AGROW>
+						end
+						msg_str = sprintf([msg_str '\n only the 1st overlapping saccade will be used']); %#ok<AGROW>
+						warning(msg_str) %#ok<SPWRN>
+						overlap_ind = overlap_ind(1);
+					end
 					if ~isempty(overlap_ind)
 						comb_sacc_tbl(row, nve_inds) = other_sacc_tbl(overlap_ind,:);
 					else 
@@ -224,6 +217,22 @@ for eye_cnt = 1:length(sacc_type_list)
 						comb_sacc_tbl.nve_non_sacc_meanvel_v(row) = mean(table2array(non_sacc_data(:,4)));
 					end
 				end
+				% look for nonoverlapping saccades of the other eye
+				other_eye_nonoverlap_inds = find_other_eye_nonoverlapping_saccades(sacc_tbl, other_sacc_tbl);
+				if ~isempty(other_eye_nonoverlap_inds)
+					% add these other eye saccades to the comb_sacc_tbl
+					for scnt = 1:length(other_eye_nonoverlap_inds)
+						other_ind = other_eye_nonoverlap_inds(scnt);
+						msk = comb_sacc_tbl{:,34} < other_sacc_tbl{other_ind,1};
+						new_row = [nan(1,33) other_sacc_tbl{other_ind,:}  0 nan(1,16)];
+						new_row_tbl = array2table(new_row, 'VariableNames', comb_sacc_tbl.Properties.VariableNames);
+
+						tmp1 = [comb_sacc_tbl(msk,:);  new_row_tbl; comb_sacc_tbl(~msk,:)];
+						comb_sacc_tbl = tmp1;	
+					end
+				end
+
+				
 				writetable(comb_sacc_tbl, strrep(sacc_fname, '.txt', '_comb.txt'), 'Delimiter', '\t' )
 			end
 		end %sacc_source & type file exists
@@ -340,7 +349,7 @@ if any(strcmp(tbl.Properties.VariableNames, 'target_t'))
 		% summarize the saccades from sacc_mask
 		start_ones = strfind([0 sacc_mask'],[0 1]);
 		% start_zeros = strfind([1 sacc_mask'],[1 0])
-		stop_ones = strfind([sacc_mask' 0],[1 0]);
+% 		stop_ones = strfind([sacc_mask' 0],[1 0]);
 		% stop_zeros = strfind([sacc_mask' 1],[0 1])
 
 		% Get lengths of islands of ones and zeros using those start-stop indices 
@@ -362,7 +371,7 @@ if any(strcmp(tbl.Properties.VariableNames, 'target_t'))
 		sm_out_tbl(logical(msk),:) = [];
 		% summarize what was removed
 		start_ones = strfind([0 msk'],[0 1]);
-		stop_ones = strfind([msk' 0],[1 0]);
+% 		stop_ones = strfind([msk' 0],[1 0]);
 		fprintf(fid, 'smooth pursuit: removed %d segments with head motion above threshold, total number of samples = %g\n', ...
 			length(start_ones), sum(msk)*min(unique(diff(sm_out_tbl.t_eye))));
 	end
