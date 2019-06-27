@@ -1875,98 +1875,98 @@ for st_cnt = 1:length(sacc_type_list)
 					if strcmp(sacc_source, 'engbert')  && strcmp(st, [ve 'h']) % only do for viewing eye horizontal
 						warning off
 						eng_summmary_tbl_ve_cnt = eng_summmary_tbl_ve_cnt + 1;
-						eng_summmary_tbl_ve.startTime(eng_summmary_tbl_ve_cnt) = beg_t;
-						eng_summmary_tbl_ve.endTime(eng_summmary_tbl_ve_cnt) = end_t;
-						eng_summmary_tbl_ve.hAmpl(eng_summmary_tbl_ve_cnt) = sacclist.sacc_horiz_component(sac_num);
-						eng_summmary_tbl_ve.vAmpl(eng_summmary_tbl_ve_cnt) = sacclist.sacc_vert_component(sac_num);
-						eng_summmary_tbl_ve.Ampl(eng_summmary_tbl_ve_cnt) = sacclist.sacc_ampl(sac_num);
-						eng_summmary_tbl_ve.swj(eng_summmary_tbl_ve_cnt) = sacclist.swj(sac_num);
+						eng_summmary_tbl_ve.startTime(eng_summmary_tbl_ve_cnt,1) = beg_t;
+						eng_summmary_tbl_ve.endTime(eng_summmary_tbl_ve_cnt,1) = end_t;
+						eng_summmary_tbl_ve.hAmpl(eng_summmary_tbl_ve_cnt,1) = sacclist.sacc_horiz_component(sac_num);
+						eng_summmary_tbl_ve.vAmpl(eng_summmary_tbl_ve_cnt,1) = sacclist.sacc_vert_component(sac_num);
+						eng_summmary_tbl_ve.Ampl(eng_summmary_tbl_ve_cnt,1) = sacclist.sacc_ampl(sac_num);
+						eng_summmary_tbl_ve.swj(eng_summmary_tbl_ve_cnt,1) = sacclist.swj(sac_num);
 						
-						eng_summmary_tbl_ve.peakVel(eng_summmary_tbl_ve_cnt) = sacclist.peak_vel(sac_num);
-						eng_summmary_tbl_ve.hPeakVelComponent(eng_summmary_tbl_ve_cnt) = sacclist.peak_vel_horiz_component(sac_num);
-						eng_summmary_tbl_ve.vPeakVelComponent(eng_summmary_tbl_ve_cnt) = sacclist.peak_vel_vert_component(sac_num);
+						eng_summmary_tbl_ve.peakVel(eng_summmary_tbl_ve_cnt,1) = sacclist.peak_vel(sac_num);
+						eng_summmary_tbl_ve.hPeakVelComponent(eng_summmary_tbl_ve_cnt,1) = sacclist.peak_vel_horiz_component(sac_num);
+						eng_summmary_tbl_ve.vPeakVelComponent(eng_summmary_tbl_ve_cnt,1) = sacclist.peak_vel_vert_component(sac_num);
 						
-						eng_summmary_tbl_ve.asAmplH(eng_summmary_tbl_ve_cnt) = sacclist.as_ampl_horiz(sac_num);
-						eng_summmary_tbl_ve.asAmplV(eng_summmary_tbl_ve_cnt) = sacclist.as_ampl_vert(sac_num);
-						eng_summmary_tbl_ve.asPeakVelH(eng_summmary_tbl_ve_cnt) = sacclist.as_peak_vel_horiz(sac_num);
-						eng_summmary_tbl_ve.asPeakVelV(eng_summmary_tbl_ve_cnt) = sacclist.as_peak_vel_vert(sac_num);
-						eng_summmary_tbl_ve.asPeakVelHtime(eng_summmary_tbl_ve_cnt) = (sacclist.as_peak_vel_horiz_time(sac_num)-handles.eye_data.start_times/1000);
-						eng_summmary_tbl_ve.asPeakVelVtime(eng_summmary_tbl_ve_cnt) = (sacclist.as_peak_vel_vert_time(sac_num)-handles.eye_data.start_times/1000);
+						eng_summmary_tbl_ve.asAmplH(eng_summmary_tbl_ve_cnt,1) = sacclist.as_ampl_horiz(sac_num);
+						eng_summmary_tbl_ve.asAmplV(eng_summmary_tbl_ve_cnt,1) = sacclist.as_ampl_vert(sac_num);
+						eng_summmary_tbl_ve.asPeakVelH(eng_summmary_tbl_ve_cnt,1) = sacclist.as_peak_vel_horiz(sac_num);
+						eng_summmary_tbl_ve.asPeakVelV(eng_summmary_tbl_ve_cnt,1) = sacclist.as_peak_vel_vert(sac_num);
+						eng_summmary_tbl_ve.asPeakVelHtime(eng_summmary_tbl_ve_cnt,1) = (sacclist.as_peak_vel_horiz_time(sac_num)-handles.eye_data.start_times/1000);
+						eng_summmary_tbl_ve.asPeakVelVtime(eng_summmary_tbl_ve_cnt,1) = (sacclist.as_peak_vel_vert_time(sac_num)-handles.eye_data.start_times/1000);
 
-						eng_summmary_tbl_ve.DriftMeanTime(eng_summmary_tbl_ve_cnt) = (sacclist.as_drift_mean_time(sac_num)-handles.eye_data.start_times/1000);
-						eng_summmary_tbl_ve.DriftMedianVelHor(eng_summmary_tbl_ve_cnt)	 = sacclist.as_median_horiz(sac_num);
-						eng_summmary_tbl_ve.DriftMeanVelHor(eng_summmary_tbl_ve_cnt)	 = sacclist.as_mean_horiz(sac_num);
-						eng_summmary_tbl_ve.DriftVarVelHor(eng_summmary_tbl_ve_cnt)	 = sacclist.as_var_horiz(sac_num);
-						eng_summmary_tbl_ve.DriftstdVelHor(eng_summmary_tbl_ve_cnt)	 = sacclist.as_std_horiz(sac_num);
-						eng_summmary_tbl_ve.DriftMedianVelVert(eng_summmary_tbl_ve_cnt)	 = sacclist.as_median_vert(sac_num);
-						eng_summmary_tbl_ve.DriftMeanVelVert(eng_summmary_tbl_ve_cnt)	 = sacclist.as_mean_vert(sac_num);
-						eng_summmary_tbl_ve.DriftvarVelVert(eng_summmary_tbl_ve_cnt)	 = sacclist.as_var_vert(sac_num);
-						eng_summmary_tbl_ve.DriftstdVelVert(eng_summmary_tbl_ve_cnt)	 = sacclist.as_std_vert(sac_num);
-						eng_summmary_tbl_ve.DriftMedianVel(eng_summmary_tbl_ve_cnt)	 = sacclist.as_median_norm_vel(sac_num);
-						eng_summmary_tbl_ve.DriftMeanVel(eng_summmary_tbl_ve_cnt)	 = sacclist.as_mean_norm_vel(sac_num);
-						eng_summmary_tbl_ve.DriftvarVel(eng_summmary_tbl_ve_cnt)	 = sacclist.as_var_norm_vel(sac_num);
-						eng_summmary_tbl_ve.DriftstdVel(eng_summmary_tbl_ve_cnt)	 = sacclist.as_std_norm_vel(sac_num);
-						eng_summmary_tbl_ve.DriftMedianPos(eng_summmary_tbl_ve_cnt)	 = sacclist.as_median_norm_pos(sac_num);
-						eng_summmary_tbl_ve.DriftMeanPos(eng_summmary_tbl_ve_cnt)	 = sacclist.as_mean_norm_pos(sac_num);
-						eng_summmary_tbl_ve.DriftvarPos(eng_summmary_tbl_ve_cnt)	 = sacclist.as_var_norm_pos(sac_num);
-						eng_summmary_tbl_ve.DriftstdPos(eng_summmary_tbl_ve_cnt)	 = sacclist.as_std_norm_pos(sac_num);
+						eng_summmary_tbl_ve.DriftMeanTime(eng_summmary_tbl_ve_cnt,1) = (sacclist.as_drift_mean_time(sac_num)-handles.eye_data.start_times/1000);
+						eng_summmary_tbl_ve.DriftMedianVelHor(eng_summmary_tbl_ve_cnt,1)	 = sacclist.as_median_horiz(sac_num);
+						eng_summmary_tbl_ve.DriftMeanVelHor(eng_summmary_tbl_ve_cnt,1)	 = sacclist.as_mean_horiz(sac_num);
+						eng_summmary_tbl_ve.DriftVarVelHor(eng_summmary_tbl_ve_cnt,1)	 = sacclist.as_var_horiz(sac_num);
+						eng_summmary_tbl_ve.DriftstdVelHor(eng_summmary_tbl_ve_cnt,1)	 = sacclist.as_std_horiz(sac_num);
+						eng_summmary_tbl_ve.DriftMedianVelVert(eng_summmary_tbl_ve_cnt,1)	 = sacclist.as_median_vert(sac_num);
+						eng_summmary_tbl_ve.DriftMeanVelVert(eng_summmary_tbl_ve_cnt,1)	 = sacclist.as_mean_vert(sac_num);
+						eng_summmary_tbl_ve.DriftvarVelVert(eng_summmary_tbl_ve_cnt,1)	 = sacclist.as_var_vert(sac_num);
+						eng_summmary_tbl_ve.DriftstdVelVert(eng_summmary_tbl_ve_cnt,1)	 = sacclist.as_std_vert(sac_num);
+						eng_summmary_tbl_ve.DriftMedianVel(eng_summmary_tbl_ve_cnt,1)	 = sacclist.as_median_norm_vel(sac_num);
+						eng_summmary_tbl_ve.DriftMeanVel(eng_summmary_tbl_ve_cnt,1)	 = sacclist.as_mean_norm_vel(sac_num);
+						eng_summmary_tbl_ve.DriftvarVel(eng_summmary_tbl_ve_cnt,1)	 = sacclist.as_var_norm_vel(sac_num);
+						eng_summmary_tbl_ve.DriftstdVel(eng_summmary_tbl_ve_cnt,1)	 = sacclist.as_std_norm_vel(sac_num);
+						eng_summmary_tbl_ve.DriftMedianPos(eng_summmary_tbl_ve_cnt,1)	 = sacclist.as_median_norm_pos(sac_num);
+						eng_summmary_tbl_ve.DriftMeanPos(eng_summmary_tbl_ve_cnt,1)	 = sacclist.as_mean_norm_pos(sac_num);
+						eng_summmary_tbl_ve.DriftvarPos(eng_summmary_tbl_ve_cnt,1)	 = sacclist.as_var_norm_pos(sac_num);
+						eng_summmary_tbl_ve.DriftstdPos(eng_summmary_tbl_ve_cnt,1)	 = sacclist.as_std_norm_pos(sac_num);
 
 
 						if ~isempty(grid_vals)
 							if ~isempty(out_tbl.region_of_interest{beg_row})
-								eng_summmary_tbl_ve.region_of_interest_start(eng_summmary_tbl_ve_cnt) = out_tbl.region_of_interest{beg_row};
+								eng_summmary_tbl_ve.region_of_interest_start(eng_summmary_tbl_ve_cnt,1) = out_tbl.region_of_interest{beg_row};
 							end
 							if ~isempty(out_tbl.region_of_interest{end_row})
-								eng_summmary_tbl_ve.region_of_interest_end(eng_summmary_tbl_ve_cnt) = out_tbl.region_of_interest{end_row};
+								eng_summmary_tbl_ve.region_of_interest_end(eng_summmary_tbl_ve_cnt,1) = out_tbl.region_of_interest{end_row};
 							end
 						end
 						warning on
 					elseif strcmp(sacc_source, 'engbert')  && strcmp(st, [nve 'h']) %  do for non viewing eye horizontal
 						warning off
 						eng_summmary_tbl_nve_cnt = eng_summmary_tbl_nve_cnt + 1;
-						eng_summmary_tbl_nve.startTime(eng_summmary_tbl_nve_cnt) = beg_t;
-						eng_summmary_tbl_nve.endTime(eng_summmary_tbl_nve_cnt) = end_t;
-						eng_summmary_tbl_nve.hAmpl(eng_summmary_tbl_nve_cnt) = sacclist.sacc_horiz_component(sac_num);
-						eng_summmary_tbl_nve.vAmpl(eng_summmary_tbl_nve_cnt) = sacclist.sacc_vert_component(sac_num);
-						eng_summmary_tbl_nve.swj(eng_summmary_tbl_nve_cnt) = sacclist.swj(sac_num);
+						eng_summmary_tbl_nve.startTime(eng_summmary_tbl_nve_cnt,1) = beg_t;
+						eng_summmary_tbl_nve.endTime(eng_summmary_tbl_nve_cnt,1) = end_t;
+						eng_summmary_tbl_nve.hAmpl(eng_summmary_tbl_nve_cnt,1) = sacclist.sacc_horiz_component(sac_num);
+						eng_summmary_tbl_nve.vAmpl(eng_summmary_tbl_nve_cnt,1) = sacclist.sacc_vert_component(sac_num);
+						eng_summmary_tbl_nve.swj(eng_summmary_tbl_nve_cnt,1) = sacclist.swj(sac_num);
 						
-						eng_summmary_tbl_nve.Ampl(eng_summmary_tbl_nve_cnt) = sacclist.sacc_ampl(sac_num);
-						eng_summmary_tbl_nve.peakVel(eng_summmary_tbl_nve_cnt) = sacclist.peak_vel(sac_num);
-						eng_summmary_tbl_nve.hPeakVelComponent(eng_summmary_tbl_nve_cnt) = sacclist.peak_vel_horiz_component(sac_num);
-						eng_summmary_tbl_nve.vPeakVelComponent(eng_summmary_tbl_nve_cnt) = sacclist.peak_vel_vert_component(sac_num);
+						eng_summmary_tbl_nve.Ampl(eng_summmary_tbl_nve_cnt,1) = sacclist.sacc_ampl(sac_num);
+						eng_summmary_tbl_nve.peakVel(eng_summmary_tbl_nve_cnt,1) = sacclist.peak_vel(sac_num);
+						eng_summmary_tbl_nve.hPeakVelComponent(eng_summmary_tbl_nve_cnt,1) = sacclist.peak_vel_horiz_component(sac_num);
+						eng_summmary_tbl_nve.vPeakVelComponent(eng_summmary_tbl_nve_cnt,1) = sacclist.peak_vel_vert_component(sac_num);
 						
-						eng_summmary_tbl_nve.asAmplH(eng_summmary_tbl_nve_cnt) = sacclist.as_ampl_horiz(sac_num);
-						eng_summmary_tbl_nve.asAmplV(eng_summmary_tbl_nve_cnt) = sacclist.as_ampl_vert(sac_num);
-						eng_summmary_tbl_nve.asPeakVelH(eng_summmary_tbl_nve_cnt) = sacclist.as_peak_vel_horiz(sac_num);
-						eng_summmary_tbl_nve.asPeakVelV(eng_summmary_tbl_nve_cnt) = sacclist.as_peak_vel_vert(sac_num);
-						eng_summmary_tbl_nve.asPeakVelHtime(eng_summmary_tbl_nve_cnt) = (sacclist.as_peak_vel_horiz_time(sac_num)-handles.eye_data.start_times/1000);
-						eng_summmary_tbl_nve.asPeakVelVtime(eng_summmary_tbl_nve_cnt) = (sacclist.as_peak_vel_vert_time(sac_num)-handles.eye_data.start_times/1000);
+						eng_summmary_tbl_nve.asAmplH(eng_summmary_tbl_nve_cnt,1) = sacclist.as_ampl_horiz(sac_num);
+						eng_summmary_tbl_nve.asAmplV(eng_summmary_tbl_nve_cnt,1) = sacclist.as_ampl_vert(sac_num);
+						eng_summmary_tbl_nve.asPeakVelH(eng_summmary_tbl_nve_cnt,1) = sacclist.as_peak_vel_horiz(sac_num);
+						eng_summmary_tbl_nve.asPeakVelV(eng_summmary_tbl_nve_cnt,1) = sacclist.as_peak_vel_vert(sac_num);
+						eng_summmary_tbl_nve.asPeakVelHtime(eng_summmary_tbl_nve_cnt,1) = (sacclist.as_peak_vel_horiz_time(sac_num)-handles.eye_data.start_times/1000);
+						eng_summmary_tbl_nve.asPeakVelVtime(eng_summmary_tbl_nve_cnt,1) = (sacclist.as_peak_vel_vert_time(sac_num)-handles.eye_data.start_times/1000);
 
-						eng_summmary_tbl_nve.DriftMeanTime(eng_summmary_tbl_nve_cnt) = (sacclist.as_drift_mean_time(sac_num)-handles.eye_data.start_times/1000);
-						eng_summmary_tbl_nve.DriftMedianVelHor(eng_summmary_tbl_nve_cnt)	 = sacclist.as_median_horiz(sac_num);
-						eng_summmary_tbl_nve.DriftMeanVelHor(eng_summmary_tbl_nve_cnt)	 = sacclist.as_mean_horiz(sac_num);
-						eng_summmary_tbl_nve.DriftVarVelHor(eng_summmary_tbl_nve_cnt)	 = sacclist.as_var_horiz(sac_num);
-						eng_summmary_tbl_nve.DriftstdVelHor(eng_summmary_tbl_nve_cnt)	 = sacclist.as_std_horiz(sac_num);
-						eng_summmary_tbl_nve.DriftMedianVelVert(eng_summmary_tbl_nve_cnt)	 = sacclist.as_median_vert(sac_num);
-						eng_summmary_tbl_nve.DriftMeanVelVert(eng_summmary_tbl_nve_cnt)	 = sacclist.as_mean_vert(sac_num);
-						eng_summmary_tbl_nve.DriftvarVelVert(eng_summmary_tbl_nve_cnt)	 = sacclist.as_var_vert(sac_num);
-						eng_summmary_tbl_nve.DriftstdVelVert(eng_summmary_tbl_nve_cnt)	 = sacclist.as_std_vert(sac_num);
-						eng_summmary_tbl_nve.DriftMedianVel(eng_summmary_tbl_nve_cnt)	 = sacclist.as_median_norm_vel(sac_num);
-						eng_summmary_tbl_nve.DriftMeanVel(eng_summmary_tbl_nve_cnt)	 = sacclist.as_mean_norm_vel(sac_num);
-						eng_summmary_tbl_nve.DriftvarVel(eng_summmary_tbl_nve_cnt)	 = sacclist.as_var_norm_vel(sac_num);
-						eng_summmary_tbl_nve.DriftstdVel(eng_summmary_tbl_nve_cnt)	 = sacclist.as_std_norm_vel(sac_num);
-						eng_summmary_tbl_nve.DriftMedianPos(eng_summmary_tbl_nve_cnt)	 = sacclist.as_median_norm_pos(sac_num);
-						eng_summmary_tbl_nve.DriftMeanPos(eng_summmary_tbl_nve_cnt)	 = sacclist.as_mean_norm_pos(sac_num);
-						eng_summmary_tbl_nve.DriftvarPos(eng_summmary_tbl_nve_cnt)	 = sacclist.as_var_norm_pos(sac_num);
-						eng_summmary_tbl_nve.DriftstdPos(eng_summmary_tbl_nve_cnt)	 = sacclist.as_std_norm_pos(sac_num);
+						eng_summmary_tbl_nve.DriftMeanTime(eng_summmary_tbl_nve_cnt,1) = (sacclist.as_drift_mean_time(sac_num)-handles.eye_data.start_times/1000);
+						eng_summmary_tbl_nve.DriftMedianVelHor(eng_summmary_tbl_nve_cnt,1)	 = sacclist.as_median_horiz(sac_num);
+						eng_summmary_tbl_nve.DriftMeanVelHor(eng_summmary_tbl_nve_cnt,1)	 = sacclist.as_mean_horiz(sac_num);
+						eng_summmary_tbl_nve.DriftVarVelHor(eng_summmary_tbl_nve_cnt,1)	 = sacclist.as_var_horiz(sac_num);
+						eng_summmary_tbl_nve.DriftstdVelHor(eng_summmary_tbl_nve_cnt,1)	 = sacclist.as_std_horiz(sac_num);
+						eng_summmary_tbl_nve.DriftMedianVelVert(eng_summmary_tbl_nve_cnt,1)	 = sacclist.as_median_vert(sac_num);
+						eng_summmary_tbl_nve.DriftMeanVelVert(eng_summmary_tbl_nve_cnt,1)	 = sacclist.as_mean_vert(sac_num);
+						eng_summmary_tbl_nve.DriftvarVelVert(eng_summmary_tbl_nve_cnt,1)	 = sacclist.as_var_vert(sac_num);
+						eng_summmary_tbl_nve.DriftstdVelVert(eng_summmary_tbl_nve_cnt,1)	 = sacclist.as_std_vert(sac_num);
+						eng_summmary_tbl_nve.DriftMedianVel(eng_summmary_tbl_nve_cnt,1)	 = sacclist.as_median_norm_vel(sac_num);
+						eng_summmary_tbl_nve.DriftMeanVel(eng_summmary_tbl_nve_cnt,1)	 = sacclist.as_mean_norm_vel(sac_num);
+						eng_summmary_tbl_nve.DriftvarVel(eng_summmary_tbl_nve_cnt,1)	 = sacclist.as_var_norm_vel(sac_num);
+						eng_summmary_tbl_nve.DriftstdVel(eng_summmary_tbl_nve_cnt,1)	 = sacclist.as_std_norm_vel(sac_num);
+						eng_summmary_tbl_nve.DriftMedianPos(eng_summmary_tbl_nve_cnt,1)	 = sacclist.as_median_norm_pos(sac_num);
+						eng_summmary_tbl_nve.DriftMeanPos(eng_summmary_tbl_nve_cnt,1)	 = sacclist.as_mean_norm_pos(sac_num);
+						eng_summmary_tbl_nve.DriftvarPos(eng_summmary_tbl_nve_cnt,1)	 = sacclist.as_var_norm_pos(sac_num);
+						eng_summmary_tbl_nve.DriftstdPos(eng_summmary_tbl_nve_cnt,1)	 = sacclist.as_std_norm_pos(sac_num);
 
 
 						if ~isempty(grid_vals)
 							if ~isempty(out_tbl.region_of_interest{beg_row})
-								eng_summmary_tbl_nve.region_of_interest_start(eng_summmary_tbl_nve_cnt) = out_tbl.region_of_interest{beg_row};
+								eng_summmary_tbl_nve.region_of_interest_start(eng_summmary_tbl_nve_cnt,1) = out_tbl.region_of_interest{beg_row};
 							end
 							if ~isempty(out_tbl.region_of_interest{end_row})
-								eng_summmary_tbl_nve.region_of_interest_end(eng_summmary_tbl_nve_cnt) = out_tbl.region_of_interest{end_row};
+								eng_summmary_tbl_nve.region_of_interest_end(eng_summmary_tbl_nve_cnt,1) = out_tbl.region_of_interest{end_row};
 							end
 						end
 						warning on
