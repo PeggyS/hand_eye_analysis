@@ -2162,6 +2162,15 @@ if ~isempty(handles.apdm_data.sensor)
 				resamp_head_ang(ind_end+1:ind_end_tbl) = nan(ind_end_tbl-ind_end,1);
 				ind_end = ind_end_tbl;
 			end
+			
+			% replace the 1st & last values with the original data's first
+			% and last values. These values are later used in a summary
+			% file to report the overall head movement. The filtering by
+			% resample pads the begining & end of the data with zeros, so
+			% there can be large inaccuracies at the begin & end.
+			resamp_head_ang(1) = h_head_ang_line.YData(1);
+			resamp_head_ang(end) = h_head_ang_line.YData(end);
+			
 			out_tbl.([sensor '_angle']) = resamp_head_ang(1:ind_end)';
 		end
 		
@@ -2249,7 +2258,11 @@ end
 h_verge_marks = findobj(handles.axes_eye, '-regexp', 'Tag', '^vergence_.*begin');
 if ~isempty(h_verge_marks)
 	out_tbl.vergence_marks = cell(height(out_tbl),1);
-	xdata = cell2mat(get(h_verge_marks, 'XData'));
+	if length(h_verge_marks) > 1
+		xdata = cell2mat(get(h_verge_marks, 'XData'));
+	else
+		xdata = get(h_verge_marks, 'XData');
+	end
 	for row_cnt = 1:size(xdata,1)
 		ind = find(out_tbl.t_eye >= xdata(row_cnt), 1, 'first');
 		out_tbl.vergence_marks(ind) = {strrep(h_verge_marks(row_cnt).Tag, 'vergence_', '')};
@@ -2259,17 +2272,26 @@ end % vergence marks
 h_verge_marks = findobj(handles.axes_eye, 'Tag', 'vergence_peak_velocity');
 if ~isempty(h_verge_marks)
 	out_tbl.vergence_peak_vel = cell(height(out_tbl),1);
-	xdata = cell2mat(get(h_verge_marks, 'XData'));
+	if length(h_verge_marks) > 1
+		xdata = cell2mat(get(h_verge_marks, 'XData'));
+		ydata = cell2mat(get(h_verge_marks, 'YData'));
+	else
+		xdata = get(h_verge_marks, 'XData');
+		ydata = get(h_verge_marks, 'YData');
+	end
 	for row_cnt = 1:size(xdata,1)
 		ind = find(out_tbl.t_eye >= xdata(row_cnt), 1, 'first');
-		out_tbl.vergence_peak_vel(ind) = {out_tbl.vergence_velocity(ind)};
+		out_tbl.vergence_peak_vel(ind) = {ydata(row_cnt)};
 	end
 end % vergence marks
 % vergence end
 h_verge_marks = findobj(handles.axes_eye, '-regexp', 'Tag', '^vergence_.*end');
 if ~isempty(h_verge_marks)
-	out_tbl.vergence_peak_vel = cell(height(out_tbl),1);
-	xdata = cell2mat(get(h_verge_marks, 'XData'));
+	if length(h_verge_marks) > 1
+		xdata = cell2mat(get(h_verge_marks, 'XData'));
+	else
+		xdata = get(h_verge_marks, 'XData');
+	end
 	for row_cnt = 1:size(xdata,1)
 		ind = find(out_tbl.t_eye >= xdata(row_cnt), 1, 'first');
 		out_tbl.vergence_marks(ind) = {strrep(h_verge_marks(row_cnt).Tag, 'vergence_', '')};
