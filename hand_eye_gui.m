@@ -1762,6 +1762,7 @@ if isfield(handles, 'line_vergence') % vergence
 	out_tbl.vergence = verge_data';
 	out_tbl.vergence_velocity = verg_vel_data';
 	out_tbl.conjugate = conj_data';
+	out_tbl.conjugate_velocity = d2pt(conj_data, 3, handles.eye_data.samp_freq);
 	out_tbl.verg_target_rh_deg = verg_target_x_right';
 	out_tbl.verg_target_lh_deg = verg_target_x_left';
 end

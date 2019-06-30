@@ -121,6 +121,10 @@ handles.target_data.right = nan(size(handles.target_data.t));
 handles.target_data.left = nan(size(handles.target_data.t));
 
 ipd = handles.led_results.testresults.ipd;
+if ipd == 0
+	info_cell = inputdlg('enter valid IPD','IPD');
+	ipd = str2double(info_cell{1});
+end
 t_start = handles.led_results.testresults.startPTB;
 % r_cal_offset = atan2d(-ipd/2,550);
 % l_cal_offset = -r_cal_offset;
