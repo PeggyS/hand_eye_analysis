@@ -1,4 +1,4 @@
-function handles = get_led_data(handles)
+function handles = get_led_targets(handles)
 % get the led data from the message file and distances from led_distances.csv
 % change this. get led data from *_results.mat
 % in results.mat:
@@ -215,4 +215,4 @@ uistack([handles.line_target_x_right, handles.line_target_x_left], 'bottom')
 % 	'Tag', 'line_target_x_right', 'Color', [0 0 0.8]);
 % handles.line_target_x_left = line(handles.target_data.t, (handles.target_data_left.x+handles.target_data_right.x)/2, ...
 % 	'Tag', 'line_target_x_left', 'Color', [0.5 0 0.8]);
-return % get_led_data
+return % get_led_targets

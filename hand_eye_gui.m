@@ -168,7 +168,7 @@ switch choice_num
 	case {13 14} % eccentric gaze holding
 		handles = parse_msg_file_for_targets(handles, 'ecc_gaze');
 	case {15 16} % vergence: get led data
-		handles = get_led_data(handles);
+		handles = get_led_targets(handles);
 	case 17 % restoring data from *_gui.mat
 		% change the choice_num corresponding to the saved .mat
 		if isfield(handles, 'vid_filename')
