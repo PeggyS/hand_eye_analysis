@@ -1702,12 +1702,13 @@ h_wait = waitbar(0, 'Gathering data');
 t_eye = handles.line_rh.XData;
 rh = handles.eye_data.rh.pos';
 lh = handles.eye_data.lh.pos';
-if isfield(handles, 'line_vergence') % vergence & no vertical data
+if isfield(handles, 'line_vergence') % vergence 
 	verge_data = handles.line_vergence.YData;
 	verg_vel_data = handles.line_vergence_velocity.YData;
 	conj_data = handles.line_conjugate.YData;
 	verg_target_x_right = handles.line_target_x_right.YData;
 	verg_target_x_left = handles.line_target_x_left.YData;
+	
 end
 if isfield(handles, 'line_rv')
 	rv = handles.line_rv.YData;
@@ -1765,6 +1766,17 @@ if isfield(handles, 'line_vergence') % vergence
 	out_tbl.conjugate_velocity = d2pt(conj_data, 3, handles.eye_data.samp_freq);
 	out_tbl.verg_target_rh_deg = verg_target_x_right';
 	out_tbl.verg_target_lh_deg = verg_target_x_left';
+	verg_target_lines = findobj(handles.axes_eye,'-regexp','Tag','.*vergence_\d+.*');
+	if isempty(verg_target_lines)
+		warning('no vergence target lines found!')
+	else
+		out_tbl.vergence_target_label = cell(height(out_tbl), 1);
+		for v_cnt = 1:length(verg_target_lines)
+			vt_line = verg_target_lines(v_cnt);
+			tbl_row = find(out_tbl.t_eye >= vt_line.XData(1), 1, 'first');
+			out_tbl.vergence_target_label{tbl_row} = vt_line.Tag;
+		end
+	end
 end
 
 % for pic diff & reading tasks, add cols for region of interest
@@ -2272,7 +2284,7 @@ end % vergence marks
 % vergence peak vel
 h_verge_marks = findobj(handles.axes_eye, 'Tag', 'vergence_peak_velocity');
 if ~isempty(h_verge_marks)
-	out_tbl.vergence_peak_vel = cell(height(out_tbl),1);
+	out_tbl.vergence_peak_vel = nan(height(out_tbl),1);
 	if length(h_verge_marks) > 1
 		xdata = cell2mat(get(h_verge_marks, 'XData'));
 		ydata = cell2mat(get(h_verge_marks, 'YData'));
@@ -2282,7 +2294,7 @@ if ~isempty(h_verge_marks)
 	end
 	for row_cnt = 1:size(xdata,1)
 		ind = find(out_tbl.t_eye >= xdata(row_cnt), 1, 'first');
-		out_tbl.vergence_peak_vel(ind) = {ydata(row_cnt)};
+		out_tbl.vergence_peak_vel(ind) = ydata(row_cnt);
 	end
 end % vergence marks
 % vergence end

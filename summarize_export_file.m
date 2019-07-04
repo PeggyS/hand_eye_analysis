@@ -434,6 +434,66 @@ if any(strcmp(tbl.Properties.VariableNames, 'target_t'))
 	writetable(sm_out_tbl, strrep(fname, '.txt', '_smooth_pursuit.txt'), 'delimiter', '\t')
 end % target_t is a column - smooth pursuit data
 
+% if it's a vergence file, there will be a column with vergence_marks
+if any(strcmp(tbl.Properties.VariableNames, 'vergence_marks'))
+	
+	verge_out_tbl = table();
+
+	vergence_label_msk = ~cellfun(@isempty, tbl.vergence_target_label);
+	vergence_peak_vel_msk = ~arrayfun(@isnan, tbl.vergence_peak_vel);
+	
+	% loop thru each vergence mark
+	verg_mark_inds = find(~cellfun(@isempty,tbl.vergence_marks));
+	verge_tbl_row = 0;
+	for v_cnt = 1:length(verg_mark_inds)
+		v_ind = verg_mark_inds(v_cnt);
+		
+		if regexpi(tbl.vergence_marks{v_ind}, 'begin')
+			verge_tbl_row = verge_tbl_row + 1;
+			warning('OFF', 'MATLAB:table:RowsAddedExistingVars')
+			verge_out_tbl.t_eye(verge_tbl_row) = tbl.t_eye(v_ind);
+			warning('ON', 'MATLAB:table:RowsAddedExistingVars')
+			
+			% find the preceeding vergence target label
+			v_label_ind = find(vergence_label_msk(1:v_ind),1,'last');
+			v_label = tbl.vergence_target_label{v_label_ind};
+
+			verge_out_tbl.vergence_target_label{verge_tbl_row} = v_label;
+			
+			% which eye
+			tmp = regexp(tbl.vergence_marks{v_ind}, '(r.)|(l.)', 'match');
+			eye_chan = tmp{1};
+			verge_out_tbl.eye_chan{verge_tbl_row}= eye_chan;
+				
+			% latency of begin
+			verge_out_tbl.begin_latency(verge_tbl_row) = verge_out_tbl.t_eye(verge_tbl_row) - tbl.t_eye(v_label_ind);
+			
+			% find the matching vergence end mark
+			end_str = strrep(tbl.vergence_marks{v_ind}, 'begin', 'end');
+			end_ind = [];
+			for i_cnt = v_cnt+1:length(verg_mark_inds)
+				if strcmp(tbl.vergence_marks(verg_mark_inds(i_cnt)), end_str)
+					end_ind = verg_mark_inds(i_cnt);
+					break
+				end
+				warning('found no matching vergence end mark for mark begin at t=%g', verge_out_tbl.t_eye(v_cnt))
+			end
+			if ~isempty(end_ind)
+				verge_out_tbl.end_latency(verge_tbl_row) = tbl.t_eye(end_ind) - tbl.t_eye(v_label_ind);
+			end
+			
+			% find the vegence peak velocity
+			v_peak_vel_ind = find(vergence_peak_vel_msk(v_ind:end),1,'first') + v_ind - 1;
+			verge_out_tbl.t_peak_vel(verge_tbl_row) = tbl.t_eye(v_peak_vel_ind);
+			verge_out_tbl.peak_vel(verge_tbl_row) = tbl.vergence_peak_vel(v_peak_vel_ind);
+		end
+		
+	end
+	% use the vergence_target_label col to determine when vergence targets change
+	verg_target_inds = find(~cellfun(@isempty,tbl.vergence_target_label));
+	
+	writetable(verge_out_tbl, strrep(fname, '.txt', '_vergence.txt'), 'delimiter', '\t')
+end
 fclose(fid); % summary file
 
 
