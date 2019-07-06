@@ -1775,6 +1775,7 @@ if isfield(handles, 'line_vergence') % vergence
 			vt_line = verg_target_lines(v_cnt);
 			tbl_row = find(out_tbl.t_eye >= vt_line.XData(1), 1, 'first');
 			out_tbl.vergence_target_label{tbl_row} = vt_line.Tag;
+			out_tbl.vergence_target_amplitude(tbl_row) = vt_line.UserData.verge_ampl;
 		end
 	end
 end

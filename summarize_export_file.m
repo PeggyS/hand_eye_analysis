@@ -459,6 +459,7 @@ if any(strcmp(tbl.Properties.VariableNames, 'vergence_marks'))
 			v_label = tbl.vergence_target_label{v_label_ind};
 
 			verge_out_tbl.vergence_target_label{verge_tbl_row} = v_label;
+			verge_out_tbl.vergence_target_amplitude(verge_tbl_row) = tbl.vergence_target_amplitude(v_label_ind);
 			
 			% which eye
 			tmp = regexp(tbl.vergence_marks{v_ind}, '(r.)|(l.)', 'match');

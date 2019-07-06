@@ -158,6 +158,8 @@ for cnt = 1:length(handles.led_results.tgtpos)
 		x_left = nan;
 		previous_led_dist_away = [];
 		previous_led_horiz_from_center = [];
+		previous_x_left = [];
+		previous_x_right = [];
 	end
 	mask = handles.target_data.t >= (handles.led_results.tgtpos(cnt).when-t_start)/1000;
 	handles.target_data.right(mask) = x_right;
@@ -169,8 +171,13 @@ for cnt = 1:length(handles.led_results.tgtpos)
 			tgt_type = 'divergence';
 		else
 			tgt_type = 'convergence';
-			yrange = [min([x_right, x_left]), max([x_right, x_left])];
+% 			yrange = [min([x_right, x_left]), max([x_right, x_left])];
 		end
+		% yrange for the vertical line at vergence
+		yrange = [min([x_right, x_left]), max([x_right, x_left])];
+		% amplitude of the vergence to store in the line's userdata
+		ud.verge_ampl = (x_left - x_right) - (previous_x_left - previous_x_right);
+		% also a saccade?
 		if abs(led_horiz_from_center - previous_led_horiz_from_center) < eps
 			incl_sacc = 0;
 		else
@@ -182,6 +189,8 @@ for cnt = 1:length(handles.led_results.tgtpos)
 	end
 	previous_led_dist_away = led_dist_away;
 	previous_led_horiz_from_center = led_horiz_from_center;
+	previous_x_left = x_left;
+	previous_x_right = x_right;
 	
 	% create vertical lines when the target changes value & label & number them
 	% convergence or divergence
@@ -192,7 +201,7 @@ for cnt = 1:length(handles.led_results.tgtpos)
 		if incl_sacc
 			tag_str = strcat(tag_str, '_plus_saccade');
 		end
-		h_line = line([x x], yrange, 'Tag', tag_str);
+		h_line = line([x x], yrange, 'Tag', tag_str, 'UserData', ud);
 		eye_m = uicontextmenu;
 		h_line.UIContextMenu = eye_m;
 		uimenu(eye_m, 'Label', tag_str);
