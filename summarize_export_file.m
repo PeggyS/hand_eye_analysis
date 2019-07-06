@@ -463,7 +463,19 @@ if any(strcmp(tbl.Properties.VariableNames, 'vergence_marks'))
 			% which eye
 			tmp = regexp(tbl.vergence_marks{v_ind}, '(r.)|(l.)', 'match');
 			eye_chan = tmp{1};
-			verge_out_tbl.eye_chan{verge_tbl_row}= eye_chan;
+			if strncmp(eye_chan, 'r', 1)
+				other_eye_chan = strrep(eye_chan, 'r', 'l');
+			else
+				other_eye_chan = strrep(eye_chan, 'l', 'r');
+			end
+			if strncmp(eye_chan, ve, 1)
+				eye_chan = ['ve_' eye_chan]; %#ok<*AGROW>
+				other_eye_chan = ['nve_' other_eye_chan];
+			else
+				eye_chan = ['nve_' eye_chan ];
+				other_eye_chan = ['ve_' other_eye_chan];
+			end
+			verge_out_tbl.eye_chan{verge_tbl_row} = eye_chan;
 				
 			% latency of begin
 			verge_out_tbl.begin_latency(verge_tbl_row) = verge_out_tbl.t_eye(verge_tbl_row) - tbl.t_eye(v_label_ind);
@@ -480,12 +492,23 @@ if any(strcmp(tbl.Properties.VariableNames, 'vergence_marks'))
 			end
 			if ~isempty(end_ind)
 				verge_out_tbl.end_latency(verge_tbl_row) = tbl.t_eye(end_ind) - tbl.t_eye(v_label_ind);
+				verge_out_tbl.vergence_amplitude(verge_tbl_row) = tbl.vergence(end_ind) - tbl.vergence(v_label_ind);
+				% eye_chan peak velocity
+				[~, tmp_ind] = nanmax(abs(tbl.([eye_chan '_vel'])(v_label_ind:end_ind)));
+				peak_vel_ind = tmp_ind  + v_label_ind -1;
+				verge_out_tbl.t_this_eye_peak_vel(verge_tbl_row) = tbl.t_eye(peak_vel_ind);
+				verge_out_tbl.this_eye_peak_vel(verge_tbl_row) = tbl.([eye_chan '_vel'])(peak_vel_ind);
+				% other_eye_chan peak velocity
+				[~, tmp_ind] = nanmax(abs(tbl.([other_eye_chan '_vel'])(v_label_ind:end_ind)));
+				peak_vel_ind = tmp_ind  + v_label_ind -1;
+				verge_out_tbl.t_other_eye_peak_vel(verge_tbl_row) = tbl.t_eye(peak_vel_ind);
+				verge_out_tbl.other_eye_peak_vel(verge_tbl_row) = tbl.([eye_chan '_vel'])(peak_vel_ind);
 			end
 			
 			% find the vegence peak velocity
 			v_peak_vel_ind = find(vergence_peak_vel_msk(v_ind:end),1,'first') + v_ind - 1;
-			verge_out_tbl.t_peak_vel(verge_tbl_row) = tbl.t_eye(v_peak_vel_ind);
-			verge_out_tbl.peak_vel(verge_tbl_row) = tbl.vergence_peak_vel(v_peak_vel_ind);
+			verge_out_tbl.t_vergence_peak_vel(verge_tbl_row) = tbl.t_eye(v_peak_vel_ind);
+			verge_out_tbl.vergence_peak_vel(verge_tbl_row) = tbl.vergence_peak_vel(v_peak_vel_ind);
 		end
 		
 	end
