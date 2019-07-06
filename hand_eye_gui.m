@@ -1636,6 +1636,9 @@ x = [h_line_velocity.XData(ind_gt_5) h_line_velocity.XData(ind_gt_5)];
 y = [h_line_velocity.YData(ind_gt_5) handles.line_vergence.YData(ind_gt_5)];
 h_beg_line = line(x, y, ...
 	'Tag', ['vergence_' eye_str '_begin'], 'Color', 'm', 'Marker', 'o', 'MarkerSize', 15);
+h_beg_line.UserData.h_line_velocity = h_line_velocity;
+draggable(h_beg_line, @vergenceMarkLineMotionFcn)
+
 % menus for the markers to delete
 eye_m = uicontextmenu;
 h_beg_line.UIContextMenu = eye_m;
@@ -1655,6 +1658,7 @@ h_peak_line = line(x, y, ...
 	'Tag', ['vergence_peak_velocity'], 'Color', 'k', 'Marker', 's', 'MarkerSize', 12);
 h_beg_line.UserData.h_peak_line = h_peak_line;
 
+
 % add marker for vergence end
 % from the peak vergence, look for the (abs(velocity)<5)
 n_pts_to_look = 1/(h_verge_vel.XData(2)-h_verge_vel.XData(1)) * 0.5;
@@ -1664,9 +1668,34 @@ x = [h_line_velocity.XData(ind_below_vel) h_line_velocity.XData(ind_below_vel)];
 y = [h_verge_vel.YData(ind_below_vel) handles.line_vergence.YData(ind_below_vel)];
 h_end_line = line(x, y, ...
 	'Tag', ['vergence_' eye_str '_end'], 'Color', 'k', 'Marker', 'p', 'MarkerSize', 12);
+h_end_line.UserData.h_line_velocity = h_verge_vel;
 h_beg_line.UserData.h_end_line = h_end_line;
+draggable(h_end_line, @vergenceMarkLineMotionFcn)
+
+
 
 guidata(handles.figure1, handles);
+return
+
+% ----------------------------------
+function vergenceMarkLineMotionFcn(h_line)
+
+verge_line = findobj(h_line.Parent, 'Tag', 'line_vergence');
+verge_x_data = verge_line.XData;
+verge_y_data = verge_line.YData;
+
+h_line_velocity = h_line.UserData.h_line_velocity;
+
+% h_line y data must stay on the verge_line & velocity line
+t_ind = find(verge_x_data >= h_line.XData(1), 1, 'first'); % time index of the moved begin or end line
+if isempty(t_ind)
+   if h_line.XData(1) < verge_x_data(1)
+      t_ind = 1;
+   elseif h_line.XData(1) > verge_x_data(end)
+      t_ind = length(verge_x_data);
+   end
+end
+h_line.YData = [h_line_velocity.YData(t_ind) verge_y_data(t_ind)];
 return
 
 % ----------------------------------------------------
