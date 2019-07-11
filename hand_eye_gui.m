@@ -525,6 +525,10 @@ if isfield(handles, 'line_rh') && isfield(handles, 'line_lh')
 		handles.line_vergence_velocity.YData = verg_vel;
 	else
 		handles.line_vergence_velocity = line(t, verg_vel, 'Tag', 'line_vergence_velocity', 'Color', 'k', 'Visible', 'off');
+		% context menus to add marks to velocity line
+		eye_m = uicontextmenu;
+		handles.line_vergence_velocity.UIContextMenu = eye_m;
+		uimenu(eye_m, 'Label', 'Add Mark', 'Callback', {@add_verge_vel_mark, handles.line_vergence_velocity});
 	end
 end
 
@@ -1658,7 +1662,6 @@ h_peak_line = line(x, y, ...
 	'Tag', ['vergence_peak_velocity'], 'Color', 'k', 'Marker', 's', 'MarkerSize', 12);
 h_beg_line.UserData.h_peak_line = h_peak_line;
 
-
 % add marker for vergence end
 % from the peak vergence, look for the (abs(velocity)<5)
 n_pts_to_look = 1/(h_verge_vel.XData(2)-h_verge_vel.XData(1)) * 0.5;
@@ -1671,8 +1674,6 @@ h_end_line = line(x, y, ...
 h_end_line.UserData.h_line_velocity = h_verge_vel;
 h_beg_line.UserData.h_end_line = h_end_line;
 draggable(h_end_line, @vergenceMarkLineMotionFcn)
-
-
 
 guidata(handles.figure1, handles);
 return
@@ -1706,6 +1707,53 @@ delete(h_verge_mark)
 delete(hObject)
 return
 
+% ---------------------------------------------------------------
+function add_verge_vel_mark( source, callbackdata, line_vergence_velocity)
+handles = guidata(gcf);
+axes(handles.axes_eye)
+cursor_loc = get(handles.axes_eye, 'CurrentPoint');
+cursor_x = cursor_loc(1);
+
+% add mark at cursor_x location on the line_vergence_velocity
+ind = find(line_vergence_velocity.XData >= cursor_x, 1, 'first');
+y = line_vergence_velocity.YData(ind);
+
+h_line = line(cursor_x, y, ...
+	'Tag', 'vergence_velocity_mark', 'Color', 'b', 'Marker', 'o', 'MarkerSize', 15);
+draggable(h_line, @vergenceVelMarkLineMotionFcn)
+
+% menus for the markers to delete
+eye_m = uicontextmenu;
+h_line.UIContextMenu = eye_m;
+uimenu(eye_m, 'Label', 'Delete', 'Callback', {@deleteVergenceVelMark, h_line}, ...
+	'Tag', 'menu_vergence_vel_mark')
+guidata(handles.figure1, handles);
+return
+
+% ----------------------------------
+function vergenceVelMarkLineMotionFcn(h_line)
+
+verge_line = findobj(h_line.Parent, 'Tag', 'line_vergence_velocity');
+verge_x_data = verge_line.XData;
+verge_y_data = verge_line.YData;
+
+% h_line y data must stay on the velocity line
+t_ind = find(verge_x_data >= h_line.XData(1), 1, 'first'); % time index of the moved begin or end line
+if isempty(t_ind)
+   if h_line.XData(1) < verge_x_data(1)
+      t_ind = 1;
+   elseif h_line.XData(1) > verge_x_data(end)
+      t_ind = length(verge_x_data);
+   end
+end
+h_line.YData = verge_y_data(t_ind);
+return
+
+% ----------------------------------------------------
+function deleteVergenceVelMark(hObject, eventdata, h_verge_mark)
+delete(h_verge_mark)
+delete(hObject)
+return
 
 % --- Executes on button press in pb_export.
 function pb_export_Callback(hObject, eventdata, handles)
