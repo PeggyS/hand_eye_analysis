@@ -267,11 +267,15 @@ if choice_num == 15 || choice_num == 16 % vergence
 	if ~isempty(handles.eye_data.lh.pos) && ~isempty(handles.eye_data.rh.pos)
 		% lh-rh = vergence
 		verg = handles.line_lh.YData - handles.line_rh.YData;
+		handles.line_vergence = line(t, verg, 'Tag', 'line_vergence', 'Color', 'b');
 		
 		% (lh+rh)/2 = conjugate
 		conj = (handles.line_lh.YData + handles.line_rh.YData)/2;
-		handles.line_vergence = line(t, verg, 'Tag', 'line_vergence', 'Color', 'b');
 		handles.line_conjugate = line(t, conj, 'Tag', 'line_conjugate', 'Color', 'c');
+		% context menus to add marks to conjugate line
+		eye_m = uicontextmenu;
+		handles.line_conjugate.UIContextMenu = eye_m;
+		uimenu(eye_m, 'Label', 'Add Mark', 'Callback', {@add_conjugate_mark, handles.line_conjugate});
 		
 	end
 	handles = create_verg_vel_lines(handles);
@@ -1755,6 +1759,53 @@ delete(h_verge_mark)
 delete(hObject)
 return
 
+% ---------------------------------------------------------------
+function add_conjugate_mark( source, callbackdata, line_conjugate)
+handles = guidata(gcf);
+axes(handles.axes_eye)
+cursor_loc = get(handles.axes_eye, 'CurrentPoint');
+cursor_x = cursor_loc(1);
+
+% add mark at cursor_x location on the line_vergence_velocity
+ind = find(line_conjugate.XData >= cursor_x, 1, 'first');
+y = line_conjugate.YData(ind);
+
+h_line = line(cursor_x, y, ...
+	'Tag', 'conjugate_mark', 'Color', 'b', 'Marker', 'o', 'MarkerSize', 15);
+draggable(h_line, @conjugateMarkLineMotionFcn)
+
+% menus for the markers to delete
+eye_m = uicontextmenu;
+h_line.UIContextMenu = eye_m;
+uimenu(eye_m, 'Label', 'Delete', 'Callback', {@deleteConjugateMark, h_line}, ...
+	'Tag', 'menu_conjugate_mark')
+guidata(handles.figure1, handles);
+return
+
+% ----------------------------------
+function conjugateMarkLineMotionFcn(h_line)
+
+h_conjugate_line = findobj(h_line.Parent, 'Tag', 'line_conjugate');
+x_data = h_line.XData;
+
+% h_line y data must stay on the velocity line
+t_ind = find(h_conjugate_line.XData >= h_line.XData(1), 1, 'first'); % time index of the moved line
+if isempty(t_ind)
+   if h_line.XData(1) < x_data(1)
+      t_ind = 1;
+   elseif h_line.XData(1) > x_data(end)
+      t_ind = length(x_data);
+   end
+end
+h_line.YData = h_conjugate_line.YData(t_ind);
+return
+
+% ----------------------------------------------------
+function deleteConjugateMark(hObject, eventdata, h_mark)
+delete(h_mark)
+delete(hObject)
+return
+
 % --- Executes on button press in pb_export.
 function pb_export_Callback(hObject, eventdata, handles)
 % hObject    handle to pb_export (see GCBO)
@@ -2388,6 +2439,34 @@ if ~isempty(h_verge_marks)
 		out_tbl.vergence_marks(ind) = {strrep(h_verge_marks(row_cnt).Tag, 'vergence_', '')};
 	end
 end % vergence marks
+
+% vergence velocity marks
+h_verge_marks = findobj(handles.axes_eye, '-regexp', 'Tag', '^vergence_velocity_mark');
+if ~isempty(h_verge_marks)
+	if length(h_verge_marks) > 1
+		xdata = cell2mat(get(h_verge_marks, 'XData'));
+	else
+		xdata = get(h_verge_marks, 'XData');
+	end
+	for row_cnt = 1:size(xdata,1)
+		ind = find(out_tbl.t_eye >= xdata(row_cnt), 1, 'first');
+		out_tbl.vergence_velocity_marks(ind) = {strrep(h_verge_marks(row_cnt).Tag, 'vergence_velocity_', '')};
+	end
+end % vergence velocity marks
+
+% conjugate_mark marks
+h_conjugate_mark = findobj(handles.axes_eye, '-regexp', 'Tag', '^conjugate_mark');
+if ~isempty(h_conjugate_mark)
+	if length(h_conjugate_mark) > 1
+		xdata = cell2mat(get(h_conjugate_mark, 'XData'));
+	else
+		xdata = get(h_conjugate_mark, 'XData');
+	end
+	for row_cnt = 1:size(xdata,1)
+		ind = find(out_tbl.t_eye >= xdata(row_cnt), 1, 'first');
+		out_tbl.conjugate_marks(ind) = {strrep(h_conjugate_mark(row_cnt).Tag, 'conjugate_', '')};
+	end
+end % conjugate_mark marks
 
 % saccade target info
 if isfield(handles, 'target_pos') && strcmp(handles.target_pos.type, 'sacc')
