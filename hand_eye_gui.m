@@ -1670,6 +1670,10 @@ h_beg_line.UserData.h_peak_line = h_peak_line;
 % from the peak vergence, look for the (abs(velocity)<5)
 n_pts_to_look = 1/(h_verge_vel.XData(2)-h_verge_vel.XData(1)) * 0.5;
 rel_ind_below_vel = find(abs(h_verge_vel.YData(ind_max_vel:ind_max_vel+n_pts_to_look)) < 5, 1, 'first');
+if isempty(rel_ind_below_vel)
+	warning('no vergence end found for begin at t = %g', h_line_velocity.XData(ind_gt_5))
+	return
+end
 ind_below_vel = ind_max_vel + rel_ind_below_vel - 1;
 x = [h_line_velocity.XData(ind_below_vel) h_line_velocity.XData(ind_below_vel)];
 y = [h_verge_vel.YData(ind_below_vel) handles.line_vergence.YData(ind_below_vel)];
