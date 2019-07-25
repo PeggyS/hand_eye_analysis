@@ -7,13 +7,12 @@ page = imread(page_img);
 
 ocr_results = ocr(page);
 wbound_boxes = ocr_results.WordBoundingBoxes;
-out_words = ocr_results.Words;
-
 % bounding boxes are pixel values
 % (0,0) of image is upper left
-
+out_words = ocr_results.Words;
 num_words = length(ocr_results.Words);
 
+figure
 
 % work on each line of text
 
@@ -112,3 +111,15 @@ end
 page_w_boxes = insertShape(page, 'Rectangle', wbound_boxes, 'Color', 'Red');
 imshow(page_w_boxes)
 imwrite(page_w_boxes, strrep(page_img, '.jpg', '_word_boxes.jpg'), 'JPEG')
+
+% save boxes as .csv with abs pixel values for rectangle left, top, right,
+% & bottom
+roi(:,1) = 1:size(wbound_boxes,1);
+roi(:,[2 3]) = wbound_boxes(:, [1 2]);
+roi(:,4) = wbound_boxes(:,1) + wbound_boxes(:,3);
+roi(:,5) = wbound_boxes(:,2) + wbound_boxes(:,4);
+
+roi_tbl = array2table(roi, 'VariableNames', {'roi', 'left', 'top', 'right', 'bottom'});
+roi_tbl.word = ocr_results.Words;
+writetable(roi_tbl, strrep(page_img, '.jpg', '_rois.csv'))
+
