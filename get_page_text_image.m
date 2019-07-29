@@ -4,7 +4,12 @@ function handles = get_page_text_image(handles)
 % the '_#' in the file name to determine the default image name
 tmp = regexp(handles.bin_filename, '_\d+.bin', 'match');
 underscore_num = strrep(tmp{1}, '.bin', '');
-page_fname = ['page' underscore_num '.jpg'];
+num = strrep(underscore_num, '_', '');
+% find od, os, or ou in path
+tmp = regexpi(handles.bin_filename, '(od)|(os)|(ou)\', 'match');
+eye = lower(tmp{1});
+
+page_fname = [eye num '.jpg'];
 [pathstr, ~, ~] = fileparts(handles.bin_filename);
 
 

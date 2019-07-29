@@ -428,7 +428,11 @@ switch choice_num
 			handles = display_mouse_clicks(handles);
 			% region of interest grid
 			handles = add_pict_diff_roi_grid(handles);
+		else 
+			% region of interest grid
+			handles = add_reading_rois(handles);
 		end
+		
 		
 	case {11 12 13 14} % gaze holding
 		% remove video axes
