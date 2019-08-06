@@ -1,6 +1,7 @@
-function roi = find_roi_from_file(handles, x_eye, y_eye, t_eye)
+function [roi, word] = find_roi_from_file(handles, x_eye, y_eye, t_eye)
 
 roi = [];
+word = '';
 
 xlims = handles.axes_video_overlay.XLim;
 ylims = handles.axes_video_overlay.YLim;
@@ -27,3 +28,7 @@ if height(tbl_rows) > 1
 end
 
 roi = tbl_rows.roi(1);
+word = '';
+if sum(contains(tbl_rows.Properties.VariableNames, 'word'))
+	word = tbl_rows.word(1);
+end

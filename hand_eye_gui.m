@@ -397,7 +397,7 @@ switch choice_num
 		set(handles.tbTargetV, 'Visible', 'on')
 	case {7 8 9 10} % picture diff & read text
 		if isfield(handles, 'im_data')
-			imshow(handles.im_data, 'Parent', handles.axes_video, 'XData', [0 1024], 'YData', [0 768] )
+			handles.img = imshow(handles.im_data, 'Parent', handles.axes_video, 'XData', [0 1024], 'YData', [0 768] );
 		else
 			save('missing_im_data.mat', handles)
 			disp('Error: im_data is missing. Handles struct is saved in the file missing_im_data.mat. Send to Peggy to troubleshoot.')
@@ -1917,11 +1917,15 @@ if isfield(handles, 'line_vergence') % vergence
 end
 
 % for pic diff & reading tasks, add cols for region of interest
-h_lines = findobj(handles.axes_video_overlay, '-regexp', 'Tag', 'line.*grid.*');
+h_lines = findobj(handles.axes_video_overlay, '-regexp', 'Tag', 'line.*grid.*'); % pic diff tasks
 grid_vals = [];
 if ~isempty(h_lines)
 	grid_vals = lines_to_grid(h_lines);
 	out_tbl.region_of_interest = cell(height(out_tbl), 1);
+end
+if isfield(handles, 'grid_file') % reading task will have grid_file
+	out_tbl.region_of_interest = cell(height(out_tbl), 1);
+	out_tbl.roi_word = cell(height(out_tbl), 1);
 end
 
 % for smooth pursuit add col if using data below head motion threshold
@@ -2003,14 +2007,14 @@ for st_cnt = 1:length(sacc_type_list)
 					end
 					
 					% if ROI grid
-					if ~isempty(grid_vals)
+					if ~isempty(grid_vals) || isfield(handles, 'grid_file')
 						eye = sacc_type(end-1);
 						h_eye = [eye 'h'];
 						v_eye = [eye 'v'];
 						if isfield(handles, 'grid_file')
-							out_tbl.region_of_interest{beg_row} = find_roi_from_file(handles, ...
+							[out_tbl.region_of_interest{beg_row}, out_tbl.roi_word{beg_row}] = find_roi_from_file(handles, ...
 								out_tbl.(h_eye)(beg_row), out_tbl.(v_eye)(beg_row), beg_t);
-							out_tbl.region_of_interest{end_row} = find_roi_from_file(handles, ...
+							[out_tbl.region_of_interest{end_row}, out_tbl.roi_word{end_row}] = find_roi_from_file(handles, ...
 								out_tbl.(h_eye)(end_row), out_tbl.(v_eye)(end_row), end_t);
 						else
 							out_tbl.region_of_interest{beg_row} = find_default_roi(grid_vals, ...
