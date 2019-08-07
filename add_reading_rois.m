@@ -34,12 +34,12 @@ if strcmpi(reply, 'n') || ~exist(grid_fname, 'file')
 	% request grid file
 	disp('Select reading page roi file (*.csv)')
 	[filename, pathname] = uigetfile('*.csv', 'Pick a roi file');
-    if isequal(filename,0) || isequal(pathname,0)
-       disp('User pressed cancel')
+	if isequal(filename,0) || isequal(pathname,0)
+		disp('User pressed cancel')
 		return
 	else
 		grid_fname = fullfile(pathname, filename);
-	end	
+	end
 end
 
 

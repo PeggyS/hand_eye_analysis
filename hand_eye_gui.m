@@ -2066,12 +2066,20 @@ for st_cnt = 1:length(sacc_type_list)
 						eng_summmary_tbl_ve.DriftstdPos(eng_summmary_tbl_ve_cnt,1)	 = sacclist.as_std_norm_pos(sac_num);
 
 
-						if ~isempty(grid_vals)
+						if ~isempty(grid_vals) || isfield(handles, 'grid_file')
 							if ~isempty(out_tbl.region_of_interest{beg_row})
 								eng_summmary_tbl_ve.region_of_interest_start(eng_summmary_tbl_ve_cnt,1) = out_tbl.region_of_interest{beg_row};
 							end
 							if ~isempty(out_tbl.region_of_interest{end_row})
 								eng_summmary_tbl_ve.region_of_interest_end(eng_summmary_tbl_ve_cnt,1) = out_tbl.region_of_interest{end_row};
+							end
+						end
+						if isfield(handles, 'grid_file')
+							if ~isempty( out_tbl.roi_word{beg_row})
+								eng_summmary_tbl_ve.roi_word_start(eng_summmary_tbl_ve_cnt,1) = out_tbl.roi_word{beg_row};
+							end
+							if ~isempty( out_tbl.roi_word{end_row})
+								eng_summmary_tbl_ve.roi_word_end(eng_summmary_tbl_ve_cnt,1) = out_tbl.roi_word{end_row};
 							end
 						end
 						warning on
@@ -2115,12 +2123,20 @@ for st_cnt = 1:length(sacc_type_list)
 						eng_summmary_tbl_nve.DriftstdPos(eng_summmary_tbl_nve_cnt,1)	 = sacclist.as_std_norm_pos(sac_num);
 
 
-						if ~isempty(grid_vals)
+						if ~isempty(grid_vals) || isfield(handles, 'grid_file')
 							if ~isempty(out_tbl.region_of_interest{beg_row})
 								eng_summmary_tbl_nve.region_of_interest_start(eng_summmary_tbl_nve_cnt,1) = out_tbl.region_of_interest{beg_row};
 							end
 							if ~isempty(out_tbl.region_of_interest{end_row})
 								eng_summmary_tbl_nve.region_of_interest_end(eng_summmary_tbl_nve_cnt,1) = out_tbl.region_of_interest{end_row};
+							end
+						end
+						if isfield(handles, 'grid_file')
+							if ~isempty( out_tbl.roi_word{beg_row})
+								eng_summmary_tbl_nve.roi_word_start(eng_summmary_tbl_nve_cnt,1) = out_tbl.roi_word{beg_row};
+							end
+							if ~isempty(out_tbl.roi_word{end_row})
+								eng_summmary_tbl_nve.roi_word_end(eng_summmary_tbl_nve_cnt,1) = out_tbl.roi_word{end_row};
 							end
 						end
 						warning on
