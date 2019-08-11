@@ -157,6 +157,17 @@ for eye_cnt = 1:length(sacc_type_list)
 
 				empty_tbl = array2table(nan(height(comb_sacc_tbl), width(other_sacc_tbl)), ...
 					'VariableNames', strcat(other_sacc_tbl.Properties.VariableNames, ['_' nve '_nve']));
+				% change VariableNames with 'word' to cell instead of NaN
+				tmp = regexp(empty_tbl.Properties.VariableNames, '.*word.*', 'match');
+				msk = ~cellfun(@isempty, tmp);
+				word_var_inds = find(msk);
+				match_cells = tmp(msk);
+				for m_cnt = 1:length(match_cells)
+					var_name = match_cells{m_cnt}{1};
+					empty_tbl.(var_name) = cell(height(comb_sacc_tbl),1);
+				end
+				startTime_nve_ind = width(sacc_tbl) + 1;
+				
 				comb_sacc_tbl = horzcat(comb_sacc_tbl, empty_tbl); %#ok<AGROW>
 				nve_inds = width(sacc_tbl) + (1 : width(other_sacc_tbl));
 				comb_sacc_tbl.ve_nve_overlap = ones(height(comb_sacc_tbl),1); % 0 or 1 overlaping ve & nve saccades
@@ -238,14 +249,22 @@ for eye_cnt = 1:length(sacc_type_list)
 					comb_sacc_tbl.ve_non_sacc_variancevel_v = nan(height(comb_sacc_tbl),1);
 					comb_sacc_tbl.ve_non_sacc_medianvel_v = nan(height(comb_sacc_tbl),1);
 					comb_sacc_tbl.ve_non_sacc_meanvel_v = nan(height(comb_sacc_tbl),1);
+					
+					tmp = regexp(comb_sacc_tbl.Properties.VariableNames, '.*word.*', 'match');
+					msk = ~cellfun(@isempty, tmp);
+					word_var_inds = find(msk);
+				
 					for scnt = 1:length(other_eye_nonoverlap_inds)
 						other_ind = other_eye_nonoverlap_inds(scnt);
-						msk = comb_sacc_tbl{:,34} < other_sacc_tbl{other_ind,1};
-						new_row = [nan(1,33) other_sacc_tbl{other_ind,:}  0 nan(1,32)];
-						new_row_tbl = array2table(new_row, 'VariableNames', comb_sacc_tbl.Properties.VariableNames);
+						msk = comb_sacc_tbl{:,startTime_nve_ind} < other_sacc_tbl{other_ind,1};
+						ve_nan_row = array2table(nan(1,startTime_nve_ind-1), 'VariableNames', comb_sacc_tbl.Properties.VariableNames(1:startTime_nve_ind-1));
+						ve_nve_ol_row = array2table(zeros(1,1), 'VariableNames', {'ve_nve_overlap'});
+						non_sac_row = array2table(nan(1,32), 'VariableNames', comb_sacc_tbl.Properties.VariableNames(end-31:end));
+						new_row = [ve_nan_row other_sacc_tbl(other_ind,:)  ve_nve_ol_row non_sac_row];
+						new_row.Properties.VariableNames =  comb_sacc_tbl.Properties.VariableNames;
 						new_row_num = sum(msk)+1;
 
-						tmp1 = [comb_sacc_tbl(msk,:);  new_row_tbl; comb_sacc_tbl(~msk,:)];
+						tmp1 = [comb_sacc_tbl(msk,:);  new_row; comb_sacc_tbl(~msk,:)];
 						comb_sacc_tbl = tmp1;	
 						
 						non_sacc_data = tbl(tbl.t_eye >= other_sacc_tbl.startTime(other_ind) & tbl.t_eye <= other_sacc_tbl.endTime(other_ind), ...
