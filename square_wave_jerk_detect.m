@@ -20,15 +20,23 @@ for eye_cnt = 1:length(eye_list)
 				if ~isfield(eye_data.(eye).saccades(source_num).sacclist, 'endpos') 
 					% endpos is not a field, calculate it
 					eye_data.(eye).saccades(source_num).sacclist.endpos = eye_data.(eye).pos(endIndex);
-					if ~isfield(eye_data.(eye_other_direction).saccades(source_num).sacclist, 'endpos')
-						eye_data.(eye_other_direction).saccades(source_num).sacclist.endpos = eye_data.(eye).pos(endIndex);
+					if length(eye_data.(eye_other_direction).saccades) >= source_num % check that other eye dir has saccades of this type - FIXME - this just checks the length of the saccades struc - what if there are other saccade types without both h & v and the source_num for the h & v saccades of this type don't match??
+						if ~isfield(eye_data.(eye_other_direction).saccades(source_num).sacclist, 'endpos')
+							eye_data.(eye_other_direction).saccades(source_num).sacclist.endpos = eye_data.(eye).pos(endIndex);
+						end
+					else
+						error('no saccades for %s of type %s', eye_other_direction, eye_data.(eye).saccades(source_num).paramtype)
 					end
 				end
 				if ~isfield(eye_data.(eye).saccades(source_num).sacclist, 'startpos') 
 					% startpos is not a field, calculate it
 					eye_data.(eye).saccades(source_num).sacclist.startpos = eye_data.(eye).pos(startIndex);
-					if ~isfield(eye_data.(eye_other_direction).saccades(source_num).sacclist, 'startpos')
-						eye_data.(eye_other_direction).saccades(source_num).sacclist.startpos = eye_data.(eye).pos(startIndex);
+					if length(eye_data.(eye_other_direction).saccades) >= source_num % check that other eye dir has saccades of this type - FIXME - this just checks the length of the saccades struc - what if there are other saccade types without both h & v and the source_num for the h & v saccades of this type don't match??
+						if ~isfield(eye_data.(eye_other_direction).saccades(source_num).sacclist, 'startpos')
+							eye_data.(eye_other_direction).saccades(source_num).sacclist.startpos = eye_data.(eye).pos(startIndex);
+						end
+					else
+						error('no saccades for %s of type %s', eye_other_direction, eye_data.(eye).saccades(source_num).paramtype)
 					end
 				end
 				
@@ -52,6 +60,7 @@ for eye_cnt = 1:length(eye_list)
 				else % for eyelink & engbert saccades use h & v eyes together to determine amplitude & direction
 					% if engbert saccades are only in h but not v, then
 					% this code will throw an error (index out of bounds) - FIXME
+					
 					if strcmp(eye, 'h')
 						dx = eye_data.(eye).saccades(source_num).sacclist.endpos ...
 							- eye_data.(eye).saccades(source_num).sacclist.startpos;
@@ -66,6 +75,7 @@ for eye_cnt = 1:length(eye_list)
 					amplitude = sqrt(dx.^2 + dy.^2);
 					directions	= atan2( dx, dy );
 					direction = mod( (directions * (180 / pi)) + 360, 360);
+					
 				end
 				blinks = filtfilt(ones(1,100), 1, double(isnan(eye_data.(eye).pos))); % extend blink (non-analyzed) data beyond nans - per script supplied by Fatema
 				[swj1, swj2] = SWJDetection.swjs(  startIndex, endIndex, amplitude, direction, ...
