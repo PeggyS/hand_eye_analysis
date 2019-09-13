@@ -453,87 +453,135 @@ if any(strcmp(tbl.Properties.VariableNames, 'target_t'))
 	writetable(sm_out_tbl, strrep(fname, '.txt', '_smooth_pursuit.txt'), 'delimiter', '\t')
 end % target_t is a column - smooth pursuit data
 
-% if it's a vergence file, there will be a column with vergence_marks
-if any(strcmp(tbl.Properties.VariableNames, 'vergence_marks'))
+% if it's a vergence file, there will be a column with vergence_target_label
+if any(strcmp(tbl.Properties.VariableNames, 'vergence_target_label'))
 	
 	verge_out_tbl = table();
 
 	vergence_label_msk = ~cellfun(@isempty, tbl.vergence_target_label);
 	vergence_peak_vel_msk = ~arrayfun(@isnan, tbl.vergence_peak_vel);
 	
-	% loop thru each vergence mark
-	verg_mark_inds = find(~cellfun(@isempty,tbl.vergence_marks));
-	verge_tbl_row = 0;
-	for v_cnt = 1:length(verg_mark_inds)
-		v_ind = verg_mark_inds(v_cnt);
-		
-		if regexpi(tbl.vergence_marks{v_ind}, 'begin')
-			verge_tbl_row = verge_tbl_row + 1;
-			warning('OFF', 'MATLAB:table:RowsAddedExistingVars')
-			verge_out_tbl.t_eye(verge_tbl_row) = tbl.t_eye(v_ind);
-			warning('ON', 'MATLAB:table:RowsAddedExistingVars')
-			
-			% find the preceeding vergence target label
-			v_label_ind = find(vergence_label_msk(1:v_ind),1,'last');
-			v_label = tbl.vergence_target_label{v_label_ind};
-
-			verge_out_tbl.vergence_target_label{verge_tbl_row} = v_label;
-			verge_out_tbl.vergence_target_amplitude(verge_tbl_row) = tbl.vergence_target_amplitude(v_label_ind);
-			
-			% which eye
-			tmp = regexp(tbl.vergence_marks{v_ind}, '(r.)|(l.)', 'match');
-			eye_chan = tmp{1};
-			if strncmp(eye_chan, 'r', 1)
-				other_eye_chan = strrep(eye_chan, 'r', 'l');
-			else
-				other_eye_chan = strrep(eye_chan, 'l', 'r');
-			end
-			if strncmp(eye_chan, ve, 1)
-				eye_chan = ['ve_' eye_chan]; %#ok<*AGROW>
-				other_eye_chan = ['nve_' other_eye_chan];
-			else
-				eye_chan = ['nve_' eye_chan ];
-				other_eye_chan = ['ve_' other_eye_chan];
-			end
-			verge_out_tbl.eye_chan{verge_tbl_row} = eye_chan;
-				
-			% latency of begin
-			verge_out_tbl.begin_latency(verge_tbl_row) = verge_out_tbl.t_eye(verge_tbl_row) - tbl.t_eye(v_label_ind);
-			
-			% find the matching vergence end mark
-			end_str = strrep(tbl.vergence_marks{v_ind}, 'begin', 'end');
-			end_ind = [];
-			for i_cnt = v_cnt+1:length(verg_mark_inds)
-				if strcmp(tbl.vergence_marks(verg_mark_inds(i_cnt)), end_str)
-					end_ind = verg_mark_inds(i_cnt);
-					break
-				end
-				warning('found no matching vergence end mark for mark begin at t=%g', verge_out_tbl.t_eye(v_cnt))
-			end
-			if ~isempty(end_ind)
-				verge_out_tbl.end_latency(verge_tbl_row) = tbl.t_eye(end_ind) - tbl.t_eye(v_label_ind);
-				verge_out_tbl.vergence_amplitude(verge_tbl_row) = tbl.vergence(end_ind) - tbl.vergence(v_label_ind);
-				% eye_chan peak velocity
-				[~, tmp_ind] = nanmax(abs(tbl.([eye_chan '_vel'])(v_label_ind:end_ind)));
-				peak_vel_ind = tmp_ind  + v_label_ind -1;
-				verge_out_tbl.t_this_eye_peak_vel(verge_tbl_row) = tbl.t_eye(peak_vel_ind);
-				verge_out_tbl.this_eye_peak_vel(verge_tbl_row) = tbl.([eye_chan '_vel'])(peak_vel_ind);
-				% other_eye_chan peak velocity
-				[~, tmp_ind] = nanmax(abs(tbl.([other_eye_chan '_vel'])(v_label_ind:end_ind)));
-				peak_vel_ind = tmp_ind  + v_label_ind -1;
-				verge_out_tbl.t_other_eye_peak_vel(verge_tbl_row) = tbl.t_eye(peak_vel_ind);
-				verge_out_tbl.other_eye_peak_vel(verge_tbl_row) = tbl.([eye_chan '_vel'])(peak_vel_ind);
-			end
-			
-			% find the vegence peak velocity
-			v_peak_vel_ind = find(vergence_peak_vel_msk(v_ind:end),1,'first') + v_ind - 1;
-			verge_out_tbl.t_vergence_peak_vel(verge_tbl_row) = tbl.t_eye(v_peak_vel_ind);
-			verge_out_tbl.vergence_peak_vel(verge_tbl_row) = tbl.vergence_peak_vel(v_peak_vel_ind);
-		end
-		
-	end
-	% use the vergence_target_label col to determine when vergence targets change
+	% loop thru each vergence target label
 	verg_target_inds = find(~cellfun(@isempty,tbl.vergence_target_label));
+% 	verg_mark_inds = find(~cellfun(@isempty,tbl.vergence_marks));
+	verge_tbl_row = 0;
+	for v_cnt = 1:length(verg_target_inds)
+		v_ind = verg_target_inds(v_cnt);
+		
+		% add the vergence target to the table
+		verge_tbl_row = verge_tbl_row + 1;
+		warning('OFF', 'MATLAB:table:RowsAddedExistingVars')
+		verge_out_tbl.t_eye(verge_tbl_row) = tbl.t_eye(v_ind);
+		warning('ON', 'MATLAB:table:RowsAddedExistingVars')
+		
+		verge_out_tbl.vergence_target_label{verge_tbl_row} = tbl.vergence_target_label{v_ind};
+		verge_out_tbl.vergence_target_amplitude(verge_tbl_row) = tbl.vergence_target_amplitude(v_ind);
+		
+		% find the vergence marks after the target
+		verge_mark_inds = find(~cellfun(@isempty, tbl.vergence_marks(v_ind:end))) + v_ind-1;
+		
+					
+		% record the vergence marks after the target_ind less than 2.5 sec
+		% after the vergence target
+		while length(verge_mark_inds) > 1
+			% find both the begin & end vergence marks
+			bb_ind = find(contains({tbl.vergence_marks{verge_mark_inds}},'begin'),1);
+			vm_beg_ind = verge_mark_inds(bb_ind);
+			ee_ind = find(contains({tbl.vergence_marks{verge_mark_inds}},'end'),1);
+			vm_end_ind = verge_mark_inds(ee_ind);	
+			% times between vergence targets are > 2 s
+			if tbl.t_eye(vm_beg_ind) - tbl.t_eye(v_ind) < 2.5
+				% add begin vergence info to verge_out_tbl
+
+				% which eye has the vergence mark
+				tmp = regexp(tbl.vergence_marks{vm_beg_ind}, '(r.)|(l.)', 'match');
+				eye_chan = tmp{1};
+				if strncmp(eye_chan, 'r', 1)
+					other_eye_chan = strrep(eye_chan, 'r', 'l');
+				else
+					other_eye_chan = strrep(eye_chan, 'l', 'r');
+				end
+				if strncmp(eye_chan, ve, 1)
+					eye_chan = ['ve_' eye_chan]; %#ok<*AGROW>
+					other_eye_chan = ['nve_' other_eye_chan];
+				else
+					eye_chan = ['nve_' eye_chan ];
+					other_eye_chan = ['ve_' other_eye_chan];
+				end
+% 					verge_out_tbl.(eye_chan){verge_tbl_row} = eye_chan;
+
+				% latency of begin 
+				eye_latency_var = ['begin_latency_' eye_chan];
+				verge_out_tbl.(eye_latency_var)(verge_tbl_row) = tbl.t_eye(vm_beg_ind) - tbl.t_eye(v_ind);
+				% latency of end 
+				eye_latency_var = ['end_latency_' eye_chan];
+				verge_out_tbl.(eye_latency_var)(verge_tbl_row) = tbl.t_eye(vm_end_ind) - tbl.t_eye(v_ind);
+
+				% amplitude
+				verge_out_tbl.vergence_amplitude(verge_tbl_row) = tbl.vergence(vm_end_ind) - tbl.vergence(vm_beg_ind);
+
+				% eye_chan peak velocity
+				[~, tmp_ind] = nanmax(abs(tbl.([eye_chan '_vel'])(v_ind:vm_end_ind)));
+				peak_vel_ind = tmp_ind  + v_ind -1;
+				verge_out_tbl.(['t_' eye_chan '_eye_peak_vel'])(verge_tbl_row) = tbl.t_eye(peak_vel_ind);
+				verge_out_tbl.(['t_' eye_chan '_eye_peak_vel'])(verge_tbl_row) = tbl.([eye_chan '_vel'])(peak_vel_ind);
+				% other_eye_chan peak velocity
+				[~, tmp_ind] = nanmax(abs(tbl.([other_eye_chan '_vel'])(v_ind:vm_end_ind)));
+				peak_vel_ind = tmp_ind  + v_ind -1;
+				verge_out_tbl.(['t_' other_eye_chan '_eye_peak_vel'])(verge_tbl_row) = tbl.t_eye(peak_vel_ind);
+				verge_out_tbl.(['t_' other_eye_chan '_eye_peak_vel'])(verge_tbl_row) = tbl.([eye_chan '_vel'])(peak_vel_ind);
+				
+				% find the vegence peak velocity
+				v_peak_vel_ind = find(vergence_peak_vel_msk(v_ind:end),1,'first') + v_ind - 1;
+				verge_out_tbl.t_vergence_peak_vel(verge_tbl_row) = tbl.t_eye(v_peak_vel_ind);
+				verge_out_tbl.vergence_peak_vel(verge_tbl_row) = tbl.vergence_peak_vel(v_peak_vel_ind);
+				
+				% saccade variables in the tbl
+				tmp = regexpi(tbl.Properties.VariableNames, '.*saccades$', 'match');
+				sacc_var_list = [tmp{:}];
+
+				for sv_cnt = 1:length(sacc_var_list)
+					% find the saccades after the target
+					sacc_var = sacc_var_list{sv_cnt};
+					sacc_inds = find(~cellfun(@isempty, tbl.(sacc_var)));
+					ss_inds = find(tbl.t_eye(sacc_inds)-tbl.t_eye(v_ind)<2 & tbl.t_eye(sacc_inds)-tbl.t_eye(v_ind)>0);
+					sv_inds = sacc_inds(ss_inds);
+					
+					sbeg_cnt = 0;
+					send_cnt = 0;
+					for sv_cnt = 1:length(sv_inds)
+						if contains(tbl.(sacc_var)(sv_inds(sv_cnt)), 'start')
+							sbeg_cnt = sbeg_cnt+1;
+							verg_t_var = [sacc_var '_' num2str(sbeg_cnt) '_t'];
+							tmp = regexp(sacc_var, '(nve|ve)_(l|r)(v|h)', 'match');
+							tbl_eye_pos_var = tmp{1};
+							verge_eye_pos_var = [sacc_var '_' num2str(sbeg_cnt) '_pos'];
+						else
+							send_cnt = send_cnt+1;
+							verg_t_var = [sacc_var '_' num2str(send_cnt) '_t'];
+							tmp = regexp(sacc_var, '(nve|ve)_(l|r)(v|h)', 'match');
+							tbl_eye_pos_var = tmp{1};
+							verge_eye_pos_var = [sacc_var '_' num2str(send_cnt) '_pos'];
+						end				
+						
+						verge_out_tbl.(verg_t_var)(verge_tbl_row) = tbl.t_eye(sv_inds(sv_cnt));
+						verge_out_tbl.(verge_eye_pos_var)(verge_tbl_row) = tbl.(tbl_eye_pos_var)(sv_inds(sv_cnt));
+					end
+				end		
+				
+				% remove these verge_mark_inds	from the list	
+				verge_mark_inds(ee_ind) = [];
+				verge_mark_inds(bb_ind) = [];
+			else
+				break
+			end
+			
+			
+		end % while there are verge_mark_inds to check
+		
+		
+	end % for loop through verge targets
+
 	
 	writetable(verge_out_tbl, strrep(fname, '.txt', '_vergence.txt'), 'delimiter', '\t')
 end
