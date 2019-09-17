@@ -459,7 +459,11 @@ if any(strcmp(tbl.Properties.VariableNames, 'vergence_target_label'))
 	verge_out_tbl = table();
 
 	vergence_label_msk = ~cellfun(@isempty, tbl.vergence_target_label);
-	vergence_peak_vel_msk = ~arrayfun(@isnan, tbl.vergence_peak_vel);
+	if contains(tbl.Properties.VariableNames, 'vergence_peak_vel')
+		vergence_peak_vel_msk = ~arrayfun(@isnan, tbl.vergence_peak_vel);
+	else
+		vergence_peak_vel_msk = zeros(height(tbl),1);
+	end
 	
 	% loop thru each vergence target label
 	verg_target_inds = find(~cellfun(@isempty,tbl.vergence_target_label));
@@ -478,8 +482,11 @@ if any(strcmp(tbl.Properties.VariableNames, 'vergence_target_label'))
 		verge_out_tbl.vergence_target_amplitude(verge_tbl_row) = tbl.vergence_target_amplitude(v_ind);
 		
 		% find the vergence marks after the target
-		verge_mark_inds = find(~cellfun(@isempty, tbl.vergence_marks(v_ind:end))) + v_ind-1;
-		
+		if contains(tbl.Properties.VariableNames, 'vergence_marks')
+			verge_mark_inds = find(~cellfun(@isempty, tbl.vergence_marks(v_ind:end))) + v_ind-1;
+		else
+			verge_mark_inds = [];
+		end
 					
 		% record the vergence marks after the target_ind less than 2.5 sec
 		% after the vergence target

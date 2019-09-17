@@ -2622,9 +2622,9 @@ h_blinks = findobj(handles.axes_eye, '-regexp', 'Tag', 'blink_id#\d*_patch');
 if ~isempty(h_blinks)
 	out_tbl.blinks = cell(height(out_tbl), 1);
 	for blink_num = 1:length(h_blinks)
-		beg_t = min(h_blinks(blink_num).XData);
+		beg_t = min(h_blinks(blink_num).XData) - 0.1; % remove an extra 100ms before the blink
 		beg_txt = ['blink_#' num2str(blink_num) '_begin'];
-		end_t = max(h_blinks(blink_num).XData);
+		end_t = max(h_blinks(blink_num).XData) + 0.1; % remove an extra 100ms after the blink
 		end_txt = ['blink_#' num2str(blink_num) '_end'];
 		% put the line tag into the table
 		row_beg = find(out_tbl.t_eye >= beg_t, 1, 'first');
@@ -2633,7 +2633,7 @@ if ~isempty(h_blinks)
 			out_tbl.blinks{row_beg} = beg_txt;
 		else
 			beep
-			disp('****** hand_eye_gui line 1535 *******')
+			disp('****** hand_eye_gui line 2636 *******')
 			disp('there will be a missing blink beginning in the exported file')
 			excl_flg = false;
 		end
@@ -2642,7 +2642,7 @@ if ~isempty(h_blinks)
 			out_tbl.blinks{row_end} = end_txt;
 		else
 			beep
-			disp('****** hand_eye_gui line 1542 *******')
+			disp('****** hand_eye_gui line 2645 *******')
 			disp('there will be a missing blink end in the exported file')
 			excl_flg = false;
 		end
