@@ -167,22 +167,32 @@ for cnt = 1:length(handles.led_results.tgtpos)
 	
 	% determine if this was convergence, diveregence, & if included saccade
 	if ~isempty(previous_led_dist_away)
-		if led_dist_away - previous_led_dist_away > 0
-			tgt_type = 'divergence';
+		if abs(led_dist_away - previous_led_dist_away) < eps
+			tgt_type = 'pure_saccade';
+			% amplitude of the vergence to store in the line's userdata
+			ud.verge_ampl = 0;
+			ud.sacc_ampl = handles.led_results.tgtpos(cnt).angle - handles.led_results.tgtpos(cnt-1).angle;
 		else
-			tgt_type = 'convergence';
-% 			yrange = [min([x_right, x_left]), max([x_right, x_left])];
+			if led_dist_away - previous_led_dist_away > 0
+				tgt_type = 'divergence';
+			
+			else 
+				tgt_type = 'convergence';
+			end
+			% amplitude of the vergence to store in the line's userdata
+			ud.verge_ampl = (x_left - x_right) - (previous_x_left - previous_x_right);
+			% also a saccade?
+			if abs(led_horiz_from_center - previous_led_horiz_from_center) < eps
+				incl_sacc = 0;
+				ud.sacc_ampl = 0;
+			else
+				incl_sacc = 1;
+				ud.sacc_ampl = handles.led_results.tgtpos(cnt).angle - handles.led_results.tgtpos(cnt-1).angle;
+			end
 		end
 		% yrange for the vertical line at vergence
 		yrange = [min([x_right, x_left]), max([x_right, x_left])];
-		% amplitude of the vergence to store in the line's userdata
-		ud.verge_ampl = (x_left - x_right) - (previous_x_left - previous_x_right);
-		% also a saccade?
-		if abs(led_horiz_from_center - previous_led_horiz_from_center) < eps
-			incl_sacc = 0;
-		else
-			incl_sacc = 1;
-		end
+				
 	else
 		tgt_type = [];
 		incl_sacc = [];

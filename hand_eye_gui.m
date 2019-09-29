@@ -1902,7 +1902,7 @@ if isfield(handles, 'line_vergence') % vergence
 	out_tbl.conjugate_velocity = d2pt(conj_data, 3, handles.eye_data.samp_freq);
 	out_tbl.verg_target_rh_deg = verg_target_x_right';
 	out_tbl.verg_target_lh_deg = verg_target_x_left';
-	verg_target_lines = findobj(handles.axes_eye,'-regexp','Tag','.*vergence_\d+.*');
+	verg_target_lines = findobj(handles.axes_eye,'-regexp','Tag','.*((vergence)|(pure_saccade))_\d+.*');
 	if isempty(verg_target_lines)
 		warning('no vergence target lines found!')
 	else
@@ -1912,6 +1912,7 @@ if isfield(handles, 'line_vergence') % vergence
 			tbl_row = find(out_tbl.t_eye >= vt_line.XData(1), 1, 'first');
 			out_tbl.vergence_target_label{tbl_row} = vt_line.Tag;
 			out_tbl.vergence_target_amplitude(tbl_row) = vt_line.UserData.verge_ampl;
+			out_tbl.vergence_target_saccade_amplitude(tbl_row) = vt_line.UserData.sacc_ampl;
 		end
 	end
 end

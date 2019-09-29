@@ -459,10 +459,10 @@ if any(strcmp(tbl.Properties.VariableNames, 'vergence_target_label'))
 	verge_out_tbl = table();
 
 	vergence_label_msk = ~cellfun(@isempty, tbl.vergence_target_label);
-	if contains(tbl.Properties.VariableNames, 'vergence_peak_vel')
-		vergence_peak_vel_msk = ~arrayfun(@isnan, tbl.vergence_peak_vel);
+	if any(contains(tbl.Properties.VariableNames, 'vergence_peak_vel'))
+		vergence_peak_vel_inds = find(~isnan(tbl.vergence_peak_vel));
 	else
-		vergence_peak_vel_msk = zeros(height(tbl),1);
+		vergence_peak_vel_inds = [];
 	end
 	
 	% loop thru each vergence target label
@@ -480,9 +480,10 @@ if any(strcmp(tbl.Properties.VariableNames, 'vergence_target_label'))
 		
 		verge_out_tbl.vergence_target_label{verge_tbl_row} = tbl.vergence_target_label{v_ind};
 		verge_out_tbl.vergence_target_amplitude(verge_tbl_row) = tbl.vergence_target_amplitude(v_ind);
+		verge_out_tbl.vergence_target_saccade_amplitude(verge_tbl_row) = tbl.vergence_target_saccade_amplitude(v_ind);		
 		
 		% find the vergence marks after the target
-		if contains(tbl.Properties.VariableNames, 'vergence_marks')
+		if any(contains(tbl.Properties.VariableNames, 'vergence_marks'))
 			verge_mark_inds = find(~cellfun(@isempty, tbl.vergence_marks(v_ind:end))) + v_ind-1;
 		else
 			verge_mark_inds = [];
@@ -528,20 +529,24 @@ if any(strcmp(tbl.Properties.VariableNames, 'vergence_target_label'))
 				verge_out_tbl.vergence_amplitude(verge_tbl_row) = tbl.vergence(vm_end_ind) - tbl.vergence(vm_beg_ind);
 
 				% eye_chan peak velocity
-				[~, tmp_ind] = nanmax(abs(tbl.([eye_chan '_vel'])(v_ind:vm_end_ind)));
+				[~, tmp_ind] = nanmax(abs(tbl.([eye_chan '_vergence_calibrated_velocity'])(v_ind:vm_end_ind)));
 				peak_vel_ind = tmp_ind  + v_ind -1;
-				verge_out_tbl.(['t_' eye_chan '_eye_peak_vel'])(verge_tbl_row) = tbl.t_eye(peak_vel_ind);
-				verge_out_tbl.(['t_' eye_chan '_eye_peak_vel'])(verge_tbl_row) = tbl.([eye_chan '_vel'])(peak_vel_ind);
+				verge_out_tbl.(['t_' eye_chan '_eye_verge_cal_peak_vel'])(verge_tbl_row) = tbl.t_eye(peak_vel_ind);
+				verge_out_tbl.([eye_chan '_eye_verge_cal_peak_vel'])(verge_tbl_row) = tbl.([eye_chan '_vergence_calibrated_velocity'])(peak_vel_ind);
 				% other_eye_chan peak velocity
-				[~, tmp_ind] = nanmax(abs(tbl.([other_eye_chan '_vel'])(v_ind:vm_end_ind)));
+				[~, tmp_ind] = nanmax(abs(tbl.([other_eye_chan '_vergence_calibrated_velocity'])(v_ind:vm_end_ind)));
 				peak_vel_ind = tmp_ind  + v_ind -1;
-				verge_out_tbl.(['t_' other_eye_chan '_eye_peak_vel'])(verge_tbl_row) = tbl.t_eye(peak_vel_ind);
-				verge_out_tbl.(['t_' other_eye_chan '_eye_peak_vel'])(verge_tbl_row) = tbl.([eye_chan '_vel'])(peak_vel_ind);
+				verge_out_tbl.(['t_' other_eye_chan '_eye_verge_cal_peak_vel'])(verge_tbl_row) = tbl.t_eye(peak_vel_ind);
+				verge_out_tbl.([other_eye_chan '_eye_verge_cal_peak_vel'])(verge_tbl_row) = tbl.([other_eye_chan '_vergence_calibrated_velocity'])(peak_vel_ind);
 				
 				% find the vegence peak velocity
-				v_peak_vel_ind = find(vergence_peak_vel_msk(v_ind:end),1,'first') + v_ind - 1;
-				verge_out_tbl.t_vergence_peak_vel(verge_tbl_row) = tbl.t_eye(v_peak_vel_ind);
-				verge_out_tbl.vergence_peak_vel(verge_tbl_row) = tbl.vergence_peak_vel(v_peak_vel_ind);
+% 				v_peak_vel_ind = find(vergence_peak_vel_inds > v_ind, 1, 'first');
+				[~, tmp_ind] = nanmax(abs(tbl.vergence_peak_vel(v_ind:vm_end_ind)));
+				peak_vel_ind = tmp_ind  + v_ind -1;
+				if ~isempty(peak_vel_ind)
+					verge_out_tbl.t_vergence_peak_vel(verge_tbl_row) = tbl.t_eye(peak_vel_ind);
+					verge_out_tbl.vergence_peak_vel(verge_tbl_row) = tbl.vergence_peak_vel(peak_vel_ind);
+				end
 				
 				% saccade variables in the tbl
 				tmp = regexpi(tbl.Properties.VariableNames, '.*saccades$', 'match');
@@ -559,20 +564,21 @@ if any(strcmp(tbl.Properties.VariableNames, 'vergence_target_label'))
 					for sv_cnt = 1:length(sv_inds)
 						if contains(tbl.(sacc_var)(sv_inds(sv_cnt)), 'start')
 							sbeg_cnt = sbeg_cnt+1;
-							verg_t_var = [sacc_var '_' num2str(sbeg_cnt) '_t'];
+							verg_t_var = [sacc_var '_' num2str(sbeg_cnt) '_start_t'];
 							tmp = regexp(sacc_var, '(nve|ve)_(l|r)(v|h)', 'match');
-							tbl_eye_pos_var = tmp{1};
-							verge_eye_pos_var = [sacc_var '_' num2str(sbeg_cnt) '_pos'];
+							tbl_eye_pos_var = [tmp{1} '_vergence_calibrated'];
+							verge_eye_pos_var = [sacc_var '_' num2str(sbeg_cnt) '_verge_cal_start_pos'];
 						else
 							send_cnt = send_cnt+1;
-							verg_t_var = [sacc_var '_' num2str(send_cnt) '_t'];
+							verg_t_var = [sacc_var '_' num2str(send_cnt) '_end_t'];
 							tmp = regexp(sacc_var, '(nve|ve)_(l|r)(v|h)', 'match');
-							tbl_eye_pos_var = tmp{1};
-							verge_eye_pos_var = [sacc_var '_' num2str(send_cnt) '_pos'];
+							tbl_eye_pos_var = [tmp{1} '_vergence_calibrated'];
+							verge_eye_pos_var = [sacc_var '_' num2str(send_cnt) '_verge_cal_end_pos'];
 						end				
-						
-						verge_out_tbl.(verg_t_var)(verge_tbl_row) = tbl.t_eye(sv_inds(sv_cnt));
-						verge_out_tbl.(verge_eye_pos_var)(verge_tbl_row) = tbl.(tbl_eye_pos_var)(sv_inds(sv_cnt));
+						if any(contains(tbl.Properties.VariableNames, tbl_eye_pos_var))
+							verge_out_tbl.(verg_t_var)(verge_tbl_row) = tbl.t_eye(sv_inds(sv_cnt));
+							verge_out_tbl.(verge_eye_pos_var)(verge_tbl_row) = tbl.(tbl_eye_pos_var)(sv_inds(sv_cnt));
+						end
 					end
 				end		
 				
