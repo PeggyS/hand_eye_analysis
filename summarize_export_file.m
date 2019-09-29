@@ -501,23 +501,45 @@ if any(strcmp(tbl.Properties.VariableNames, 'vergence_target_label'))
 			if tbl.t_eye(vm_beg_ind) - tbl.t_eye(v_ind) < 2.5
 				% add begin vergence info to verge_out_tbl
 
-				% which eye has the vergence mark
-				tmp = regexp(tbl.vergence_marks{vm_beg_ind}, '(r.)|(l.)', 'match');
-				eye_chan = tmp{1};
-				if strncmp(eye_chan, 'r', 1)
-					other_eye_chan = strrep(eye_chan, 'r', 'l');
-				else
-					other_eye_chan = strrep(eye_chan, 'l', 'r');
+% 				% which eye has the vergence mark
+% 				tmp = regexp(tbl.vergence_marks{vm_beg_ind}, '(r.)|(l.)', 'match');
+% 				eye_chan = tmp{1};
+% 				if strncmp(eye_chan, 'r', 1)
+% 					other_eye_chan = strrep(eye_chan, 'r', 'l');
+% 				else
+% 					other_eye_chan = strrep(eye_chan, 'l', 'r');
+% 				end
+% 				if strncmp(eye_chan, ve, 1)
+% 					eye_chan = ['ve_' eye_chan]; %#ok<*AGROW>
+% 					other_eye_chan = ['nve_' other_eye_chan];
+% 				else
+% 					eye_chan = ['nve_' eye_chan ];
+% 					other_eye_chan = ['ve_' other_eye_chan];
+% 				end
+% 					
+				% add vergence source to the out tbl
+				verge_out_tbl.verge_vel_source{verge_tbl_row} = strrep(tbl.vergence_marks{vm_beg_ind}, '_begin', '');
+				
+				% find the viewing & nve chans
+				tmp = regexp(tbl.Properties.VariableNames, 've_(l|r)h', 'match');
+				eye_chan = [];
+				tmp_cnt = 1;
+				while isempty(eye_chan)
+					if ~isempty(tmp{tmp_cnt})
+						eye_chan = tmp{tmp_cnt}{1};
+					end
+					tmp_cnt = tmp_cnt + 1;
 				end
-				if strncmp(eye_chan, ve, 1)
-					eye_chan = ['ve_' eye_chan]; %#ok<*AGROW>
-					other_eye_chan = ['nve_' other_eye_chan];
-				else
-					eye_chan = ['nve_' eye_chan ];
-					other_eye_chan = ['ve_' other_eye_chan];
+				tmp = regexp(tbl.Properties.VariableNames, 'nve_(l|r)h', 'match');
+				other_eye_chan = [];
+				tmp_cnt = 1;
+				while isempty(other_eye_chan)
+					if ~isempty(tmp{tmp_cnt})
+						other_eye_chan = tmp{tmp_cnt}{1};
+					end
+					tmp_cnt = tmp_cnt + 1;
 				end
-% 					verge_out_tbl.(eye_chan){verge_tbl_row} = eye_chan;
-
+				
 				% latency of begin 
 				eye_latency_var = ['begin_latency_' eye_chan];
 				verge_out_tbl.(eye_latency_var)(verge_tbl_row) = tbl.t_eye(vm_beg_ind) - tbl.t_eye(v_ind);

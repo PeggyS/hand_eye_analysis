@@ -536,7 +536,8 @@ if isfield(handles, 'line_rh') && isfield(handles, 'line_lh')
 		% context menus to add marks to velocity line
 		eye_m = uicontextmenu;
 		handles.line_vergence_velocity.UIContextMenu = eye_m;
-		uimenu(eye_m, 'Label', 'Add Mark', 'Callback', {@add_verge_vel_mark, handles.line_vergence_velocity});
+		uimenu(eye_m, 'Label', 'Add Vergence Start Point', 'Callback', {@add_verge_start, handles.line_vergence_velocity});
+% 		uimenu(eye_m, 'Label', 'Add Mark', 'Callback', {@add_verge_vel_mark, handles.line_vergence_velocity});
 	end
 end
 
@@ -1641,11 +1642,19 @@ ind_lt_5 = find(abs(h_line_velocity.YData(1:ind_cursor))<5, 1, 'last');
 % from this point look right for a abs value >= 5
 ind_gt_5 = find(abs(h_line_velocity.YData(ind_lt_5:end))>=5, 1, 'first') + ind_lt_5 - 1;
 
-% at this point add a marker on the velocity line and the vergence line
+% at this point add a marker on the eye velocity line and the vergence line
 tmp = regexp(h_line_velocity.Tag, '(lh)|(rh)', 'match');
-eye_str  = tmp{1};
+if ~isempty(tmp)  strcmp(h_line_velocity.Tag, 'line_vergence_velocity')
+	eye_str  = tmp{1};
+elseif strcmp(h_line_velocity.Tag, 'line_vergence_velocity')
+	eye_str = 'verg_vel';
+else
+	eye_str = '';
+end
+
 x = [h_line_velocity.XData(ind_gt_5) h_line_velocity.XData(ind_gt_5)];
 y = [h_line_velocity.YData(ind_gt_5) handles.line_vergence.YData(ind_gt_5)];
+
 h_beg_line = line(x, y, ...
 	'Tag', ['vergence_' eye_str '_begin'], 'Color', 'm', 'Marker', 'o', 'MarkerSize', 15);
 h_beg_line.UserData.h_line_velocity = h_line_velocity;
@@ -1686,6 +1695,7 @@ h_end_line = line(x, y, ...
 h_end_line.UserData.h_line_velocity = h_verge_vel;
 h_beg_line.UserData.h_end_line = h_end_line;
 draggable(h_end_line, @vergenceMarkLineMotionFcn)
+
 
 guidata(handles.figure1, handles);
 return
