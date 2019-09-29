@@ -72,6 +72,62 @@ samp_freq = handles.eye_data.samp_freq;
 numsamps = handles.eye_data.numsamps;
 t = (1:numsamps)/samp_freq;
 
+% is this vergence data? if so get the vergence cal file and recalibrate
+% for vergence
+answer = input('Apply vergence calibration to the horizontal data (y/n)? ', 's');
+if strcmpi(answer, 'y')
+		% calibrate the data with the vergence cal_info
+	% look for the Left & Right_verg_cal.mat files
+	if ~isempty(handles.eye_data.rh.pos)
+		[~, rcal_fname] = system('mdfind -onlyin ../ -name Right_verg_cal.mat');
+		handles.rcal_fname = strtrim(rcal_fname);
+		if isempty(handles.rcal_fname)
+			disp('Choose right eye vergence cal mat.')
+			[fnSave, pnSave] = uigetfile({'*.mat'},'Choose right eye vergence cal mat.');
+			if isequal(fnSave,0) || isequal(pnSave,0)
+				disp('no file chosen ... ')
+			else
+				handles.rcal_fname = fullfile(pnSave, fnSave);
+			end
+		end
+		
+		if ~isempty(handles.rcal_fname)
+			load(handles.rcal_fname);
+			handles.rcal_info = cal_info;
+			handles.eye_data.rh.pos = apply_vergence_cal(handles.eye_data.rh.pos, handles.rcal_info, false);
+% 			handles.eye_data.rh.pos_verge_cal = apply_vergence_cal(handles.eye_data.rh.pos, handles.rcal_info, false);
+% 			handles.line_rh = line(t, handles.eye_data.rh.pos_verge_cal, 'Tag', 'line_rh', 'Color', 'g');
+% 		else
+% 			handles.line_rh = line(t, handles.eye_data.rh.pos, 'Tag', 'line_rh', 'Color', 'g');
+		end
+	end
+	
+	if ~isempty(handles.eye_data.lh.pos)
+		[~, lcal_fname] = system('mdfind -onlyin ../ -name Left_verg_cal.mat');
+		handles.lcal_fname = strtrim(lcal_fname);
+		if isempty(handles.lcal_fname)
+			disp('Choose left eye vergence cal mat.')
+			[fnSave, pnSave] = uigetfile({'*.mat'},'Choose left eye vergence cal mat.');
+			if isequal(fnSave,0) || isequal(pnSave,0)
+				disp('no file chosen ... ')
+			else
+				handles.lcal_fname = fullfile(pnSave, fnSave);
+			end
+		end
+		if ~isempty(handles.lcal_fname)
+			load(handles.lcal_fname);
+			handles.lcal_info = cal_info;
+			handles.eye_data.lh.pos = apply_vergence_cal(handles.eye_data.lh.pos, handles.lcal_info, false);
+% 			handles.eye_data.lh.pos_verge_cal = apply_vergence_cal(handles.eye_data.lh.pos, handles.lcal_info, false);
+% 			handles.line_lh = line(t, handles.eye_data.lh.pos_verge_cal, 'Tag', 'line_lh', 'Color', 'r');
+% 		else
+% 			handles.line_lh = line(t, handles.eye_data.lh.pos, 'Tag', 'line_lh', 'Color', 'r');
+		end
+	end
+
+end
+
+
 % initialize the data in the axes
 axes(handles.axes_eye)
 if ~isempty(handles.eye_data.rh.pos)
