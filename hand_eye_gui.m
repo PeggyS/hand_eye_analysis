@@ -2632,10 +2632,10 @@ waitbar(0.6, h_wait, 'Removing blinks from data');
 h_blinks = findobj(handles.axes_eye, '-regexp', 'Tag', 'blink_id#\d*_patch');
 if ~isempty(h_blinks)
 	out_tbl.blinks = cell(height(out_tbl), 1);
-	for blink_num = 1:length(h_blinks)
-		beg_t = min(h_blinks(blink_num).XData) - 0.1; % remove an extra 100ms before the blink
+	for blink_num = 1:length(h_blinks) % HERE
+		beg_t = min(h_blinks(blink_num).XData); 
 		beg_txt = ['blink_#' num2str(blink_num) '_begin'];
-		end_t = max(h_blinks(blink_num).XData) + 0.1; % remove an extra 100ms after the blink
+		end_t = max(h_blinks(blink_num).XData); 
 		end_txt = ['blink_#' num2str(blink_num) '_end'];
 		% put the line tag into the table
 		row_beg = find(out_tbl.t_eye >= beg_t, 1, 'first');
@@ -3126,9 +3126,10 @@ end
 blinks = joinBlinks(blinks);
 
 % change absolute ms values to relative to eye_data start time seconds
+% and add an extra 350 ms to beginning & end
 for cnt = 1:length(blinks.start)
-   blinks.start(cnt) = (blinks.start(cnt) - start_ms) / 1000;
-   blinks.end(cnt) = (blinks.end(cnt) - start_ms) / 1000;
+   blinks.start(cnt) = (blinks.start(cnt) - start_ms) / 1000 - 0.350;
+   blinks.end(cnt) = (blinks.end(cnt) - start_ms) / 1000 + 0.350;
 end
 
 % createBox
