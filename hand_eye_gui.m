@@ -2072,12 +2072,22 @@ for st_cnt = 1:length(sacc_type_list)
 						eng_summmary_tbl_ve.DriftMeanVel(eng_summmary_tbl_ve_cnt,1)	 = sacclist.as_mean_norm_vel(sac_num);
 						eng_summmary_tbl_ve.DriftvarVel(eng_summmary_tbl_ve_cnt,1)	 = sacclist.as_var_norm_vel(sac_num);
 						eng_summmary_tbl_ve.DriftstdVel(eng_summmary_tbl_ve_cnt,1)	 = sacclist.as_std_norm_vel(sac_num);
+						eng_summmary_tbl_ve.DriftMaxVel(eng_summmary_tbl_ve_cnt,1)	 = sacclist.as_max_norm_vel(sac_num);
+						
 						eng_summmary_tbl_ve.DriftMedianPos(eng_summmary_tbl_ve_cnt,1)	 = sacclist.as_median_norm_pos(sac_num);
 						eng_summmary_tbl_ve.DriftMeanPos(eng_summmary_tbl_ve_cnt,1)	 = sacclist.as_mean_norm_pos(sac_num);
 						eng_summmary_tbl_ve.DriftvarPos(eng_summmary_tbl_ve_cnt,1)	 = sacclist.as_var_norm_pos(sac_num);
 						eng_summmary_tbl_ve.DriftstdPos(eng_summmary_tbl_ve_cnt,1)	 = sacclist.as_std_norm_pos(sac_num);
-
-
+						eng_summmary_tbl_ve.DriftPosAmpl(eng_summmary_tbl_ve_cnt,1)	 = sacclist.as_ampl_norm_pos(sac_num);
+						eng_summmary_tbl_ve.DriftPosAngle(eng_summmary_tbl_ve_cnt,1)	 = sacclist.as_angle_norm_pos(sac_num);
+						
+						if sac_num+1 <= length(sacclist.enabled)
+							end_fix_t = (sacclist.start(sac_num+1)-handles.eye_data.start_times)/1000;
+							eng_summmary_tbl_ve.fixDuration(eng_summmary_tbl_ve_cnt,1)	 = end_fix_t - end_t;
+						else
+							eng_summmary_tbl_ve.fixDuration(eng_summmary_tbl_ve_cnt,1)	 = nan;
+						end
+						
 						if ~isempty(grid_vals) || isfield(handles, 'grid_file')
 							if ~isempty(out_tbl.region_of_interest{beg_row})
 								eng_summmary_tbl_ve.region_of_interest_start(eng_summmary_tbl_ve_cnt,1) = out_tbl.region_of_interest{beg_row};
@@ -2130,12 +2140,22 @@ for st_cnt = 1:length(sacc_type_list)
 						eng_summmary_tbl_nve.DriftMeanVel(eng_summmary_tbl_nve_cnt,1)	 = sacclist.as_mean_norm_vel(sac_num);
 						eng_summmary_tbl_nve.DriftvarVel(eng_summmary_tbl_nve_cnt,1)	 = sacclist.as_var_norm_vel(sac_num);
 						eng_summmary_tbl_nve.DriftstdVel(eng_summmary_tbl_nve_cnt,1)	 = sacclist.as_std_norm_vel(sac_num);
+						eng_summmary_tbl_nve.DriftMaxVel(eng_summmary_tbl_nve_cnt,1)	 = sacclist.as_max_norm_vel(sac_num);
+						
 						eng_summmary_tbl_nve.DriftMedianPos(eng_summmary_tbl_nve_cnt,1)	 = sacclist.as_median_norm_pos(sac_num);
 						eng_summmary_tbl_nve.DriftMeanPos(eng_summmary_tbl_nve_cnt,1)	 = sacclist.as_mean_norm_pos(sac_num);
 						eng_summmary_tbl_nve.DriftvarPos(eng_summmary_tbl_nve_cnt,1)	 = sacclist.as_var_norm_pos(sac_num);
 						eng_summmary_tbl_nve.DriftstdPos(eng_summmary_tbl_nve_cnt,1)	 = sacclist.as_std_norm_pos(sac_num);
+						eng_summmary_tbl_nve.DriftPosAmpl(eng_summmary_tbl_nve_cnt,1)	 = sacclist.as_ampl_norm_pos(sac_num);
+						eng_summmary_tbl_nve.DriftPosAngle(eng_summmary_tbl_nve_cnt,1)	 = sacclist.as_angle_norm_pos(sac_num);
 
-
+						if  sac_num+1 <= length(sacclist.enabled)
+							end_fix_t = (sacclist.start(sac_num+1)-handles.eye_data.start_times)/1000;
+							eng_summmary_tbl_nve.fixDuration(eng_summmary_tbl_nve_cnt,1)	 = end_fix_t - end_t;
+						else
+							eng_summmary_tbl_nve.fixDuration(eng_summmary_tbl_nve_cnt,1)	 = nan;
+						end
+						
 						if ~isempty(grid_vals) || isfield(handles, 'grid_file')
 							if ~isempty(out_tbl.region_of_interest{beg_row})
 								eng_summmary_tbl_nve.region_of_interest_start(eng_summmary_tbl_nve_cnt,1) = out_tbl.region_of_interest{beg_row};

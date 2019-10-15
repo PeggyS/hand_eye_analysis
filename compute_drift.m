@@ -22,6 +22,9 @@ new_sacclist.as_median_norm_pos = nan(size(sacclist.start_ind));
 new_sacclist.as_mean_norm_pos = nan(size(sacclist.start_ind));
 new_sacclist.as_var_norm_pos = nan(size(sacclist.start_ind));
 new_sacclist.as_std_norm_pos = nan(size(sacclist.start_ind));
+new_sacclist.as_max_norm_vel = nan(size(sacclist.start_ind));
+new_sacclist.as_ampl_norm_pos = nan(size(sacclist.start_ind));
+new_sacclist.as_angle_norm_pos = nan(size(sacclist.start_ind));
 
 % norm pos
 norm_pos = sqrt(h_pos.^2 + v_pos.^2);
@@ -57,12 +60,15 @@ for sacc_num = 1:length(sacclist.start_ind)-1
 		new_sacclist.as_mean_norm_vel(sacc_num) = mean(norm_vel(start_ind:end_ind));
 		new_sacclist.as_var_norm_vel(sacc_num) = var(norm_vel(start_ind:end_ind));
 		new_sacclist.as_std_norm_vel(sacc_num) = std(norm_vel(start_ind:end_ind));
+		new_sacclist.as_max_norm_vel(sacc_num) = max(norm_vel(start_ind:end_ind));
 	end
 	if ~any(isnan(norm_pos(start_ind:end_ind)))
 		new_sacclist.as_median_norm_pos(sacc_num) = median(norm_pos(start_ind:end_ind));
 		new_sacclist.as_mean_norm_pos(sacc_num) = mean(norm_pos(start_ind:end_ind));
 		new_sacclist.as_var_norm_pos(sacc_num) = var(norm_pos(start_ind:end_ind));
 		new_sacclist.as_std_norm_pos(sacc_num) = std(norm_pos(start_ind:end_ind));
+		new_sacclist.as_ampl_norm_pos(sacc_num) = sqrt((h_pos(end_ind)-h_pos(start_ind))^2 + (v_pos(end_ind)-v_pos(start_ind))^2);	
+		new_sacclist.as_angle_norm_pos(sacc_num) = atan2d((v_pos(end_ind)-v_pos(start_ind)), (h_pos(end_ind)-h_pos(start_ind)));
 	end
 end % each saccade in sacclist
 
