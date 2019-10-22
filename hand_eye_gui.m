@@ -2095,6 +2095,7 @@ for st_cnt = 1:length(sacc_type_list)
 							if ~isempty(out_tbl.region_of_interest{end_row})
 								eng_summmary_tbl_ve.region_of_interest_end(eng_summmary_tbl_ve_cnt,1) = out_tbl.region_of_interest{end_row};
 							end
+							
 						end
 						if isfield(handles, 'grid_file')
 							if ~isempty( out_tbl.roi_word{beg_row})
@@ -2102,6 +2103,13 @@ for st_cnt = 1:length(sacc_type_list)
 							end
 							if ~isempty( out_tbl.roi_word{end_row})
 								eng_summmary_tbl_ve.roi_word_end(eng_summmary_tbl_ve_cnt,1) = out_tbl.roi_word{end_row};
+							end
+							if ~isempty(out_tbl.region_of_interest{beg_row}) && ~isempty(out_tbl.region_of_interest{end_row})
+								if out_tbl.region_of_interest{beg_row} == out_tbl.region_of_interest{end_row}
+									eng_summmary_tbl_ve.intra_word(eng_summmary_tbl_ve_cnt,1) = 1;
+								else
+									eng_summmary_tbl_ve.intra_word(eng_summmary_tbl_ve_cnt,1) = 0;
+								end
 							end
 						end
 						warning on
