@@ -157,8 +157,8 @@ for eye_cnt = 1:length(sacc_type_list)
 
 				empty_tbl = array2table(nan(height(comb_sacc_tbl), width(other_sacc_tbl)), ...
 					'VariableNames', strcat(other_sacc_tbl.Properties.VariableNames, ['_' nve '_nve']));
-				% change VariableNames with 'word' to cell instead of NaN
-				tmp = regexp(empty_tbl.Properties.VariableNames, '.*word.*', 'match');
+				% change VariableNames with 'word' and 'type' to cell instead of NaN
+				tmp = regexp(empty_tbl.Properties.VariableNames, '(.*word.*)|(.*type.*)', 'match');
 				msk = ~cellfun(@isempty, tmp);
 				word_var_inds = find(msk);
 				match_cells = tmp(msk);

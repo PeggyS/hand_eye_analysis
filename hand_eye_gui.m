@@ -2046,6 +2046,7 @@ for st_cnt = 1:length(sacc_type_list)
 						eng_summmary_tbl_ve.vAmpl(eng_summmary_tbl_ve_cnt,1) = sacclist.sacc_vert_component(sac_num);
 						eng_summmary_tbl_ve.Ampl(eng_summmary_tbl_ve_cnt,1) = sacclist.sacc_ampl(sac_num);
 						eng_summmary_tbl_ve.angle(eng_summmary_tbl_ve_cnt,1) = atan2d(sacclist.sacc_vert_component(sac_num), sacclist.sacc_horiz_component(sac_num));
+						eng_summmary_tbl_ve.type(eng_summmary_tbl_ve_cnt,1) = sacc_type_angle_lookup(eng_summmary_tbl_ve.angle(eng_summmary_tbl_ve_cnt,1));
 						eng_summmary_tbl_ve.swj(eng_summmary_tbl_ve_cnt,1) = sacclist.swj(sac_num);
 						
 						eng_summmary_tbl_ve.peakVel(eng_summmary_tbl_ve_cnt,1) = sacclist.peak_vel(sac_num);
@@ -2121,6 +2122,7 @@ for st_cnt = 1:length(sacc_type_list)
 						eng_summmary_tbl_nve.hAmpl(eng_summmary_tbl_nve_cnt,1) = sacclist.sacc_horiz_component(sac_num);
 						eng_summmary_tbl_nve.vAmpl(eng_summmary_tbl_nve_cnt,1) = sacclist.sacc_vert_component(sac_num);
 						eng_summmary_tbl_nve.angle(eng_summmary_tbl_nve_cnt,1) = atan2d(sacclist.sacc_vert_component(sac_num), sacclist.sacc_horiz_component(sac_num));
+						eng_summmary_tbl_nve.type(eng_summmary_tbl_nve_cnt,1) = sacc_type_angle_lookup(eng_summmary_tbl_nve.angle(eng_summmary_tbl_nve_cnt,1));
 						eng_summmary_tbl_nve.swj(eng_summmary_tbl_nve_cnt,1) = sacclist.swj(sac_num);
 						
 						eng_summmary_tbl_nve.Ampl(eng_summmary_tbl_nve_cnt,1) = sacclist.sacc_ampl(sac_num);
