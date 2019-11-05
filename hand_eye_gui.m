@@ -27,11 +27,11 @@ function varargout = hand_eye_gui(varargin)
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 0;
 gui_State = struct('gui_Name',       mfilename, ...
-   'gui_Singleton',  gui_Singleton, ...
-   'gui_OpeningFcn', @hand_eye_gui_OpeningFcn, ...
-   'gui_OutputFcn',  @hand_eye_gui_OutputFcn, ...
-   'gui_LayoutFcn',  [] , ...
-   'gui_Callback',   []);
+	'gui_Singleton',  gui_Singleton, ...
+	'gui_OpeningFcn', @hand_eye_gui_OpeningFcn, ...
+	'gui_OutputFcn',  @hand_eye_gui_OutputFcn, ...
+	'gui_LayoutFcn',  [] , ...
+	'gui_Callback',   []);
 if nargin && ischar(varargin{1})
 	gui_State.gui_Callback = str2func(varargin{1});
 end
@@ -91,7 +91,7 @@ else % all other choices, read in *.bin file for eye data
 	handles.bin_filename = fullfile(pnSave, fnSave); %'/Users/peggy/Desktop/pegtas2/pegtas2_1.bin'; % must be full path for rd_cli to work
 	handles.eye_data = rd(handles.bin_filename, 'batch', 'nofilt');
 	handles.eye_data = enable_all_saccades(handles.eye_data);
- 	handles.eye_data = square_wave_jerk_detect(handles.eye_data);
+	handles.eye_data = square_wave_jerk_detect(handles.eye_data);
 end
 
 
@@ -305,46 +305,46 @@ end
 
 
 if isfield(handles,'apdm_data') && ~isempty(handles.apdm_data.sensor)
-   axes(handles.axes_sensor1) % for head data
-   %drawSensorAccelLines(handles.apdm_data, 1);
-%    drawSensorCombinedVelocityLine(handles.apdm_data, 1)
-     if strcmpi(handles.apdm_data.sensor{1}, 'head')
-         % check for calibaration data in head_cal.mat
-         cur_dir = pwd;
-         cd ..
-         parent_dir = pwd;
-         cd(cur_dir)
-         calfile = fullfile(parent_dir, 'head_cal.mat');
-         if exist(calfile, 'file')
-             disp(['using head calibration file ' calfile])
-             handles.head_cal = load(calfile);
-             handles.head_cal.filename = calfile;
-         else
-             disp('no head calibration file')
-         end
-%          drawMagLine(handles, 1)
-		 drawHeadAngleLine(handles, 1)
-     end
-%    drawCorrectedVelocityLine(handles.apdm_data, 1)
-%    scale_norm_gyro_corrected_vel_to_axes(handles.axes_sensor1)
-   
-   % if pursuit, add a head movement threshold line
-   if choice_num == 5
-	   add_head_vel_threshold_line(handles.axes_sensor1)
-   end
-     
-   handles.linkprop_axes_xlims = linkprop([handles.axes_eye, handles.axes_sensor1 ], 'XLim');
-
+	axes(handles.axes_sensor1) % for head data
+	%drawSensorAccelLines(handles.apdm_data, 1);
+	%    drawSensorCombinedVelocityLine(handles.apdm_data, 1)
+	if strcmpi(handles.apdm_data.sensor{1}, 'head')
+		% check for calibaration data in head_cal.mat
+		cur_dir = pwd;
+		cd ..
+		parent_dir = pwd;
+		cd(cur_dir)
+		calfile = fullfile(parent_dir, 'head_cal.mat');
+		if exist(calfile, 'file')
+			disp(['using head calibration file ' calfile])
+			handles.head_cal = load(calfile);
+			handles.head_cal.filename = calfile;
+		else
+			disp('no head calibration file')
+		end
+		%          drawMagLine(handles, 1)
+		drawHeadAngleLine(handles, 1)
+	end
+	%    drawCorrectedVelocityLine(handles.apdm_data, 1)
+	%    scale_norm_gyro_corrected_vel_to_axes(handles.axes_sensor1)
+	
+	% if pursuit, add a head movement threshold line
+	if choice_num == 5
+		add_head_vel_threshold_line(handles.axes_sensor1)
+	end
+	
+	handles.linkprop_axes_xlims = linkprop([handles.axes_eye, handles.axes_sensor1 ], 'XLim');
+	
 	if length(handles.apdm_data.sensor) > 1
-	   axes(handles.axes_sensor2) % axes are for right hand data
-	   drawCorrectedVelocityLine(handles.apdm_data, 2);
-% 	   handles.linkprop_list(end+1) = linkprop([handles.axes_eye, handles.axes_sensor2 ], 'XLim');
+		axes(handles.axes_sensor2) % axes are for right hand data
+		drawCorrectedVelocityLine(handles.apdm_data, 2);
+		% 	   handles.linkprop_list(end+1) = linkprop([handles.axes_eye, handles.axes_sensor2 ], 'XLim');
 		addtarget(handles.linkprop_axes_xlims, handles.axes_sensor2);
 	end
 	if length(handles.apdm_data.sensor) > 2
-	   axes(handles.axes_sensor3) % axes are for left hand data
-	   drawCorrectedVelocityLine(handles.apdm_data, 3);
-% 	   handles.linkprop_list(end+1) = linkprop([handles.axes_eye, handles.axes_sensor3 ], 'XLim');
+		axes(handles.axes_sensor3) % axes are for left hand data
+		drawCorrectedVelocityLine(handles.apdm_data, 3);
+		% 	   handles.linkprop_list(end+1) = linkprop([handles.axes_eye, handles.axes_sensor3 ], 'XLim');
 		addtarget(handles.linkprop_axes_xlims, handles.axes_sensor3);
 	end
 end
@@ -361,16 +361,16 @@ drawnow
 % adjust axes for displaying or not displaying picture or video
 switch choice_num
 	case {1 2}
-
+		
 		if isa(handles.video_reader,'VideoReader')
 			% video overlay
 			handles.axes_video_overlay.Color = 'none';
-
+			
 			xmin_max = handles.eye_data.h_pix_z / handles.eye_data.h_pix_deg;
 			ymin_max = handles.eye_data.v_pix_z / handles.eye_data.v_pix_deg;
 			handles.axes_video_overlay.XLim = [-xmin_max xmin_max];
 			handles.axes_video_overlay.YLim = [-ymin_max ymin_max];
-
+			
 			% video
 			show_video_frame(handles, 1/samp_freq)
 			if isfield(handles, 'restore_data')
@@ -385,13 +385,13 @@ switch choice_num
 		delete(handles.axes_video)
 		% make extraneous objects invisible
 		obj_list = [handles.tbPlayPause, handles.text29, handles.text2, handles.edTime, handles.text2, handles.text23, ...
-					handles.edPlaybackSpeed, handles.ahead1samp, handles.back1samp, handles.samp_tweak, ...
-					handles.text21, handles.text20, handles.pbBack, handles.pbForward, ...
-					handles.txtVergence, handles.tbConjugate, handles.tbVergence, handles.tbVergenceVelocity];
+			handles.edPlaybackSpeed, handles.ahead1samp, handles.back1samp, handles.samp_tweak, ...
+			handles.text21, handles.text20, handles.pbBack, handles.pbForward, ...
+			handles.txtVergence, handles.tbConjugate, handles.tbVergence, handles.tbVergenceVelocity];
 		set(obj_list, 'Visible', 'off')
- 		% make eye data axes wider
+		% make eye data axes wider
 		handles = widen_axes(handles);
-		% show toggle buttons 
+		% show toggle buttons
 		set(handles.txtSaccadeTargets, 'Visible', 'on')
 		set(handles.tbTargetH, 'Visible', 'on')
 		set(handles.tbTargetV, 'Visible', 'on')
@@ -403,17 +403,17 @@ switch choice_num
 			disp('Error: im_data is missing. Handles struct is saved in the file missing_im_data.mat. Send to Peggy to troubleshoot.')
 			return
 		end
-% 		handles.axes_video.Visible = 'on';
+		% 		handles.axes_video.Visible = 'on';
 		obj_list = [handles.txtVergence, handles.tbConjugate, handles.tbVergence, handles.tbVergenceVelocity];
 		set(obj_list, 'Visible', 'off')
 		% eye position overlay on pciture
 		handles.axes_video_overlay.Color = 'none';
 		handles.axes_video_overlay.Visible = 'off';
-%  		xmin_max = handles.eye_data.h_pix_z / handles.eye_data.h_pix_deg;
-%  		ymin_max = handles.eye_data.v_pix_z / handles.eye_data.v_pix_deg;
+		%  		xmin_max = handles.eye_data.h_pix_z / handles.eye_data.h_pix_deg;
+		%  		ymin_max = handles.eye_data.v_pix_z / handles.eye_data.v_pix_deg;
 		xmin_max = handles.eye_data.h_pix_z / 30;
- 		ymin_max = handles.eye_data.v_pix_z / 30;
-
+		ymin_max = handles.eye_data.v_pix_z / 30;
+		
 		handles.axes_video_overlay.XLim = [-xmin_max xmin_max];
 		handles.axes_video_overlay.YLim = [-ymin_max ymin_max];
 		display_eye_pos_overlay(handles, 1/samp_freq)
@@ -428,7 +428,7 @@ switch choice_num
 			handles = display_mouse_clicks(handles);
 			% region of interest grid
 			handles = add_pict_diff_roi_grid(handles);
-		else 
+		else
 			% region of interest grid
 			handles = add_reading_rois(handles);
 		end
@@ -440,12 +440,12 @@ switch choice_num
 		delete(handles.axes_video)
 		% make extraneous objects invisible
 		obj_list = [handles.tbPlayPause, handles.text29, handles.text2, handles.edTime, handles.text2, handles.text23, ...
-					handles.edPlaybackSpeed, handles.ahead1samp, handles.back1samp, handles.samp_tweak, ...
-					handles.text21, handles.text20, handles.pbBack, handles.pbForward, ...
-					handles.txtVergence, handles.tbConjugate, handles.tbVergence, handles.tbVergenceVelocity, ...
-					handles.tbLHVel, handles.tbRHVel];
+			handles.edPlaybackSpeed, handles.ahead1samp, handles.back1samp, handles.samp_tweak, ...
+			handles.text21, handles.text20, handles.pbBack, handles.pbForward, ...
+			handles.txtVergence, handles.tbConjugate, handles.tbVergence, handles.tbVergenceVelocity, ...
+			handles.tbLHVel, handles.tbRHVel];
 		set(obj_list, 'Visible', 'off')
- 		% make eye data axes wider
+		% make eye data axes wider
 		handles = widen_axes(handles);
 		
 	case {15 16} % vergence
@@ -454,17 +454,17 @@ switch choice_num
 		delete(handles.axes_video)
 		% make extraneous objects invisible
 		obj_list = [handles.tbPlayPause, handles.text29, handles.text2, handles.edTime, handles.text2, handles.text23, ...
-					handles.edPlaybackSpeed, handles.ahead1samp, handles.back1samp, handles.samp_tweak, ...
-					handles.text21, handles.text20, handles.pbBack, handles.pbForward, handles.uibgReachType];
+			handles.edPlaybackSpeed, handles.ahead1samp, handles.back1samp, handles.samp_tweak, ...
+			handles.text21, handles.text20, handles.pbBack, handles.pbForward, handles.uibgReachType];
 		set(obj_list, 'Visible', 'off')
 		obj_list = [handles.txtVergence, handles.tbConjugate, handles.tbVergence, handles.tbVergenceVelocity, ...
-					handles.tbLHVel, handles.tbRHVel];
+			handles.tbLHVel, handles.tbRHVel];
 		set(obj_list, 'Visible', 'on')
- 		% make eye data axes wider
+		% make eye data axes wider
 		handles = widen_axes(handles);
 end
 
-	
+
 
 % uicontextmenu to axes
 eye_m = uicontextmenu;
@@ -473,27 +473,34 @@ uimenu(eye_m, 'Label', 'Exclude Data', 'Callback', {@createBox, [], 'exclude'});
 uimenu(eye_m, 'Label', 'Analyze Data 1', 'Callback', {@createBox, [], 'analysis_1'});
 uimenu(eye_m, 'Label', 'Analyze Data 2', 'Callback', {@createBox, [], 'analysis_2'});
 uimenu(eye_m, 'Label', 'Analyze Data 3', 'Callback', {@createBox, [], 'analysis_3'});
+uimenu(eye_m, 'Label', 'Bead Task: Reading', 'Callback', {@addLine, 'annotation_bead_task_read'})
+uimenu(eye_m, 'Label', 'Bead Task: Picking', 'Callback', {@addLine, 'annotation_bead_task_pick'})
+uimenu(eye_m, 'Label', 'Bead Task: Threading', 'Callback', {@addLine, 'annotation_bead_task_thread'})
+uimenu(eye_m, 'Label', 'Bead Task: Return', 'Callback', {@addLine, 'annotation_bead_task_return'})
+
 
 if isfield(handles, 'apdm_data')
 	if ~isempty(handles.apdm_data.sensor)
 		hand_m = uicontextmenu;
 		handles.axes_sensor1.UIContextMenu = hand_m;
-	% 	uimenu(hand_m, 'Label', 'Add Move', 'Callback', {@addMove, handles.axes_sensor1})
+		% 	uimenu(hand_m, 'Label', 'Add Move', 'Callback', {@addMove, handles.axes_sensor1})
 		uimenu(hand_m, 'Label', 'Add Mistake', 'Callback', {@addLine, 'annotation_mistake'})
 	end
 	if length(handles.apdm_data.sensor) > 1
 		head_m = uicontextmenu;
 		handles.axes_sensor2.UIContextMenu = head_m;
-% 	 	uimenu(head_m, 'Label', 'Add Begin Move', 'Callback', {@addLine, 'annotation_begin_move_right'})
-% 		uimenu(head_m, 'Label', 'Add End Move', 'Callback', {@addLine, 'annotation_end_move_right'})
+		% 	 	uimenu(head_m, 'Label', 'Add Begin Move', 'Callback', {@addLine, 'annotation_begin_move_right'})
+		% 		uimenu(head_m, 'Label', 'Add End Move', 'Callback', {@addLine, 'annotation_end_move_right'})
 		uimenu(head_m, 'Label', 'Add Mistake', 'Callback', {@addLine, 'annotation_mistake'})
+		uimenu(head_m, 'Label', 'Bead Task Begin', 'Callback', {@addLine, 'annotation_bead_task_begin'})
 	end
 	if length(handles.apdm_data.sensor) > 2
 		sensor3_m = uicontextmenu;
 		handles.axes_sensor3.UIContextMenu = sensor3_m;
-% 		uimenu(sensor3_m, 'Label', 'Add Begin Move', 'Callback', {@addLine, 'annotation_begin_move_left'})
-% 		uimenu(sensor3_m, 'Label', 'Add End Move', 'Callback', {@addLine, 'annotation_end_move_left'})
+		% 		uimenu(sensor3_m, 'Label', 'Add Begin Move', 'Callback', {@addLine, 'annotation_begin_move_left'})
+		% 		uimenu(sensor3_m, 'Label', 'Add End Move', 'Callback', {@addLine, 'annotation_end_move_left'})
 		uimenu(sensor3_m, 'Label', 'Add Mistake', 'Callback', {@addLine, 'annotation_mistake'})
+		uimenu(sensor3_m, 'Label', 'Bead Task Begin', 'Callback', {@addLine, 'annotation_bead_task_begin'})
 	end
 end
 
@@ -537,7 +544,7 @@ if isfield(handles, 'line_rh') && isfield(handles, 'line_lh')
 		eye_m = uicontextmenu;
 		handles.line_vergence_velocity.UIContextMenu = eye_m;
 		uimenu(eye_m, 'Label', 'Add Vergence Start Point', 'Callback', {@add_verge_start, handles.line_vergence_velocity});
-% 		uimenu(eye_m, 'Label', 'Add Mark', 'Callback', {@add_verge_vel_mark, handles.line_vergence_velocity});
+		% 		uimenu(eye_m, 'Label', 'Add Mark', 'Callback', {@add_verge_vel_mark, handles.line_vergence_velocity});
 	end
 end
 
@@ -583,40 +590,52 @@ function handles = add_scrub_lines(handles, init_pos)
 x_scrub_line = init_pos;
 axes(handles.axes_eye)
 handles.scrub_line_eye = line( [x_scrub_line, x_scrub_line], handles.axes_eye.YLim, ...
-   'Color', 'b', 'linewidth', 2, 'Tag', 'scrub_line_eye');
+	'Color', 'b', 'linewidth', 2, 'Tag', 'scrub_line_eye');
 draggable(handles.scrub_line_eye,'h', @scrubLineMotionFcn)
 
 if isfield(handles, 'apdm_data')
 	if ~isempty(handles.apdm_data.sensor)
-	   axes(handles.axes_sensor1)
-% 	   handles.scrub_line_hand = line( [x_scrub_line, x_scrub_line], handles.axes_sensor1.YLim, ...
+		axes(handles.axes_sensor1)
+		% 	   handles.scrub_line_hand = line( [x_scrub_line, x_scrub_line], handles.axes_sensor1.YLim, ...
 		handles.scrub_line_hand = line( [x_scrub_line, x_scrub_line], handles.axes_sensor1.YLim, ...
-		  'Color', 'b', 'linewidth', 2, 'Tag', 'scrub_line_hand', 'Visible', handles.axes_sensor1.Visible);
-	   draggable(handles.scrub_line_hand,'h', @scrubLineMotionFcn)
-	   handles.linkprop_scrubline = linkprop([handles.scrub_line_hand, handles.scrub_line_eye], 'XData');
-	   
-% 	   handles.linkprop_list(end+1) = linkprop([handles.scrub_line_hand, handles.axes_sensor1], 'Visible');
-		handles.axes_sensor1.UserData.linkprop_visible = linkprop([handles.axes_sensor1, handles.scrub_line_hand], 'Visible');
+			'Color', 'b', 'linewidth', 2, 'Tag', 'scrub_line_hand', 'Visible', handles.axes_sensor1.Visible);
+		draggable(handles.scrub_line_hand,'h', @scrubLineMotionFcn)
+		handles.linkprop_scrubline = linkprop([handles.scrub_line_hand, handles.scrub_line_eye], 'XData');
+		
+		if isfield(handles.axes_sensor1.UserData, 'linkprop_visible')
+			addtarget(handles.axes_sensor1.UserData.linkprop_visible, handles.scrub_line_hand)
+		else
+			handles.axes_sensor1.UserData.linkprop_visible = linkprop([handles.axes_sensor1, handles.scrub_line_hand], 'Visible');
+		end
+		
 	end
 	if length(handles.apdm_data.sensor) > 1
-	   axes(handles.axes_sensor2)
-	   handles.scrub_line_head = line( [x_scrub_line, x_scrub_line], handles.axes_sensor2.YLim, ...
-		  'Color', 'b', 'linewidth', 2, 'Tag', 'scrub_line_head', 'Visible', handles.axes_sensor2.Visible);
-	   draggable(handles.scrub_line_head,'h', @scrubLineMotionFcn)
-% 	   handles.linkprop_list(end+1) = linkprop([handles.scrub_line_head, handles.scrub_line_eye], 'XData');
-% 	   handles.linkprop_list(end+1) = linkprop([handles.scrub_line_head, handles.axes_sensor2], 'Visible');
+		axes(handles.axes_sensor2)
+		handles.scrub_line_head = line( [x_scrub_line, x_scrub_line], handles.axes_sensor2.YLim, ...
+			'Color', 'b', 'linewidth', 2, 'Tag', 'scrub_line_head', 'Visible', handles.axes_sensor2.Visible);
+		draggable(handles.scrub_line_head,'h', @scrubLineMotionFcn)
+		% 	   handles.linkprop_list(end+1) = linkprop([handles.scrub_line_head, handles.scrub_line_eye], 'XData');
+		% 	   handles.linkprop_list(end+1) = linkprop([handles.scrub_line_head, handles.axes_sensor2], 'Visible');
 		addtarget(handles.linkprop_scrubline, handles.scrub_line_head);
-		handles.axes_sensor2.UserData.linkprop_visible = linkprop([handles.axes_sensor2, handles.scrub_line_head], 'Visible');
+		if isfield(handles.axes_sensor2.UserData, 'linkprop_visible')
+			addtarget(handles.axes_sensor2.UserData.linkprop_visible, handles.scrub_line_head)
+		else
+			handles.axes_sensor2.UserData.linkprop_visible = linkprop([handles.axes_sensor2, handles.scrub_line_head], 'Visible');
+		end
 	end
 	if length(handles.apdm_data.sensor) > 2
-	   axes(handles.axes_sensor3)
-	   handles.scrub_line_sensor3 = line( [x_scrub_line, x_scrub_line], handles.axes_sensor3.YLim, ...
-		  'Color', 'b', 'linewidth', 2, 'Tag', 'scrub_line_sensor3', 'Visible', handles.axes_sensor3.Visible);
-	   draggable(handles.scrub_line_sensor3,'h', @scrubLineMotionFcn)
-% 	   handles.linkprop_list(end+1) = linkprop([handles.scrub_line_sensor3, handles.scrub_line_eye], 'XData');
-% 	   handles.linkprop_list(end+1) = linkprop([handles.scrub_line_sensor3, handles.axes_sensor3], 'Visible');
+		axes(handles.axes_sensor3)
+		handles.scrub_line_sensor3 = line( [x_scrub_line, x_scrub_line], handles.axes_sensor3.YLim, ...
+			'Color', 'b', 'linewidth', 2, 'Tag', 'scrub_line_sensor3', 'Visible', handles.axes_sensor3.Visible);
+		draggable(handles.scrub_line_sensor3,'h', @scrubLineMotionFcn)
+		% 	   handles.linkprop_list(end+1) = linkprop([handles.scrub_line_sensor3, handles.scrub_line_eye], 'XData');
+		% 	   handles.linkprop_list(end+1) = linkprop([handles.scrub_line_sensor3, handles.axes_sensor3], 'Visible');
 		addtarget(handles.linkprop_scrubline, handles.scrub_line_sensor3);
-		handles.axes_sensor3.UserData.linkprop_visible = linkprop([handles.axes_sensor3, handles.scrub_line_sensor3], 'Visible');
+		if isfield(handles.axes_sensor3.UserData, 'linkprop_visible')
+			addtarget(handles.axes_sensor3.UserData.linkprop_visible, handles.scrub_line_sensor3)
+		else
+			handles.axes_sensor3.UserData.linkprop_visible = linkprop([handles.axes_sensor3, handles.scrub_line_sensor3], 'Visible');
+		end
 	end
 end
 return
@@ -638,12 +657,12 @@ disp('Choose a Scenelink video overlay file: ')
 filefilt={'*.m4v;*.mp4;*.mov'};
 [fnSave, pnSave] = uigetfile(filefilt,'Choose a Scenelink video file.');
 if isequal(fnSave,0) || isequal(pnSave,0)
-   disp('no file chosen ... ')
-   handles.video_reader = [];
-   handles.vid_filename = [];
+	disp('no file chosen ... ')
+	handles.video_reader = [];
+	handles.vid_filename = [];
 else
-   handles.vid_filename = fullfile(pnSave, fnSave);
-   handles.video_reader = VideoReader(handles.vid_filename);
+	handles.vid_filename = fullfile(pnSave, fnSave);
+	handles.video_reader = VideoReader(handles.vid_filename);
 end
 % used to syncronize the video start time to the data start time
 handles.video_reader.UserData.current_frame_num = 1;
@@ -651,7 +670,7 @@ handles.video_reader.UserData.current_frame_num = 1;
 return
 
 % -------------------------------------------------------------
-function drawSensorAccelLines(apdm_data, sensor_num)
+function drawSensorAccelLines(apdm_data, sensor_num) %#ok<*DEFNU>
 sensor = apdm_data.sensor{sensor_num};
 accel = filterData(apdm_data, sensor_num);
 
@@ -689,9 +708,9 @@ mag_rel_earth = apdm_RotateVector(apdm_data.mag{sensor_num}', apdm_data.orient{s
 
 cal_offset = 0;
 if isfield(handles, 'head_cal') && isfield(handles.head_cal, 'center')
-    cal_offset = handles.head_cal.center;
+	cal_offset = handles.head_cal.center;
 end
-l_r_angle = -atan2(mag_rel_earth(:,2), mag_rel_earth(:,1)) * 180 / pi - cal_offset; 
+l_r_angle = -atan2(mag_rel_earth(:,2), mag_rel_earth(:,1)) * 180 / pi - cal_offset;
 
 line(apdm_data.time, l_r_angle, 'Tag', ['line_' sensor '_l_r_angle'], 'Color', [0.2 0.8 0.2], 'Linewidth', 1.5)
 
@@ -702,7 +721,7 @@ return
 function drawHeadAngleLine(handles, sensor_num)
 apdm_data = handles.apdm_data;
 sensor = apdm_data.sensor{sensor_num};
-% y vector 
+% y vector
 y_vec = [0 1 0];
 y_mat = repmat(y_vec, length(apdm_data.orient{sensor_num}),1);
 y_in_earth_ref = apdm_RotateVector(y_mat, apdm_data.orient{sensor_num}');
@@ -711,9 +730,9 @@ y_in_earth_ref = apdm_RotateVector(y_mat, apdm_data.orient{sensor_num}');
 head_horiz_angle = atan2d(y_in_earth_ref(:,1), y_in_earth_ref(:,2));
 
 % only applying calibration offset for now
-cal_offset = 0;
+cal_offset = 0; %#ok<*NASGU>
 if isfield(handles, 'head_cal') && isfield(handles.head_cal, 'center')
-    cal_offset = handles.head_cal.center;
+	cal_offset = handles.head_cal.center;
 	head_horiz_angle = head_horiz_angle - handles.head_cal.center;
 end
 
@@ -738,7 +757,7 @@ accelEarth = apdm_RotateVector(accel',apdm_data.orient{sensor_num}');
 gyroEarth = apdm_RotateVector(apdm_data.gyro{sensor_num}', apdm_data.orient{sensor_num}');
 norm_gyroEarth = zeros(size(gyroEarth,1),1);
 for gg = 1:size(gyroEarth,1)
-   norm_gyroEarth(gg) = norm(gyroEarth(gg,:));
+	norm_gyroEarth(gg) = norm(gyroEarth(gg,:));
 end
 
 
@@ -748,7 +767,7 @@ accel_no_g = accelEarth;
 accel_no_g(:,3) = accel_no_g(:,3) - gravity_estimate;
 norm_accel_no_g = zeros(size(accel_no_g,1),1);
 for aa = 1:size(accel_no_g,1)
-   norm_accel_no_g(aa) = norm(accel_no_g(aa,:));
+	norm_accel_no_g(aa) = norm(accel_no_g(aa,:));
 end
 
 
@@ -761,34 +780,34 @@ gyro_corrected_vel = zeros(size(vel));
 ind = 1;
 threshold = 0.1;
 while ind < length(norm_gyroEarth)
-   if norm_gyroEarth(ind) < threshold % zero vel, look for end of zero vel segment
-      next_ind = find(norm_gyroEarth(ind:end) > threshold, 1) + ind - 1; % index of 1st non-zero velocity
-%       if ind > 1 && isempty(next_ind)
-      if  isempty(next_ind)
-         break
-	  end
-% 	  else
-% 		  next_ind = length(norm_gyroEarth);
-%       end
-      % during this non-zero segment, compute the integral of accel
-%       gyro_corrected_vel(ind:next_ind,:) = cumsum(accel_no_g(ind:next_ind,:),1)/samp_freq;
-	  
-      ind = next_ind;
-   else
-      % in non-zero segment, look for its end
-      next_ind = find(norm_gyroEarth(ind:end) < threshold, 1) + ind - 1; % index of end of non-zero segment
-      if isempty(next_ind)
-         break
-      end
-      % during this non-zero segment, compute the integral of accel
-      gyro_corrected_vel(ind:next_ind,:) = cumsum(accel_no_g(ind:next_ind,:),1)/samp_freq;
-      ind = next_ind;
-   end
+	if norm_gyroEarth(ind) < threshold % zero vel, look for end of zero vel segment
+		next_ind = find(norm_gyroEarth(ind:end) > threshold, 1) + ind - 1; % index of 1st non-zero velocity
+		%       if ind > 1 && isempty(next_ind)
+		if  isempty(next_ind)
+			break
+		end
+		% 	  else
+		% 		  next_ind = length(norm_gyroEarth);
+		%       end
+		% during this non-zero segment, compute the integral of accel
+		%       gyro_corrected_vel(ind:next_ind,:) = cumsum(accel_no_g(ind:next_ind,:),1)/samp_freq;
+		
+		ind = next_ind;
+	else
+		% in non-zero segment, look for its end
+		next_ind = find(norm_gyroEarth(ind:end) < threshold, 1) + ind - 1; % index of end of non-zero segment
+		if isempty(next_ind)
+			break
+		end
+		% during this non-zero segment, compute the integral of accel
+		gyro_corrected_vel(ind:next_ind,:) = cumsum(accel_no_g(ind:next_ind,:),1)/samp_freq;
+		ind = next_ind;
+	end
 end
 
 norm_gyro_corrected_vel = zeros(size(gyro_corrected_vel,1),1);
 for cc = 1:size(gyro_corrected_vel,1)
-   norm_gyro_corrected_vel(cc) = norm(gyro_corrected_vel(cc,:));
+	norm_gyro_corrected_vel(cc) = norm(gyro_corrected_vel(cc,:));
 end
 
 % line(apdm_data.time, gyro_corrected_vel(:,1), 'Tag', ['line_' sensor '_vel_x']);
@@ -852,7 +871,7 @@ return
 
 % -------------------------------------------------------------
 function handles = resizeAxes(handles)
-% are the sensors off or on? 
+% are the sensors off or on?
 head = handles.chkbx_head.Value;
 right = handles.chkbx_right_hand.Value;
 left = handles.chkbx_left_hand.Value;
@@ -864,113 +883,113 @@ if ~isfield(handles, 'apdm_data') || ~isfield(handles.apdm_data, 'sensor') ...
 	num_sensors = 0;
 end
 switch num_sensors
-   case 0
-%       handles.axes_eye.Position = [0.067 0.24 0.40 0.628];
+	case 0
+		%       handles.axes_eye.Position = [0.067 0.24 0.40 0.628];
 		handles.axes_eye.Position(2) = 0.24;
 		handles.axes_eye.Position(4) = 0.628;
-      handles.axes_eye.XLabel.String = 'Time (sec)';
-% 	  handles.axes_eye.XTickLabel = arrayfun(@num2str, handles.axes_eye.XTick, 'uniformoutput', false)';
+		handles.axes_eye.XLabel.String = 'Time (sec)';
+		% 	  handles.axes_eye.XTickLabel = arrayfun(@num2str, handles.axes_eye.XTick, 'uniformoutput', false)';
 		handles.axes_eye.XTickLabelMode = 'auto';
-      handles.axes_sensor1.Visible = 'Off';
-      handles.axes_sensor2.Visible = 'Off';
-	  handles.axes_sensor3.Visible = 'Off';
-   case 1
-%       handles.axes_eye.Position = [0.067 0.539 0.40 0.329];
+		handles.axes_sensor1.Visible = 'Off';
+		handles.axes_sensor2.Visible = 'Off';
+		handles.axes_sensor3.Visible = 'Off';
+	case 1
+		%       handles.axes_eye.Position = [0.067 0.539 0.40 0.329];
 		handles.axes_eye.Position(2) = 0.539;
 		handles.axes_eye.Position(4) = 0.329;
-      handles.axes_eye.XTickLabel = {};
-	  handles.axes_eye.XLabel.String = '';
-	  if head
-		  vis_axes = 'axes_sensor1';
-		  non_vis_axes1 = 'axes_sensor2';
-		  non_vis_axes2 = 'axes_sensor3';
-	  elseif right
-		  vis_axes = 'axes_sensor2';
-		  non_vis_axes1 = 'axes_sensor1';
-		  non_vis_axes2 = 'axes_sensor3';
-	  elseif left
-		  vis_axes = 'axes_sensor3';
-		  non_vis_axes1 = 'axes_sensor1';
-		  non_vis_axes2 = 'axes_sensor2';
-	  end
-%       handles.axes_sensor1.Position = [0.067 0.252 0.40 0.261];
+		handles.axes_eye.XTickLabel = {};
+		handles.axes_eye.XLabel.String = '';
+		if head
+			vis_axes = 'axes_sensor1';
+			non_vis_axes1 = 'axes_sensor2';
+			non_vis_axes2 = 'axes_sensor3';
+		elseif right
+			vis_axes = 'axes_sensor2';
+			non_vis_axes1 = 'axes_sensor1';
+			non_vis_axes2 = 'axes_sensor3';
+		elseif left
+			vis_axes = 'axes_sensor3';
+			non_vis_axes1 = 'axes_sensor1';
+			non_vis_axes2 = 'axes_sensor2';
+		end
+		%       handles.axes_sensor1.Position = [0.067 0.252 0.40 0.261];
 		handles.(vis_axes).Position(2) = 0.252;
 		handles.(vis_axes).Position(4) = 0.261;
 		handles.(vis_axes).Visible = 'on';
-%       handles.axes_sensor1.XLabel.String = 'Time (sec)';
+		%       handles.axes_sensor1.XLabel.String = 'Time (sec)';
 		handles.(vis_axes).XLabel.String = 'Time (sec)';
-% 		handles.(vis_axes).XTickLabel = arrayfun(@num2str, handles.(vis_axes).XTick, 'uniformoutput', false)';
+		% 		handles.(vis_axes).XTickLabel = arrayfun(@num2str, handles.(vis_axes).XTick, 'uniformoutput', false)';
 		handles.(vis_axes).XTickLabelMode = 'auto';
-%       handles.axes_sensor2.Visible = 'Off';
+		%       handles.axes_sensor2.Visible = 'Off';
 		handles.(non_vis_axes1).Visible = 'Off';
-%		handles.axes_sensor3.Visible = 'Off';
+		%		handles.axes_sensor3.Visible = 'Off';
 		handles.(non_vis_axes2).Visible = 'Off';
-   case 2
-%       handles.axes_eye.Position = [0.067 0.641 0.40 0.227];
+	case 2
+		%       handles.axes_eye.Position = [0.067 0.641 0.40 0.227];
 		handles.axes_eye.Position(2) = 0.641;
 		handles.axes_eye.Position(4) = 0.227;
 		handles.axes_eye.XTickLabel = {};
 		if head && right
-		  vis_axes1 = 'axes_sensor1';
-		  vis_axes2 = 'axes_sensor2';
-		  non_vis_axes = 'axes_sensor3';
-	  elseif head && left
-		  vis_axes1 = 'axes_sensor1';
-		  vis_axes2 = 'axes_sensor3';
-		  non_vis_axes = 'axes_sensor2';
-	  elseif right && left
-		  vis_axes1 = 'axes_sensor2';
-		  vis_axes2 = 'axes_sensor3';
-		  non_vis_axes = 'axes_sensor1';
-	  end
-%       handles.axes_sensor1.Position = [0.067 0.439 0.40 0.187];
+			vis_axes1 = 'axes_sensor1';
+			vis_axes2 = 'axes_sensor2';
+			non_vis_axes = 'axes_sensor3';
+		elseif head && left
+			vis_axes1 = 'axes_sensor1';
+			vis_axes2 = 'axes_sensor3';
+			non_vis_axes = 'axes_sensor2';
+		elseif right && left
+			vis_axes1 = 'axes_sensor2';
+			vis_axes2 = 'axes_sensor3';
+			non_vis_axes = 'axes_sensor1';
+		end
+		%       handles.axes_sensor1.Position = [0.067 0.439 0.40 0.187];
 		handles.(vis_axes1).Position(2) = 0.439;
 		handles.(vis_axes1).Position(4) = 0.187;
 		handles.(vis_axes1).Visible = 'on';
 		handles.(vis_axes1).XTickLabel = {};
 		handles.(vis_axes1).XLabel.String = '';
-%       handles.axes_sensor1.XTickLabel = {};
-%       handles.axes_sensor2.Position = [0.067 0.239 0.40 0.187];
+		%       handles.axes_sensor1.XTickLabel = {};
+		%       handles.axes_sensor2.Position = [0.067 0.239 0.40 0.187];
 		handles.(vis_axes2).Position(2) = 0.239;
 		handles.(vis_axes2).Position(4) = 0.187;
 		handles.(vis_axes2).Visible = 'on';
-% 		handles.(vis_axes2).XTickLabel = arrayfun(@num2str, handles.(vis_axes2).XTick, 'uniformoutput', false)';
+		% 		handles.(vis_axes2).XTickLabel = arrayfun(@num2str, handles.(vis_axes2).XTick, 'uniformoutput', false)';
 		handles.(vis_axes2).XTickLabelMode = 'auto';
 		handles.(vis_axes2).XLabel.String = 'Time (sec)';
-% 	  handles.axes_sensor3.Visible = 'Off';
+		% 	  handles.axes_sensor3.Visible = 'Off';
 		handles.(non_vis_axes).Visible = 'Off';
 	case 3
-%       handles.axes_eye.Position = [0.067 0.7 0.40 0.17];
+		%       handles.axes_eye.Position = [0.067 0.7 0.40 0.17];
 		handles.axes_eye.Position(2) = 0.7;
 		handles.axes_eye.Position(4) = 0.17;
-      handles.axes_eye.XTickLabel = {};
-	  handles.axes_eye.XLabel.String = '';
-%       handles.axes_sensor1.Position = [0.067 0.535 0.40 0.14];
-	  handles.axes_sensor1.Position(2) = 0.535;
-	  handles.axes_sensor1.Position(4) = 0.14;
-      handles.axes_sensor1.XTickLabel = {};
-	  handles.axes_sensor1.XLabel.String = '';
-	  handles.axes_sensor1.Visible = 'on';
-%       handles.axes_sensor2.Position = [0.067 0.387 0.40 0.14];
-	  handles.axes_sensor2.Position(2) = 0.387;
-	  handles.axes_sensor2.Position(4) = 0.14;
-	  handles.axes_sensor2.XTickLabel = {};
-	  handles.axes_sensor1.XLabel.String = '';
-	  handles.axes_sensor2.Visible = 'on';
-%       handles.axes_sensor3.Position = [0.067 0.24 0.40 0.14];
+		handles.axes_eye.XTickLabel = {};
+		handles.axes_eye.XLabel.String = '';
+		%       handles.axes_sensor1.Position = [0.067 0.535 0.40 0.14];
+		handles.axes_sensor1.Position(2) = 0.535;
+		handles.axes_sensor1.Position(4) = 0.14;
+		handles.axes_sensor1.XTickLabel = {};
+		handles.axes_sensor1.XLabel.String = '';
+		handles.axes_sensor1.Visible = 'on';
+		%       handles.axes_sensor2.Position = [0.067 0.387 0.40 0.14];
+		handles.axes_sensor2.Position(2) = 0.387;
+		handles.axes_sensor2.Position(4) = 0.14;
+		handles.axes_sensor2.XTickLabel = {};
+		handles.axes_sensor1.XLabel.String = '';
+		handles.axes_sensor2.Visible = 'on';
+		%       handles.axes_sensor3.Position = [0.067 0.24 0.40 0.14];
 		handles.axes_sensor3.Position(2) = 0.24;
 		handles.axes_sensor3.Position(4) = 0.14;
 		handles.axes_sensor3.Visible = 'on';
-      handles.axes_sensor3.XLabel.String = 'Time (sec)';
-% 	  handles.axes_sensor3.XTickLabel = arrayfun(@num2str, handles.axes_sensor3.XTick, 'uniformoutput', false)';
-	  handles.axes_sensor3.XTickLabelMode = 'auto';
-    otherwise
-      error('more than 3 sensors of data')
+		handles.axes_sensor3.XLabel.String = 'Time (sec)';
+		% 	  handles.axes_sensor3.XTickLabel = arrayfun(@num2str, handles.axes_sensor3.XTick, 'uniformoutput', false)';
+		handles.axes_sensor3.XTickLabelMode = 'auto';
+	otherwise
+		error('more than 3 sensors of data')
 end
 return
 
 % -------------------------------------------------------------
-function createBox(source,callbackdata, xlims, tag_str)
+function createBox(source,callbackdata, xlims, tag_str) %#ok<*INUSL>
 % if call by create_blinks then the xlims are the blink interval. If xlims
 % is empty, then this was called by the exclude data menu and the position
 % of the box is at the current cursor postion with a width of 5 s. The
@@ -981,9 +1000,9 @@ p_color = get_patch_color(tag_str);
 handles = guidata(gcf);
 axes(handles.axes_eye)
 if isempty(xlims)
-   cursor_loc = get(handles.axes_eye, 'CurrentPoint');
-   cursor_x = cursor_loc(1);
-   xlims = [cursor_x cursor_x+5];
+	cursor_loc = get(handles.axes_eye, 'CurrentPoint');
+	cursor_x = cursor_loc(1);
+	xlims = [cursor_x cursor_x+5];
 end
 ylims = get(handles.axes_eye, 'YLim');
 
@@ -995,20 +1014,20 @@ patch_id = unique_id(handles.dataPatches);
 handles.dataPatches = [handles.dataPatches, patch_id];
 
 h_patch = patch([xlims(1) xlims(1) xlims(2) xlims(2)], ...
-   [ylims(1) ylims(2) ylims(2) ylims(1)], p_color, 'Tag', [tag_str '_id#' num2str(patch_id) '_patch']);
+	[ylims(1) ylims(2) ylims(2) ylims(1)], p_color, 'Tag', [tag_str '_id#' num2str(patch_id) '_patch']);
 set(h_patch, 'FaceAlpha', 0.5, ...
-   'LineStyle', 'none')
+	'LineStyle', 'none')
 createPatchMenu(h_patch);
 uistack(h_patch, 'bottom')
 
 % left side of patch
 h_left_line = line([xlims(1) xlims(1)], ...
-   [ylims(1) ylims(2)], 'Color', 'k', 'Tag', [tag_str  '_id#' num2str(patch_id)  '_l_line']);
+	[ylims(1) ylims(2)], 'Color', 'k', 'Tag', [tag_str  '_id#' num2str(patch_id)  '_l_line']);
 h_left_line.UserData = h_patch;
 
 %right side of patch
 h_right_line = line([xlims(2) xlims(2)], ...
-   [ylims(1) ylims(2)], 'Color', 'k', 'Tag', [tag_str  '_id#' num2str(patch_id) '_r_line']);
+	[ylims(1) ylims(2)], 'Color', 'k', 'Tag', [tag_str  '_id#' num2str(patch_id) '_r_line']);
 h_right_line.UserData = h_patch;
 
 % save lines in patch userdata & make whole patch draggable
@@ -1018,15 +1037,15 @@ h_patch.UserData.h_l_line = h_left_line;
 % matching patch in other axes
 if isfield(handles, 'apdm_data')
 	if ~isempty(handles.apdm_data.sensor)
-	   axes(handles.axes_sensor1)
-	   ylims = get(handles.axes_sensor1, 'YLim');
-	   h_patch2 = patch([xlims(1) xlims(1) xlims(2) xlims(2)], ...
-		  [ylims(1) ylims(2) ylims(2) ylims(1)], p_color);
-	   set(h_patch2, 'FaceAlpha', 0.5, 'Tag', [tag_str '_id#' num2str(patch_id) '_patch'], ...
-		   'Visible', handles.axes_sensor1.Visible)
-	   uistack(h_patch2, 'bottom')
-% 	   handles.linkprop_list(end+1) = linkprop([h_patch, h_patch2], 'XData');
-% 	   handles.linkprop_list(end+1) = linkprop([h_patch2, handles.axes_sensor1], 'Visible');
+		axes(handles.axes_sensor1)
+		ylims = get(handles.axes_sensor1, 'YLim');
+		h_patch2 = patch([xlims(1) xlims(1) xlims(2) xlims(2)], ...
+			[ylims(1) ylims(2) ylims(2) ylims(1)], p_color);
+		set(h_patch2, 'FaceAlpha', 0.5, 'Tag', [tag_str '_id#' num2str(patch_id) '_patch'], ...
+			'Visible', handles.axes_sensor1.Visible)
+		uistack(h_patch2, 'bottom')
+		% 	   handles.linkprop_list(end+1) = linkprop([h_patch, h_patch2], 'XData');
+		% 	   handles.linkprop_list(end+1) = linkprop([h_patch2, handles.axes_sensor1], 'Visible');
 		h_patch.UserData.linkprop_xdata = linkprop([h_patch, h_patch2], 'XData');
 		if isfield(handles.axes_sensor1.UserData, 'linkprop_visible')
 			addtarget(handles.axes_sensor1.UserData.linkprop_visible, h_patch2)
@@ -1035,15 +1054,15 @@ if isfield(handles, 'apdm_data')
 		end
 	end
 	if length(handles.apdm_data.sensor) > 1
-	   axes(handles.axes_sensor2)
-	   ylims = get(handles.axes_sensor2, 'YLim');
-	   h_patch2 = patch([xlims(1) xlims(1) xlims(2) xlims(2)], ...
-		  [ylims(1) ylims(2) ylims(2) ylims(1)], p_color);
-	   set(h_patch2, 'FaceAlpha', 0.5, 'Tag', [tag_str '_id#' num2str(patch_id) '_patch'], ...
-		   'Visible', handles.axes_sensor2.Visible)
-	   uistack(h_patch2, 'bottom')
-% 	   handles.linkprop_list(end+1) = linkprop([h_patch, h_patch2], 'XData');
-% 	   handles.linkprop_list(end+1) = linkprop([h_patch2, handles.axes_sensor2], 'Visible');
+		axes(handles.axes_sensor2)
+		ylims = get(handles.axes_sensor2, 'YLim');
+		h_patch2 = patch([xlims(1) xlims(1) xlims(2) xlims(2)], ...
+			[ylims(1) ylims(2) ylims(2) ylims(1)], p_color);
+		set(h_patch2, 'FaceAlpha', 0.5, 'Tag', [tag_str '_id#' num2str(patch_id) '_patch'], ...
+			'Visible', handles.axes_sensor2.Visible)
+		uistack(h_patch2, 'bottom')
+		% 	   handles.linkprop_list(end+1) = linkprop([h_patch, h_patch2], 'XData');
+		% 	   handles.linkprop_list(end+1) = linkprop([h_patch2, handles.axes_sensor2], 'Visible');
 		addtarget(h_patch.UserData.linkprop_xdata, h_patch2)
 		if isfield(handles.axes_sensor2.UserData, 'linkprop_visible')
 			addtarget(handles.axes_sensor2.UserData.linkprop_visible, h_patch2)
@@ -1052,15 +1071,15 @@ if isfield(handles, 'apdm_data')
 		end
 	end
 	if length(handles.apdm_data.sensor) > 2
-	   axes(handles.axes_sensor3)
-	   ylims = get(handles.axes_sensor3, 'YLim');
-	   h_patch2 = patch([xlims(1) xlims(1) xlims(2) xlims(2)], ...
-		  [ylims(1) ylims(2) ylims(2) ylims(1)], p_color);
-	   set(h_patch2, 'FaceAlpha', 0.5, 'Tag', [tag_str '_id#' num2str(patch_id) '_patch'], ...
-		   'Visible', handles.axes_sensor3.Visible)
-	   uistack(h_patch2, 'bottom')
-% 	   handles.linkprop_list(end+1) = linkprop([h_patch, h_patch2], 'XData');
-% 	   handles.linkprop_list(end+1) = linkprop([h_patch2, handles.axes_sensor3], 'Visible');
+		axes(handles.axes_sensor3)
+		ylims = get(handles.axes_sensor3, 'YLim');
+		h_patch2 = patch([xlims(1) xlims(1) xlims(2) xlims(2)], ...
+			[ylims(1) ylims(2) ylims(2) ylims(1)], p_color);
+		set(h_patch2, 'FaceAlpha', 0.5, 'Tag', [tag_str '_id#' num2str(patch_id) '_patch'], ...
+			'Visible', handles.axes_sensor3.Visible)
+		uistack(h_patch2, 'bottom')
+		% 	   handles.linkprop_list(end+1) = linkprop([h_patch, h_patch2], 'XData');
+		% 	   handles.linkprop_list(end+1) = linkprop([h_patch2, handles.axes_sensor3], 'Visible');
 		addtarget(h_patch.UserData.linkprop_xdata, h_patch2)
 		if isfield(handles.axes_sensor3.UserData, 'linkprop_visible')
 			addtarget(handles.axes_sensor3.UserData.linkprop_visible, h_patch2)
@@ -1114,24 +1133,24 @@ return
 % -------------------------------------------------------------
 function handles = show_annot_symbols(handles)
 if isfield(handles,'apdm_data')
-   annot = handles.apdm_data.annot;
-   
-   for annot_num = 1:length(handles.apdm_data.annot)
-      line_type = ['annotation_' annot{annot_num}.msg];
-%       handles = addAnnotSymbol(handles, annot{annot_num}.time, line_type, 'on');      
-   end
+	annot = handles.apdm_data.annot;
+	
+	for annot_num = 1:length(handles.apdm_data.annot)
+		line_type = ['annotation_' annot{annot_num}.msg];
+		%       handles = addAnnotSymbol(handles, annot{annot_num}.time, line_type, 'on');
+	end
 end
 return
 
 % -------------------------------------------------------------
 function handles = show_annot_lines(handles)
 if isfield(handles,'apdm_data') && isfield(handles.apdm_data, 'annot')
-   annot = handles.apdm_data.annot;
-   
-   for annot_num = 1:length(handles.apdm_data.annot)
-      line_type = ['annotation_' annot{annot_num}.msg];
-      handles = addAxesLine(handles, annot{annot_num}.time, line_type, 'on');      
-   end
+	annot = handles.apdm_data.annot;
+	
+	for annot_num = 1:length(handles.apdm_data.annot)
+		line_type = ['annotation_' annot{annot_num}.msg];
+		handles = addAxesLine(handles, annot{annot_num}.time, line_type, 'on');
+	end
 end
 return
 
@@ -1150,7 +1169,7 @@ for click_cnt = 1:height(handles.click_data_tbl)
 	% use the abs click time and eye_data start time to display the click time
 	if any(strcmp(handles.click_data_tbl.Properties.VariableNames, 'abs_click_time'))
 		click_time = (handles.click_data_tbl.abs_click_time(click_cnt) - handles.eye_data.start_times )/1000;
-
+		
 		if click_time >= handles.axes_eye.XLim(1) && click_time <= handles.axes_eye.XLim(2) % only display clicks within the eye data times
 			click_coords = parse_click_coords(handles.click_data_tbl.CLICK_COORDINATES(click_cnt));
 			if ~isempty(click_coords)
@@ -1181,9 +1200,9 @@ return
 function [hcmenu, ud] = createClickLineMenu(h_line)
 hcmenu = uicontextmenu;
 ud.hMenuShowClick = uimenu(hcmenu, 'Label', 'Highlight Location', 'Tag', 'menuShowClick', ...
-   'Callback', {@menuClickLine_Callback, h_line}, 'Checked', 'off');
+	'Callback', {@menuClickLine_Callback, h_line}, 'Checked', 'off');
 ud.hMenuDeleteClick = uimenu(hcmenu, 'Label', 'Delete', 'Tag', 'menuDeleteClick', ...
-   'Callback', {@menuClickLine_Callback, h_line}, 'Checked', 'off');
+	'Callback', {@menuClickLine_Callback, h_line}, 'Checked', 'off');
 return
 
 function menuClickLine_Callback(source, callbackdata, h_line)
@@ -1195,27 +1214,27 @@ switch source.Tag
 			h_line.UserData.h_click_on_pic.MarkerSize = 10;
 			h_line.UserData.h_click_on_pic_text.Color = 'y';
 			h_line.UserData.h_click_on_pic_text.FontSize = 15;
-% 			h_line.UserData.h_click_on_pic.Visible = 'off';
+			% 			h_line.UserData.h_click_on_pic.Visible = 'off';
 		else
 			source.Checked = 'on';
 			h_line.UserData.h_click_on_pic.Color = 'r';
 			h_line.UserData.h_click_on_pic.MarkerSize = 20;
 			h_line.UserData.h_click_on_pic_text.Color = 'r';
 			h_line.UserData.h_click_on_pic_text.FontSize = 18;
-% 			h_line.UserData.h_click_on_pic.Visible = 'on';
+			% 			h_line.UserData.h_click_on_pic.Visible = 'on';
 		end
 	case 'menuDeleteClick'
-% 		keyboard
+		% 		keyboard
 		handles = guidata(gcf);
 		row = find_click_tbl_row(handles.click_data_tbl, h_line.UserData.click_coords);
 		assert(~isempty(row), 'error finding the row in click_data_tbl for %d, %d', ...
 			h_line.UserData.click_coords.x, h_line.UserData.click_coords.y)
-% 		handles.click_data_tbl(row,:) = [];
+		% 		handles.click_data_tbl(row,:) = [];
 		guidata(gcf, handles)
 		delete(h_line.UserData.hMenuShowClick)
 		delete(h_line.UserData.hMenuDeleteClick)
 		delete(h_line.UserData.h_click_on_pic)
-		delete(h_line.UserData.h_click_on_pic_text)	
+		delete(h_line.UserData.h_click_on_pic_text)
 		delete(h_line)
 end
 return
@@ -1252,75 +1271,122 @@ line_color = getLineColor(handles, line_type);
 
 if isfield(handles, 'apdm_data')
 	if ~isempty(handles.apdm_data.sensor)
-
-	   axes(handles.axes_sensor1)
-	   ylims = get(handles.axes_sensor1, 'YLim');
-	   h_sensor1 = line([time, time], ylims, 'Color', line_color, 'Tag', line_type, ...
-		  'Visible', vis_on_off);
-	   uistack(h_sensor1, 'bottom')
-	   [hcmenu, ud] = createLineMenu(h_sensor1);
-	   set(h_sensor1, 'UIContextMenu', hcmenu, 'UserData', ud);
+		
+		axes(handles.axes_sensor1)
+		ylims = get(handles.axes_sensor1, 'YLim');
+		h_sensor1 = line([time, time], ylims, 'Color', line_color, 'Tag', line_type, ...
+			'LineWidth', 2, 'Visible', vis_on_off);
+		uistack(h_sensor1, 'bottom')
+		[hcmenu, ud] = createLineMenu(h_sensor1, line_type);
+		set(h_sensor1, 'UIContextMenu', hcmenu, 'UserData', ud);
+		if isfield(handles.axes_sensor1.UserData, 'linkprop_visible')
+			addtarget(handles.axes_sensor1.UserData.linkprop_visible, h_sensor1)
+		else
+			handles.axes_sensor1.UserData.linkprop_visible = linkprop([handles.axes_sensor1, h_sensor1], 'Visible');
+		end
+		
 	end
 	if length(handles.apdm_data.sensor) > 1
-	   axes(handles.axes_sensor2)
-	   ylims = get(handles.axes_sensor2, 'YLim');
-	   h_sensor2 = line([time, time], ylims, 'Color', line_color, 'Tag',  line_type, ...
-		  'Visible', vis_on_off);
-	   uistack(h_sensor2, 'bottom')
-	   [hcmenu, ud] = createLineMenu(h_sensor2);
-	   set(h_sensor2, 'UIContextMenu', hcmenu, 'UserData', ud);
-% 	   handles.linkprop_list(end+1) = linkprop([h_hand, h_head], 'XData');
+		axes(handles.axes_sensor2)
+		ylims = get(handles.axes_sensor2, 'YLim');
+		h_sensor2 = line([time, time], ylims, 'Color', line_color, 'Tag',  line_type, ...
+			'LineWidth', 2, 'Visible', vis_on_off);
+		uistack(h_sensor2, 'bottom')
+		[hcmenu, ud] = createLineMenu(h_sensor2, line_type);
+		set(h_sensor2, 'UIContextMenu', hcmenu, 'UserData', ud);
+		
 		% put xdata linkprop in the line user data in axes_sensor1
 		h_sensor1.UserData.linkprop_xdata = linkprop([h_sensor1, h_sensor2], 'XData');
-		% FIXME - also link visible property to axes
+		% also link visible property to axes
+		if isfield(handles.axes_sensor2.UserData, 'linkprop_visible')
+			addtarget(handles.axes_sensor2.UserData.linkprop_visible, h_sensor2)
+		else
+			handles.axes_sensor2.UserData.linkprop_visible = linkprop([handles.axes_sensor2, h_sensor2], 'Visible');
+		end
 	end
-
+	
 	if length(handles.apdm_data.sensor) > 2
-	   axes(handles.axes_sensor3)
-	   ylims = get(handles.axes_sensor3, 'YLim');
-	   h_sensor3 = line([time, time], ylims, 'Color', line_color, 'Tag',  line_type, ...
-		  'Visible', vis_on_off);
-	   uistack(h_sensor2, 'bottom')
-	   [hcmenu, ud] = createLineMenu(h_sensor3);
-	   set(h_sensor3, 'UIContextMenu', hcmenu, 'UserData', ud);
-% 	   handles.linkprop_list(end+1) = linkprop([h_sensor1, h_sensor3], 'XData');
+		axes(handles.axes_sensor3)
+		ylims = get(handles.axes_sensor3, 'YLim');
+		h_sensor3 = line([time, time], ylims, 'Color', line_color, 'Tag',  line_type, ...
+			'LineWidth', 2, 'Visible', vis_on_off);
+		uistack(h_sensor2, 'bottom')
+		[hcmenu, ud] = createLineMenu(h_sensor3, line_type);
+		set(h_sensor3, 'UIContextMenu', hcmenu, 'UserData', ud);
+		
 		addtarget(h_sensor1.UserData.linkprop_xdata, h_sensor3);
+		if isfield(handles.axes_sensor3.UserData, 'linkprop_visible')
+			addtarget(handles.axes_sensor3.UserData.linkprop_visible, h_sensor3)
+		else
+			handles.axes_sensor3.UserData.linkprop_visible = linkprop([handles.axes_sensor3, h_sensor3], 'Visible');
+		end
+	end
+	% add bead task to eye data axes
+	if strncmp(line_type, 'annotation_bead_', 16)
+		axes(handles.axes_eye)
+		ylims = get(handles.axes_eye, 'YLim');
+		
+		h_eye = line([time, time], ylims, 'Color', line_color, 'Tag', line_type, ...
+			'LineWidth', 2, 'Visible', vis_on_off);
+		uistack(h_eye, 'bottom')
+		
+		[hcmenu, ud] = createLineMenu(h_eye, line_type);
+		ud.line_type = line_type;
+		ud.h_all_lines = h_eye;
+		set(h_eye, 'UIContextMenu', hcmenu, 'UserData', ud)
+		
+		addtarget(h_sensor1.UserData.linkprop_xdata, h_eye);
+		
 	end
 else
 	axes(handles.axes_eye)
 	ylims = get(handles.axes_eye, 'YLim');
 	
 	h_eye = line([time, time], ylims, 'Color', line_color, 'Tag', line_type, ...
-		'Visible', vis_on_off);
+		'LineWidth', 2, 'Visible', vis_on_off);
 	uistack(h_eye, 'bottom')
 	
 	[hcmenu, ud] = createLineMenu(h_eye);
 	ud.line_type = line_type;
 	ud.h_all_lines = h_eye;
 	set(h_eye, 'UIContextMenu', hcmenu, 'UserData', ud)
-
+	
 end
 
 return
 
 %--------------------------------------
 function line_color = getLineColor(handles, type)
-line_color = 'y';
+line_color = 'm';
 h_txt = findobj(handles.figure1, 'Tag', ['txt_' type]);
 if ~isempty(h_txt)
-   line_color = h_txt.ForegroundColor;
+	line_color = h_txt.ForegroundColor;
 else
-   beg_or_end = regexp(type, '(begin)|(end)|(bp)|(start)$', 'match');
-   if ~isempty(beg_or_end)
-      switch beg_or_end{:}
-         case {'begin', 'start'}
-            line_color = 'g';
-         case 'end'
-            line_color = 'r';
-		  case 'bp'
-			  line_color = 'c';
-      end
-   end
+	%    beg_or_end = regexp(type, '(begin)|(end)|(bp)|(start)|(bead)|(read)|(pick)|(thread)|(return)$', 'match');
+	if contains(type, '_begin')
+		line_color = 'g';
+	elseif contains(type, '_read')
+		line_color = 'c';
+	elseif contains(type, '_pick')
+		line_color = [114 214 247]/255;
+	elseif contains(type, '_thread')
+		line_color = [247 175 114]/255; % orange
+	elseif contains(type, '_return')
+		line_color = 'r';
+	end
+	%       switch beg_or_end{:}
+	%          case {'begin', 'start'}
+	%             line_color = 'g';
+	%          case {'end', 'return'}
+	%             line_color = 'r';
+	% 		  case {'bp', 'pick'}
+	% 			  line_color = 'c';
+	% 		  case 'thread'
+	% 			  line_color = [247 175 114]/255; % orange
+	% 		  case 'bead'
+	% 			  line_color = 'c';
+	%       end
+	%    end
 end
 return
 
@@ -1328,68 +1394,81 @@ return
 function createLineColorMenu(hLine)
 hcmenu = uicontextmenu;
 ud.hMenuShow = uimenu(hcmenu, 'Label', 'Blue', 'Tag', 'menuBlue', ...
-   'Callback', {@menuLineColor_Callback, hLine});
+	'Callback', {@menuLineColor_Callback, hLine});
 ud.hMenuDrag = uimenu(hcmenu, 'Label', 'Green', 'Tag', 'menuGreen', ...
-   'Callback', {@menuLineColor_Callback, hLine});
+	'Callback', {@menuLineColor_Callback, hLine});
 ud.hMenuDrag = uimenu(hcmenu, 'Label', 'Red', 'Tag', 'menuRed', ...
-   'Callback', {@menuLineColor_Callback, hLine});
+	'Callback', {@menuLineColor_Callback, hLine});
 ud.hMenuDrag = uimenu(hcmenu, 'Label', 'Cyan', 'Tag', 'menuCyan', ...
-   'Callback', {@menuLineColor_Callback, hLine});
+	'Callback', {@menuLineColor_Callback, hLine});
 ud.hMenuDrag = uimenu(hcmenu, 'Label', 'Magenta', 'Tag', ...
-   'menuMagenta', 'Callback', {@menuLineColor_Callback, hLine});
+	'menuMagenta', 'Callback', {@menuLineColor_Callback, hLine});
 ud.hMenuDrag = uimenu(hcmenu, 'Label', 'Orange', 'Tag', ...
-   'menuOrange', 'Callback', {@menuLineColor_Callback, hLine});
+	'menuOrange', 'Callback', {@menuLineColor_Callback, hLine});
 set(hLine, 'UIContextMenu', hcmenu, 'UserData', ud);
 
 
 function menuLineColor_Callback(source, callbackdata, hLine)
 switch source.Tag
-   case 'menuBlue'
-      hLine.Color = [0 0 0.8];
-   case 'menuGreen'
-      hLine.Color = [0 0.5 0];
-   case 'menuRed'
-      hLine.Color = [0.5 0 0];
-   case 'menuCyan'
-      hLine.Color = [114 214 247]/255;
-   case 'menuMagenta'
-      hLine.Color = [247 114 238]/255;
-   case 'menuOrange'
-      hLine.Color = [247 175 114]/255;
+	case 'menuBlue'
+		hLine.Color = [0 0 0.8];
+	case 'menuGreen'
+		hLine.Color = [0 0.5 0];
+	case 'menuRed'
+		hLine.Color = [0.5 0 0];
+	case 'menuCyan'
+		hLine.Color = [114 214 247]/255;
+	case 'menuMagenta'
+		hLine.Color = [247 114 238]/255;
+	case 'menuOrange'
+		hLine.Color = [247 175 114]/255;
 end
 
 
 
 % -------------------------------------------------------------
-function [hcmenu, ud] = createLineMenu(h_line)
+function [hcmenu, ud] = createLineMenu(varargin)
+tag = [];
+if nargin > 1
+	tag = varargin{2};
+end	
+if nargin > 0
+	h_line = varargin{1};
+else
+	error('createLineMenu must be called with at least 1 input argument')
+end
+
 hcmenu = uicontextmenu;
+if ~isempty(tag)
+	ud.hMenuTag = uimenu(hcmenu, 'Label', tag, 'Tag', 'menuTag', 'Checked', 'on');
+end
 ud.hMenuLock = uimenu(hcmenu, 'Label', 'Locked', 'Tag', 'menuLock', ...
-   'Callback', {@menuLine_Callback, h_line}, 'Checked', 'on');
+	'Callback', {@menuLine_Callback, h_line}, 'Checked', 'on');
 ud.hMenuDeleteLine = uimenu(hcmenu, 'Label', 'Delete', 'Tag', 'menuDelete', ...
-   'Callback', {@menuLine_Callback, h_line});
+	'Callback', {@menuLine_Callback, h_line});
 
 % set(h_line, 'UIContextMenu', hcmenu, 'UserData', ud);
 return
 
 function menuLine_Callback(source, callbackdata, h_line)
 switch source.Tag
-   case 'menuLock'
-      if strcmp(source.Checked, 'on')
-         source.Checked = 'off';
-         draggable(h_line,'h');
-%          for ind = 1:length(h_line.UserData.h_all_lines),
-%             draggable(h_line.UserData.h_all_lines(ind),'h');
-%          end
-      else
-         source.Checked = 'on';
-         draggable(h_line, 'off')
-%          for ind = 1:length(h_line.UserData.h_all_lines),
-%             draggable(h_line.UserData.h_all_lines(ind),'off');
-%          end
-      end
-   case 'menuDelete'
-      h_all_lines = findobj('XData', h_line.XData);
-      delete(h_all_lines)
+	case 'menuLock'
+		if strcmp(source.Checked, 'on')
+			source.Checked = 'off';
+			draggable(h_line,'h');
+			%          for ind = 1:length(h_line.UserData.h_all_lines),
+			%             draggable(h_line.UserData.h_all_lines(ind),'h');
+			%          end
+		else
+			source.Checked = 'on';
+			draggable(h_line, 'off')
+			%          for ind = 1:length(h_line.UserData.h_all_lines),
+			%             draggable(h_line.UserData.h_all_lines(ind),'off');
+			%          end
+		end
+	case 'menuDelete'
+		h_all_lines = findobj('XData', h_line.XData);
+		delete(h_all_lines)
 end
 return
 
@@ -1398,26 +1477,26 @@ return
 function createPatchMenu(h_patch)
 hcmenu = uicontextmenu;
 ud.hMenuLock = uimenu(hcmenu, 'Label', 'Locked', 'Tag', 'menuLock', ...
-   'Callback', {@menuPatch_Callback, h_patch}, 'Checked', 'on');
+	'Callback', {@menuPatch_Callback, h_patch}, 'Checked', 'on');
 ud.hMenuDelete = uimenu(hcmenu, 'Label', 'Delete', 'Tag', 'menuDelete', ...
-   'Callback', {@menuPatch_Callback, h_patch});
+	'Callback', {@menuPatch_Callback, h_patch});
 set(h_patch, 'UIContextMenu', hcmenu, 'UserData', ud);
 
 function menuPatch_Callback(source, callbackdata, h_patch)
 switch source.Tag
-   case 'menuLock'
-      if strcmp(source.Checked, 'on')
-         source.Checked = 'off';
-         draggable( h_patch, 'h', @patchMotionFcn)
-         draggable(h_patch.UserData.h_l_line,'h', @leftPatchMotionFcn)
-         draggable(h_patch.UserData.h_r_line,'h', @rightPatchMotionFcn)
-      else
-         source.Checked = 'on';
-         draggable( h_patch, 'off', @patchMotionFcn)
-         draggable(h_patch.UserData.h_l_line,'off', @leftPatchMotionFcn)
-         draggable(h_patch.UserData.h_r_line,'off', @rightPatchMotionFcn)
-         
-      end
+	case 'menuLock'
+		if strcmp(source.Checked, 'on')
+			source.Checked = 'off';
+			draggable( h_patch, 'h', @patchMotionFcn)
+			draggable(h_patch.UserData.h_l_line,'h', @leftPatchMotionFcn)
+			draggable(h_patch.UserData.h_r_line,'h', @rightPatchMotionFcn)
+		else
+			source.Checked = 'on';
+			draggable( h_patch, 'off', @patchMotionFcn)
+			draggable(h_patch.UserData.h_l_line,'off', @leftPatchMotionFcn)
+			draggable(h_patch.UserData.h_r_line,'off', @rightPatchMotionFcn)
+			
+		end
 	case 'menuDelete'
 		% get the tag id #
 		idnum_str = regexp(h_patch.Tag, '#\d*', 'match');
@@ -1426,11 +1505,11 @@ switch source.Tag
 		handles = guidata(gcf);
 		handles.dataPatches(handles.dataPatches==id) = [];
 		guidata(gcf, handles)
-
+		
 		h_all_patches = findobj(handles.figure1, 'Tag', h_patch.Tag);
-      delete(h_patch.UserData.h_l_line)
-      delete(h_patch.UserData.h_r_line)
-      delete(h_all_patches)
+		delete(h_patch.UserData.h_l_line)
+		delete(h_patch.UserData.h_r_line)
+		delete(h_all_patches)
 end
 
 % -------------------------------------------------------------
@@ -1456,35 +1535,35 @@ abs_t_ms = (ind/samp_freq)*1000 + handles.eye_data.start_times;
 % find the corresponding vFramenum
 assert(~isempty(handles.eye_data.vframes), 'eye_data.vframes is empty. Was the *.ett file present when running edf2bin?')
 vframe_ind = find(handles.eye_data.vframes.frametime >= abs_t_ms, 1);
-if isempty(vframe_ind) 
-   % if not found, just use the last frame
-   vframe_ind = length(handles.eye_data.vframes.frametime); 
+if isempty(vframe_ind)
+	% if not found, just use the last frame
+	vframe_ind = length(handles.eye_data.vframes.frametime);
 end
 vframe_num = handles.eye_data.vframes.framenum(vframe_ind);
 assert(vframe_num > 0 && vframe_num < v.Duration* v.FrameRate, 'error finding video frame')
 
 if vframe_num ~= v.UserData.current_frame_num
-   v.UserData.current_frame_num = vframe_num;
-   
-   v.CurrentTime = (vframe_num-1) / v.FrameRate;
-   vidFrame = readFrame(v);
-   % readFrame increments the time after reading the frame, code here
-   % makes is so it does not
-   v.CurrentTime = (vframe_num-1) / v.FrameRate;
-   
-   image(vidFrame, 'Parent', handles.axes_video);
-   handles.axes_video.Visible = 'off';
+	v.UserData.current_frame_num = vframe_num;
+	
+	v.CurrentTime = (vframe_num-1) / v.FrameRate;
+	vidFrame = readFrame(v);
+	% readFrame increments the time after reading the frame, code here
+	% makes is so it does not
+	v.CurrentTime = (vframe_num-1) / v.FrameRate;
+	
+	image(vidFrame, 'Parent', handles.axes_video);
+	handles.axes_video.Visible = 'off';
 end
 
 % v.CurrentTime = time + v.UserData.eye_data_offset;
-%    
-% 
+%
+%
 % if hasFrame(v)
 %    vidFrame = readFrame(v);
 %    % readFrame increments the time after reading the frame, code here
 %    % makes is so it does not
 %    v.CurrentTime = time + v.UserData.eye_data_offset;
-%    
+%
 %    image(vidFrame, 'Parent', handles.axes_video);
 %    handles.axes_video.Visible = 'off';
 % end
@@ -1514,25 +1593,25 @@ if ind == 0, ind = 1; end
 r_eye = findobj(handles.figure1, 'Tag', 'line_right_eye_overlay');
 % samp_tweak = 0;
 if isempty(r_eye)
-    line(handles.axes_video_overlay, handles.eye_data.rh.pos(ind), ...
-       handles.eye_data.rv.pos(ind+samp_tweak), ...
-       'Color', 'g', 'Marker', 'o', 'MarkerSize', 20, ... %'MarkerFaceColor', 'g', ...
-       'Tag', 'line_right_eye_overlay', 'linewidth',3)
+	line(handles.axes_video_overlay, handles.eye_data.rh.pos(ind), ...
+		handles.eye_data.rv.pos(ind+samp_tweak), ...
+		'Color', 'g', 'Marker', 'o', 'MarkerSize', 20, ... %'MarkerFaceColor', 'g', ...
+		'Tag', 'line_right_eye_overlay', 'linewidth',3)
 else
-   r_eye.XData = handles.eye_data.rh.pos(ind);
-   r_eye.YData = handles.eye_data.rv.pos(ind);
+	r_eye.XData = handles.eye_data.rh.pos(ind);
+	r_eye.YData = handles.eye_data.rv.pos(ind);
 end
 
 % left
 l_eye = findobj(handles.figure1, 'Tag', 'line_left_eye_overlay');
 if isempty(l_eye)
-   line(handles.axes_video_overlay, handles.eye_data.lh.pos(ind), ...
-      handles.eye_data.lv.pos(ind+samp_tweak), ...
-      'Color', 'r', 'Marker', 'o', 'MarkerSize', 20, ... %'MarkerFaceColor', 'r', ...
-        'Tag', 'line_left_eye_overlay', 'linewidth',3)
+	line(handles.axes_video_overlay, handles.eye_data.lh.pos(ind), ...
+		handles.eye_data.lv.pos(ind+samp_tweak), ...
+		'Color', 'r', 'Marker', 'o', 'MarkerSize', 20, ... %'MarkerFaceColor', 'r', ...
+		'Tag', 'line_left_eye_overlay', 'linewidth',3)
 else
-   l_eye.XData = handles.eye_data.lh.pos(ind);
-   l_eye.YData = handles.eye_data.lv.pos(ind);
+	l_eye.XData = handles.eye_data.lh.pos(ind);
+	l_eye.YData = handles.eye_data.lv.pos(ind);
 end
 return
 
@@ -1540,27 +1619,27 @@ function moveVideoFrame(handles, frames)
 samp_freq = handles.eye_data.samp_freq;
 min_time = 1/samp_freq;
 max_time = min([ length(handles.eye_data.rh.pos) / samp_freq, ...
-   handles.video_reader.Duration+1/handles.video_reader.FrameRate]);
+	handles.video_reader.Duration+1/handles.video_reader.FrameRate]);
 
 old_time = str2double(handles.edTime.String);
 new_time= old_time + frames/handles.video_reader.FrameRate;
 
 if new_time > min_time && new_time <= max_time
-   show_video_frame(handles, new_time);
-   
-   updateScrubLine(handles, new_time)
-   updateEdTime(handles, new_time)
+	show_video_frame(handles, new_time);
+	
+	updateScrubLine(handles, new_time)
+	updateEdTime(handles, new_time)
 end
 return
 
 function updateScrubLine(handles, time)
 handles.scrub_line_eye.XData = [time, time];
-adjustAxesForScrubLine(handles, time); 
+adjustAxesForScrubLine(handles, time);
 if isfield(handles, 'scrub_line_hand')
-   handles.scrub_line_hand.XData = [time, time];
+	handles.scrub_line_hand.XData = [time, time];
 end
 if isfield(handles, 'scrub_line_head')
-   handles.scrub_line_head.XData = [time, time];
+	handles.scrub_line_head.XData = [time, time];
 end
 return
 
@@ -1573,10 +1652,10 @@ h = guidata(gcf);
 % don't allow line to go beyond the data
 
 if t < min(h.line_rh.XData)
-   t = min(h.line_rh.XData);
+	t = min(h.line_rh.XData);
 end
 if t > max(h.line_rh.XData)
-   t = max(h.line_rh.XData);
+	t = max(h.line_rh.XData);
 end
 adjustAxesForScrubLine(h, t)
 if isfield(h, 'video_reader')
@@ -1590,9 +1669,9 @@ return
 function adjustAxesForScrubLine(handles, time)
 % change the x axes limits to keep the line in view
 if time < handles.axes_eye.XLim(1)
-   handles.axes_eye.XLim(1) = time;
+	handles.axes_eye.XLim(1) = time;
 elseif time > handles.axes_eye.XLim(2)
-   handles.axes_eye.XLim(2) = time;
+	handles.axes_eye.XLim(2) = time;
 end
 return
 
@@ -1606,8 +1685,8 @@ function leftPatchMotionFcn(h_line)
 h_patch = h_line.UserData;
 % limit left line to be less than right edge of patch
 if h_line.XData(1) >= h_patch.XData(3)
-   h_line.XData(1) = h_patch.XData(3);
-   h_line.XData(2) = h_patch.XData(3);
+	h_line.XData(1) = h_patch.XData(3);
+	h_line.XData(2) = h_patch.XData(3);
 end
 h_patch.XData(1) = h_line.XData(1);
 h_patch.XData(2) = h_line.XData(1);
@@ -1617,8 +1696,8 @@ function rightPatchMotionFcn(h_line)
 h_patch = h_line.UserData;
 % limit right line to be greater than left edge of patch
 if h_line.XData(1) <= h_patch.XData(1)
-   h_line.XData(1) = h_patch.XData(1);
-   h_line.XData(2) = h_patch.XData(1);
+	h_line.XData(1) = h_patch.XData(1);
+	h_line.XData(2) = h_patch.XData(1);
 end
 h_patch.XData(3) = h_line.XData(1);
 h_patch.XData(4) = h_line.XData(1);
@@ -1644,7 +1723,7 @@ ind_gt_5 = find(abs(h_line_velocity.YData(ind_lt_5:end))>=5, 1, 'first') + ind_l
 
 % at this point add a marker on the eye velocity line and the vergence line
 tmp = regexp(h_line_velocity.Tag, '(lh)|(rh)', 'match');
-if ~isempty(tmp)  strcmp(h_line_velocity.Tag, 'line_vergence_velocity')
+if ~isempty(tmp).  strcmp(h_line_velocity.Tag, 'line_vergence_velocity') %#ok<*SEPEX>
 	eye_str  = tmp{1};
 elseif strcmp(h_line_velocity.Tag, 'line_vergence_velocity')
 	eye_str = 'verg_vel';
@@ -1676,7 +1755,7 @@ ind_max_vel = ind_gt_5 + rel_ind_max_vel - 1;
 x = [h_line_velocity.XData(ind_max_vel) h_line_velocity.XData(ind_max_vel)];
 y = [h_verge_vel.YData(ind_max_vel) handles.line_vergence.YData(ind_max_vel)];
 h_peak_line = line(x, y, ...
-	'Tag', ['vergence_peak_velocity'], 'Color', 'k', 'Marker', 's', 'MarkerSize', 12);
+	'Tag', ['vergence_peak_velocity'], 'Color', 'k', 'Marker', 's', 'MarkerSize', 12); %#ok<*NBRAK>
 h_beg_line.UserData.h_peak_line = h_peak_line;
 
 % add marker for vergence end
@@ -1712,11 +1791,11 @@ h_line_velocity = h_line.UserData.h_line_velocity;
 % h_line y data must stay on the verge_line & velocity line
 t_ind = find(verge_x_data >= h_line.XData(1), 1, 'first'); % time index of the moved begin or end line
 if isempty(t_ind)
-   if h_line.XData(1) < verge_x_data(1)
-      t_ind = 1;
-   elseif h_line.XData(1) > verge_x_data(end)
-      t_ind = length(verge_x_data);
-   end
+	if h_line.XData(1) < verge_x_data(1)
+		t_ind = 1;
+	elseif h_line.XData(1) > verge_x_data(end)
+		t_ind = length(verge_x_data);
+	end
 end
 h_line.YData = [h_line_velocity.YData(t_ind) verge_y_data(t_ind)];
 return
@@ -1762,11 +1841,11 @@ verge_y_data = verge_line.YData;
 % h_line y data must stay on the velocity line
 t_ind = find(verge_x_data >= h_line.XData(1), 1, 'first'); % time index of the moved begin or end line
 if isempty(t_ind)
-   if h_line.XData(1) < verge_x_data(1)
-      t_ind = 1;
-   elseif h_line.XData(1) > verge_x_data(end)
-      t_ind = length(verge_x_data);
-   end
+	if h_line.XData(1) < verge_x_data(1)
+		t_ind = 1;
+	elseif h_line.XData(1) > verge_x_data(end)
+		t_ind = length(verge_x_data);
+	end
 end
 h_line.YData = verge_y_data(t_ind);
 return
@@ -1809,11 +1888,11 @@ x_data = h_line.XData;
 % h_line y data must stay on the velocity line
 t_ind = find(h_conjugate_line.XData >= h_line.XData(1), 1, 'first'); % time index of the moved line
 if isempty(t_ind)
-   if h_line.XData(1) < x_data(1)
-      t_ind = 1;
-   elseif h_line.XData(1) > x_data(end)
-      t_ind = length(x_data);
-   end
+	if h_line.XData(1) < x_data(1)
+		t_ind = 1;
+	elseif h_line.XData(1) > x_data(end)
+		t_ind = length(x_data);
+	end
 end
 h_line.YData = h_conjugate_line.YData(t_ind);
 return
@@ -1833,8 +1912,8 @@ function pb_export_Callback(hObject, eventdata, handles)
 disp('Choose file name to save exported data')
 [fnSave, pnSave] = uiputfile({'*.txt'}, 'Choose export data *.txt file ...');
 if isequal(fnSave,0) || isequal(pnSave,0)
-   disp('no  file chosen ... ')
-   return
+	disp('no  file chosen ... ')
+	return
 end
 export_filename = fullfile(pnSave, fnSave);
 
@@ -1848,7 +1927,7 @@ h_wait = waitbar(0, 'Gathering data');
 t_eye = handles.line_rh.XData;
 rh = handles.eye_data.rh.pos';
 lh = handles.eye_data.lh.pos';
-if isfield(handles, 'line_vergence') % vergence 
+if isfield(handles, 'line_vergence') % vergence
 	verge_data = handles.line_vergence.YData;
 	verg_vel_data = handles.line_vergence_velocity.YData;
 	conj_data = handles.line_conjugate.YData;
@@ -1890,7 +1969,7 @@ if exist(pupil_mat_file, 'file')
 else
 	disp('No pupil data found. If pupil data is expected, rerun edf2bin(''pupil'')')
 end
-	
+
 % get the viewing eye
 if handles.rb_right_eye_viewing.Value
 	ve = 'r';
@@ -1967,11 +2046,11 @@ for st_cnt = 1:length(sacc_type_list)
 			cluster_sac_tbl.startTime = nan(height(cluster_sac_tbl),1);
 			cluster_sac_tbl.endTime = nan(height(cluster_sac_tbl),1);
 			cluster_sac_tbl.enabled = ones(height(cluster_sac_tbl),1);
-		end 
+		end
 		
 		sacc_type = [sacc_source '_' st];
 		if strcmp(sacc_type, 'engbert_rh')
-% 			keyboard
+			% 			keyboard
 		end
 		
 		sacclist = handles.eye_data.(st).saccades(ss_cnt).sacclist;
@@ -1989,7 +2068,7 @@ for st_cnt = 1:length(sacc_type_list)
 			eng_summmary_tbl_ve_cnt = 0;
 			eng_summmary_tbl_nve = table();
 			eng_summmary_tbl_nve_cnt = 0;
-		
+			
 			for sac_num = 1:length(sacclist.start)
 				waitbar(sac_num/length(sacclist.start), h_wait, ['Getting ' strrep(sacc_type, '_', ' ') ' saccades'])
 				
@@ -1997,10 +2076,10 @@ for st_cnt = 1:length(sacc_type_list)
 					beg_t = (sacclist.start(sac_num)-handles.eye_data.start_times)/1000;
 					end_t = (sacclist.end(sac_num)-handles.eye_data.start_times)/1000;
 					% put the line tag into the table
-					beg_row = find(out_tbl.t_eye >= beg_t, 1, 'first');					
+					beg_row = find(out_tbl.t_eye >= beg_t, 1, 'first');
 					out_tbl.([sacc_type '_saccades']){beg_row} = [sacc_type '_' num2str(sac_num) '_start'];
 					
-					end_row = find(out_tbl.t_eye >= end_t, 1, 'first');					
+					end_row = find(out_tbl.t_eye >= end_t, 1, 'first');
 					out_tbl.([sacc_type '_saccades']){end_row} = [sacc_type '_' num2str(sac_num) '_end'];
 					
 					% find the label menus for this beg_saccade & add a the label if checked
@@ -2059,7 +2138,7 @@ for st_cnt = 1:length(sacc_type_list)
 						eng_summmary_tbl_ve.asPeakVelV(eng_summmary_tbl_ve_cnt,1) = sacclist.as_peak_vel_vert(sac_num);
 						eng_summmary_tbl_ve.asPeakVelHtime(eng_summmary_tbl_ve_cnt,1) = (sacclist.as_peak_vel_horiz_time(sac_num)-handles.eye_data.start_times/1000);
 						eng_summmary_tbl_ve.asPeakVelVtime(eng_summmary_tbl_ve_cnt,1) = (sacclist.as_peak_vel_vert_time(sac_num)-handles.eye_data.start_times/1000);
-
+						
 						eng_summmary_tbl_ve.DriftMeanTime(eng_summmary_tbl_ve_cnt,1) = (sacclist.as_drift_mean_time(sac_num)-handles.eye_data.start_times/1000);
 						eng_summmary_tbl_ve.DriftMedianVelHor(eng_summmary_tbl_ve_cnt,1)	 = sacclist.as_median_horiz(sac_num);
 						eng_summmary_tbl_ve.DriftMeanVelHor(eng_summmary_tbl_ve_cnt,1)	 = sacclist.as_mean_horiz(sac_num);
@@ -2136,7 +2215,7 @@ for st_cnt = 1:length(sacc_type_list)
 						eng_summmary_tbl_nve.asPeakVelV(eng_summmary_tbl_nve_cnt,1) = sacclist.as_peak_vel_vert(sac_num);
 						eng_summmary_tbl_nve.asPeakVelHtime(eng_summmary_tbl_nve_cnt,1) = (sacclist.as_peak_vel_horiz_time(sac_num)-handles.eye_data.start_times/1000);
 						eng_summmary_tbl_nve.asPeakVelVtime(eng_summmary_tbl_nve_cnt,1) = (sacclist.as_peak_vel_vert_time(sac_num)-handles.eye_data.start_times/1000);
-
+						
 						eng_summmary_tbl_nve.DriftMeanTime(eng_summmary_tbl_nve_cnt,1) = (sacclist.as_drift_mean_time(sac_num)-handles.eye_data.start_times/1000);
 						eng_summmary_tbl_nve.DriftMedianVelHor(eng_summmary_tbl_nve_cnt,1)	 = sacclist.as_median_horiz(sac_num);
 						eng_summmary_tbl_nve.DriftMeanVelHor(eng_summmary_tbl_nve_cnt,1)	 = sacclist.as_mean_horiz(sac_num);
@@ -2158,7 +2237,7 @@ for st_cnt = 1:length(sacc_type_list)
 						eng_summmary_tbl_nve.DriftstdPos(eng_summmary_tbl_nve_cnt,1)	 = sacclist.as_std_norm_pos(sac_num);
 						eng_summmary_tbl_nve.DriftPosAmpl(eng_summmary_tbl_nve_cnt,1)	 = sacclist.as_ampl_norm_pos(sac_num);
 						eng_summmary_tbl_nve.DriftPosAngle(eng_summmary_tbl_nve_cnt,1)	 = sacclist.as_angle_norm_pos(sac_num);
-
+						
 						if  sac_num+1 <= length(sacclist.enabled)
 							end_fix_t = (sacclist.start(sac_num+1)-handles.eye_data.start_times)/1000;
 							eng_summmary_tbl_nve.fixDuration(eng_summmary_tbl_nve_cnt,1)	 = end_fix_t - end_t;
@@ -2198,9 +2277,9 @@ for st_cnt = 1:length(sacc_type_list)
 					% cluster saccades
 					if strcmp(sacc_source, 'cluster')
 						% find the saccade in cluster_sac_tbl
-% 						row = find(cluster_sac_tbl.startIndex == sacclist.start_ind(sac_num));
+						% 						row = find(cluster_sac_tbl.startIndex == sacclist.start_ind(sac_num));
 						% make it disnabled
-						cluster_sac_tbl(cluster_sac_tbl.startIndex == sacclist.start_ind(sac_num), 'enabled') = {0};	
+						cluster_sac_tbl(cluster_sac_tbl.startIndex == sacclist.start_ind(sac_num), 'enabled') = {0};
 					end % cluster saccades
 				end % if enabled
 				
@@ -2209,7 +2288,7 @@ for st_cnt = 1:length(sacc_type_list)
 			if eng_summmary_tbl_ve_cnt > 0
 				% add 1 more column
 				eng_summmary_tbl_ve.asPeakVelCombined = sqrt(eng_summmary_tbl_ve.asPeakVelH .^2 + ...
-															eng_summmary_tbl_ve.asPeakVelV .^2);
+					eng_summmary_tbl_ve.asPeakVelV .^2);
 				summ_fname_cnt = summ_fname_cnt + 1;
 				summ_filename{summ_fname_cnt} = strrep(export_filename, '.txt', ['_' sacc_type '_ve.txt']);
 				writetable(eng_summmary_tbl_ve, summ_filename{summ_fname_cnt}, 'delimiter', '\t');
@@ -2217,7 +2296,7 @@ for st_cnt = 1:length(sacc_type_list)
 			if eng_summmary_tbl_nve_cnt > 0
 				% add 1 more column
 				eng_summmary_tbl_nve.asPeakVelCombined = sqrt(eng_summmary_tbl_nve.asPeakVelH .^2 + ...
-															eng_summmary_tbl_nve.asPeakVelV .^2);
+					eng_summmary_tbl_nve.asPeakVelV .^2);
 				summ_fname_cnt = summ_fname_cnt + 1;
 				summ_filename{summ_fname_cnt} = strrep(export_filename, '.txt', ['_' sacc_type '_nve.txt']);
 				writetable(eng_summmary_tbl_nve, summ_filename{summ_fname_cnt}, 'delimiter', '\t');
@@ -2253,201 +2332,201 @@ end
 
 % sensors
 if isfield(handles, 'apdm_data')
-if ~isempty(handles.apdm_data.sensor)
-	t_sensor = handles.apdm_data.time;
-	
-	for sens_num = 1:length(handles.apdm_data.sensor)
-		sensor = handles.apdm_data.sensor{sens_num};
-		accel_x = handles.apdm_data.accel{sens_num}(1,:);
-		accel_y = handles.apdm_data.accel{sens_num}(2,:);
-		accel_z = handles.apdm_data.accel{sens_num}(3,:);
-		gyro_x = handles.apdm_data.gyro{sens_num}(1,:);
-		gyro_y = handles.apdm_data.gyro{sens_num}(2,:);
-		gyro_z = handles.apdm_data.gyro{sens_num}(3,:);
-		mag_x = handles.apdm_data.mag{sens_num}(1,:);
-		mag_y = handles.apdm_data.mag{sens_num}(2,:);
-		mag_z = handles.apdm_data.mag{sens_num}(3,:);
-		orient_1 = handles.apdm_data.orient{sens_num}(1,:);
-		orient_2 = handles.apdm_data.orient{sens_num}(2,:);
-		orient_3 = handles.apdm_data.orient{sens_num}(3,:);
-		orient_4 = handles.apdm_data.orient{sens_num}(4,:);
-
-		[resamp_accel_x, resamp_t] = resample(accel_x, t_sensor, handles.eye_data.samp_freq);
-		[resamp_accel_y, resamp_t] = resample(accel_y, t_sensor, handles.eye_data.samp_freq);
-		[resamp_accel_z, resamp_t] = resample(accel_z, t_sensor, handles.eye_data.samp_freq);
-		[resamp_gyro_x, resamp_t] = resample(gyro_x, t_sensor, handles.eye_data.samp_freq);
-		[resamp_gyro_y, resamp_t] = resample(gyro_y, t_sensor, handles.eye_data.samp_freq);
-		[resamp_gyro_z, resamp_t] = resample(gyro_z, t_sensor, handles.eye_data.samp_freq);
-		[resamp_mag_x, resamp_t] = resample(mag_x, t_sensor, handles.eye_data.samp_freq);
-		[resamp_mag_y, resamp_t] = resample(mag_y, t_sensor, handles.eye_data.samp_freq);
-		[resamp_mag_z, resamp_t] = resample(mag_z, t_sensor, handles.eye_data.samp_freq);
-		[resamp_orient_1, resamp_t] = resample(orient_1, t_sensor, handles.eye_data.samp_freq);
-		[resamp_orient_2, resamp_t] = resample(orient_2, t_sensor, handles.eye_data.samp_freq);
-		[resamp_orient_3, resamp_t] = resample(orient_3, t_sensor, handles.eye_data.samp_freq);
-		[resamp_orient_4, resamp_t] = resample(orient_4, t_sensor, handles.eye_data.samp_freq);
+	if ~isempty(handles.apdm_data.sensor)
+		t_sensor = handles.apdm_data.time;
 		
-		% resamp_t begins at 0, t_eye begins with 0.004. make first values of resamp_t and t_eye match
-		resamp_t = resamp_t(2:end);
-		resamp_accel_x = resamp_accel_x(2:end);	
-		resamp_accel_y = resamp_accel_y(2:end);	
-		resamp_accel_z = resamp_accel_z(2:end);	
-		resamp_gyro_x = resamp_gyro_x(2:end);	
-		resamp_gyro_y = resamp_gyro_y(2:end);	
-		resamp_gyro_z = resamp_gyro_z(2:end);	
-		resamp_mag_x = resamp_mag_x(2:end);	
-		resamp_mag_y = resamp_mag_y(2:end);	
-		resamp_mag_z = resamp_mag_z(2:end);	
-		resamp_orient_1 = resamp_orient_1(2:end);	
-		resamp_orient_2 = resamp_orient_2(2:end);	
-		resamp_orient_3 = resamp_orient_3(2:end);	
-		resamp_orient_4 = resamp_orient_4(2:end);	
-		
-		ind_end = length(resamp_t);
-		t_diff = resamp_t(end) - t_eye(end);
-		if t_diff > eps
-			disp('apdm sensor time vector is longer than eye data time vector')
-			disp([num2str(t_diff) 's of apdm sensor time will be discarded from the end of the record'])
-			ind_end = length(t_eye);
-		elseif t_diff < eps
-			disp('eye data time vector is longer than apdm sensor time vector')
-			ind_end_tbl = height(out_tbl);
-			resamp_t(ind_end+1:ind_end_tbl) = nan(ind_end_tbl-ind_end,1);
-			resamp_accel_x(ind_end+1:ind_end_tbl) = nan(ind_end_tbl-ind_end,1);
-			resamp_accel_y(ind_end+1:ind_end_tbl) = nan(ind_end_tbl-ind_end,1);
-			resamp_accel_z(ind_end+1:ind_end_tbl) = nan(ind_end_tbl-ind_end,1);
-			resamp_gyro_x(ind_end+1:ind_end_tbl) = nan(ind_end_tbl-ind_end,1);
-			resamp_gyro_y(ind_end+1:ind_end_tbl) = nan(ind_end_tbl-ind_end,1);
-			resamp_gyro_z(ind_end+1:ind_end_tbl) = nan(ind_end_tbl-ind_end,1);
-			resamp_mag_x(ind_end+1:ind_end_tbl) = nan(ind_end_tbl-ind_end,1);
-			resamp_mag_y(ind_end+1:ind_end_tbl) = nan(ind_end_tbl-ind_end,1);
-			resamp_mag_z(ind_end+1:ind_end_tbl) = nan(ind_end_tbl-ind_end,1);
-			resamp_orient_1(ind_end+1:ind_end_tbl) = nan(ind_end_tbl-ind_end,1);
-			resamp_orient_2(ind_end+1:ind_end_tbl) = nan(ind_end_tbl-ind_end,1);
-			resamp_orient_3(ind_end+1:ind_end_tbl) = nan(ind_end_tbl-ind_end,1);
-			resamp_orient_4(ind_end+1:ind_end_tbl) = nan(ind_end_tbl-ind_end,1);
-			ind_end = ind_end_tbl;
-		end
-		
-		% add column for t, accel x, y, & z
-		out_tbl.('t_sensors') = resamp_t(1:ind_end);
-		out_tbl.([sensor '_accel_x']) = resamp_accel_x(1:ind_end)';
-		out_tbl.([sensor '_accel_y']) = resamp_accel_y(1:ind_end)';
-		out_tbl.([sensor '_accel_z']) = resamp_accel_z(1:ind_end)';
-		out_tbl.([sensor '_gyro_x']) = resamp_gyro_x(1:ind_end)';
-		out_tbl.([sensor '_gyro_y']) = resamp_gyro_y(1:ind_end)';
-		out_tbl.([sensor '_gyro_z']) = resamp_gyro_z(1:ind_end)';
-		out_tbl.([sensor '_mag_x']) = resamp_mag_x(1:ind_end)';
-		out_tbl.([sensor '_mag_y']) = resamp_mag_y(1:ind_end)';
-		out_tbl.([sensor '_mag_z']) = resamp_mag_z(1:ind_end)';
-		out_tbl.([sensor '_orient_1']) = resamp_orient_1(1:ind_end)';
-		out_tbl.([sensor '_orient_2']) = resamp_orient_2(1:ind_end)';
-		out_tbl.([sensor '_orient_3']) = resamp_orient_3(1:ind_end)';
-		out_tbl.([sensor '_orient_4']) = resamp_orient_4(1:ind_end)';
-		
-		% the string at the end of the axes tag (ie handles.axes_sensor1 or
-		% axes_sensor2)
-		switch sens_num
-			case 1
-				axes_str = 'axes_sensor1';
-			case 2
-				axes_str = 'axes_sensor2';
-			case 3
-				axes_str = 'axes_sensor3';
-		end
-		
-		is_head = strcmpi(sensor, 'head'); % output add'l info for the head sensor
-		if is_head
-			% add column for head angle data
-			out_tbl.([sensor '_angle']) = cell(height(out_tbl), 1);
-			% 				out_tbl.([sensor '_angle2']) = cell(height(out_tbl), 1);
-			% get the angle data line
-			h_head_ang_line = findobj(handles.(axes_str), 'Tag', 'line_HEAD_horiz_angle');
-			[resamp_head_ang, resamp_t2] = resample(h_head_ang_line.YData, h_head_ang_line.XData, handles.eye_data.samp_freq);
-			resamp_head_ang = resamp_head_ang(2:end);
-			resamp_t2 = resamp_t2(2:end);
-			ind_end = length(resamp_t2);
-			t_diff = resamp_t2(end) - t_eye(end);
+		for sens_num = 1:length(handles.apdm_data.sensor)
+			sensor = handles.apdm_data.sensor{sens_num};
+			accel_x = handles.apdm_data.accel{sens_num}(1,:);
+			accel_y = handles.apdm_data.accel{sens_num}(2,:);
+			accel_z = handles.apdm_data.accel{sens_num}(3,:);
+			gyro_x = handles.apdm_data.gyro{sens_num}(1,:);
+			gyro_y = handles.apdm_data.gyro{sens_num}(2,:);
+			gyro_z = handles.apdm_data.gyro{sens_num}(3,:);
+			mag_x = handles.apdm_data.mag{sens_num}(1,:);
+			mag_y = handles.apdm_data.mag{sens_num}(2,:);
+			mag_z = handles.apdm_data.mag{sens_num}(3,:);
+			orient_1 = handles.apdm_data.orient{sens_num}(1,:);
+			orient_2 = handles.apdm_data.orient{sens_num}(2,:);
+			orient_3 = handles.apdm_data.orient{sens_num}(3,:);
+			orient_4 = handles.apdm_data.orient{sens_num}(4,:);
+			
+			[resamp_accel_x, resamp_t] = resample(accel_x, t_sensor, handles.eye_data.samp_freq); %#ok<*ASGLU>
+			[resamp_accel_y, resamp_t] = resample(accel_y, t_sensor, handles.eye_data.samp_freq);
+			[resamp_accel_z, resamp_t] = resample(accel_z, t_sensor, handles.eye_data.samp_freq);
+			[resamp_gyro_x, resamp_t] = resample(gyro_x, t_sensor, handles.eye_data.samp_freq);
+			[resamp_gyro_y, resamp_t] = resample(gyro_y, t_sensor, handles.eye_data.samp_freq);
+			[resamp_gyro_z, resamp_t] = resample(gyro_z, t_sensor, handles.eye_data.samp_freq);
+			[resamp_mag_x, resamp_t] = resample(mag_x, t_sensor, handles.eye_data.samp_freq);
+			[resamp_mag_y, resamp_t] = resample(mag_y, t_sensor, handles.eye_data.samp_freq);
+			[resamp_mag_z, resamp_t] = resample(mag_z, t_sensor, handles.eye_data.samp_freq);
+			[resamp_orient_1, resamp_t] = resample(orient_1, t_sensor, handles.eye_data.samp_freq);
+			[resamp_orient_2, resamp_t] = resample(orient_2, t_sensor, handles.eye_data.samp_freq);
+			[resamp_orient_3, resamp_t] = resample(orient_3, t_sensor, handles.eye_data.samp_freq);
+			[resamp_orient_4, resamp_t] = resample(orient_4, t_sensor, handles.eye_data.samp_freq);
+			
+			% resamp_t begins at 0, t_eye begins with 0.004. make first values of resamp_t and t_eye match
+			resamp_t = resamp_t(2:end);
+			resamp_accel_x = resamp_accel_x(2:end);
+			resamp_accel_y = resamp_accel_y(2:end);
+			resamp_accel_z = resamp_accel_z(2:end);
+			resamp_gyro_x = resamp_gyro_x(2:end);
+			resamp_gyro_y = resamp_gyro_y(2:end);
+			resamp_gyro_z = resamp_gyro_z(2:end);
+			resamp_mag_x = resamp_mag_x(2:end);
+			resamp_mag_y = resamp_mag_y(2:end);
+			resamp_mag_z = resamp_mag_z(2:end);
+			resamp_orient_1 = resamp_orient_1(2:end);
+			resamp_orient_2 = resamp_orient_2(2:end);
+			resamp_orient_3 = resamp_orient_3(2:end);
+			resamp_orient_4 = resamp_orient_4(2:end);
+			
+			ind_end = length(resamp_t);
+			t_diff = resamp_t(end) - t_eye(end);
 			if t_diff > eps
+				disp('apdm sensor time vector is longer than eye data time vector')
+				disp([num2str(t_diff) 's of apdm sensor time will be discarded from the end of the record'])
 				ind_end = length(t_eye);
 			elseif t_diff < eps
+				disp('eye data time vector is longer than apdm sensor time vector')
 				ind_end_tbl = height(out_tbl);
-				resamp_t2(ind_end+1:ind_end_tbl) = nan(ind_end_tbl-ind_end,1);
-				resamp_head_ang(ind_end+1:ind_end_tbl) = nan(ind_end_tbl-ind_end,1);
+				resamp_t(ind_end+1:ind_end_tbl) = nan(ind_end_tbl-ind_end,1);
+				resamp_accel_x(ind_end+1:ind_end_tbl) = nan(ind_end_tbl-ind_end,1);
+				resamp_accel_y(ind_end+1:ind_end_tbl) = nan(ind_end_tbl-ind_end,1);
+				resamp_accel_z(ind_end+1:ind_end_tbl) = nan(ind_end_tbl-ind_end,1);
+				resamp_gyro_x(ind_end+1:ind_end_tbl) = nan(ind_end_tbl-ind_end,1);
+				resamp_gyro_y(ind_end+1:ind_end_tbl) = nan(ind_end_tbl-ind_end,1);
+				resamp_gyro_z(ind_end+1:ind_end_tbl) = nan(ind_end_tbl-ind_end,1);
+				resamp_mag_x(ind_end+1:ind_end_tbl) = nan(ind_end_tbl-ind_end,1);
+				resamp_mag_y(ind_end+1:ind_end_tbl) = nan(ind_end_tbl-ind_end,1);
+				resamp_mag_z(ind_end+1:ind_end_tbl) = nan(ind_end_tbl-ind_end,1);
+				resamp_orient_1(ind_end+1:ind_end_tbl) = nan(ind_end_tbl-ind_end,1);
+				resamp_orient_2(ind_end+1:ind_end_tbl) = nan(ind_end_tbl-ind_end,1);
+				resamp_orient_3(ind_end+1:ind_end_tbl) = nan(ind_end_tbl-ind_end,1);
+				resamp_orient_4(ind_end+1:ind_end_tbl) = nan(ind_end_tbl-ind_end,1);
 				ind_end = ind_end_tbl;
 			end
 			
-			% replace the 1st & last values with the original data's first
-			% and last values. These values are later used in a summary
-			% file to report the overall head movement. The filtering by
-			% resample pads the begining & end of the data with zeros, so
-			% there can be large inaccuracies at the begin & end.
-			resamp_head_ang(1) = h_head_ang_line.YData(1);
-			resamp_head_ang(end) = h_head_ang_line.YData(end);
+			% add column for t, accel x, y, & z
+			out_tbl.('t_sensors') = resamp_t(1:ind_end);
+			out_tbl.([sensor '_accel_x']) = resamp_accel_x(1:ind_end)';
+			out_tbl.([sensor '_accel_y']) = resamp_accel_y(1:ind_end)';
+			out_tbl.([sensor '_accel_z']) = resamp_accel_z(1:ind_end)';
+			out_tbl.([sensor '_gyro_x']) = resamp_gyro_x(1:ind_end)';
+			out_tbl.([sensor '_gyro_y']) = resamp_gyro_y(1:ind_end)';
+			out_tbl.([sensor '_gyro_z']) = resamp_gyro_z(1:ind_end)';
+			out_tbl.([sensor '_mag_x']) = resamp_mag_x(1:ind_end)';
+			out_tbl.([sensor '_mag_y']) = resamp_mag_y(1:ind_end)';
+			out_tbl.([sensor '_mag_z']) = resamp_mag_z(1:ind_end)';
+			out_tbl.([sensor '_orient_1']) = resamp_orient_1(1:ind_end)';
+			out_tbl.([sensor '_orient_2']) = resamp_orient_2(1:ind_end)';
+			out_tbl.([sensor '_orient_3']) = resamp_orient_3(1:ind_end)';
+			out_tbl.([sensor '_orient_4']) = resamp_orient_4(1:ind_end)';
 			
-			out_tbl.([sensor '_angle']) = resamp_head_ang(1:ind_end)';
-		end
-		
-% 		% norm_corrected velocity line data
-% 		h_vel_norm_line = findobj(handles.(axes_str), '-regexp', 'Tag', 'line_.*_vel_norm');
-% 		out_tbl.([sensor '_gyro_corrected_velocity_norm']) = cell(height(out_tbl), 1);
-% 		[resamp_vel_norm, resamp_t2] = resample(h_vel_norm_line.YData, h_vel_norm_line.XData, handles.eye_data.samp_freq);
-% 		resamp_vel_norm = resamp_vel_norm(2:end);
-% 		resamp_t2 = resamp_t2(2:end);
-% 		ind_end = length(resamp_t2);
-% 		t_diff = resamp_t2(end) - t_eye(end);
-% 		if t_diff > eps
-% 			ind_end = length(t_eye);
-% 		elseif t_diff < eps
-% 			ind_end_tbl = height(out_tbl);
-% 			resamp_t2(ind_end+1:ind_end_tbl) = nan(ind_end_tbl-ind_end,1);
-% 			resamp_vel_norm(ind_end+1:ind_end_tbl) = nan(ind_end_tbl-ind_end,1);
-% 			ind_end = ind_end_tbl;
-% 		end
-% 		out_tbl.([sensor '_gyro_corrected_velocity_norm']) = resamp_vel_norm(1:ind_end)';
+			% the string at the end of the axes tag (ie handles.axes_sensor1 or
+			% axes_sensor2)
+			switch sens_num
+				case 1
+					axes_str = 'axes_sensor1';
+				case 2
+					axes_str = 'axes_sensor2';
+				case 3
+					axes_str = 'axes_sensor3';
+			end
 			
-		% moves for each sensor
-		move_beg_lines = findobj(handles.(axes_str), '-regexp', 'Tag', 'move_.*_begin$');
-		if ~isempty(move_beg_lines)
-			% add column for reach for for this sensor
-			out_tbl.([sensor '_moves']) = cell(height(out_tbl), 1);
-            
-			for r_num = 1:length(move_beg_lines)
-				beg_t = move_beg_lines(r_num).XData;
-				beg_line_tag = move_beg_lines(r_num).Tag;
-				end_line_tag = strrep(beg_line_tag, 'begin', 'end');
-				end_line = findobj(handles.(axes_str), 'Tag', end_line_tag);
-				end_t = end_line.XData;
-                % look for breakpoints
-                bp_line_tag = strrep(beg_line_tag, 'begin', 'bp');
-                bp_lines = findobj(handles.(axes_str), '-regexp', 'Tag', [bp_line_tag '.*']);
-                
-				% put the line tag into the table
-				row = find(out_tbl.t_sensors >= beg_t, 1, 'first');
-				out_tbl.([sensor '_moves']){row} = beg_line_tag;
-%                 if is_head
-%                     ind = find(h_head_ang_line.XData >= beg_t, 1, 'first');
-%                     out_tbl.([sensor '_angle2']){row} = h_head_ang_line.YData(ind);
-%                 end
-				row = find(out_tbl.t_sensors >= end_t, 1, 'first');
-				out_tbl.([sensor '_moves']){row} = end_line_tag;
-%                 if is_head
-%                     ind = find(h_head_ang_line.XData >= end_t, 1, 'first');
-%                     out_tbl.([sensor '_angle2']){row} = h_head_ang_line.YData(ind);
-%                 end
-                if ~isempty(bp_lines)
-                    for bp_cnt = 1:length(bp_lines)
-                        row = find(out_tbl.t_sensors >= bp_lines(bp_cnt).XData, 1, 'first');
-                        out_tbl.([sensor '_moves']){row} = bp_lines(bp_cnt).Tag;
-                        if is_head
-                            ind = find(h_head_ang_line.XData >= bp_lines(bp_cnt).XData, 1, 'first');
-                            out_tbl.([sensor '_angle2']){row} = h_head_ang_line.YData(ind);
-                        end
-                    end
-                end
+			is_head = strcmpi(sensor, 'head'); % output add'l info for the head sensor
+			if is_head
+				% add column for head angle data
+				out_tbl.([sensor '_angle']) = cell(height(out_tbl), 1);
+				% 				out_tbl.([sensor '_angle2']) = cell(height(out_tbl), 1);
+				% get the angle data line
+				h_head_ang_line = findobj(handles.(axes_str), 'Tag', 'line_HEAD_horiz_angle');
+				[resamp_head_ang, resamp_t2] = resample(h_head_ang_line.YData, h_head_ang_line.XData, handles.eye_data.samp_freq);
+				resamp_head_ang = resamp_head_ang(2:end);
+				resamp_t2 = resamp_t2(2:end);
+				ind_end = length(resamp_t2);
+				t_diff = resamp_t2(end) - t_eye(end);
+				if t_diff > eps
+					ind_end = length(t_eye);
+				elseif t_diff < eps
+					ind_end_tbl = height(out_tbl);
+					resamp_t2(ind_end+1:ind_end_tbl) = nan(ind_end_tbl-ind_end,1);
+					resamp_head_ang(ind_end+1:ind_end_tbl) = nan(ind_end_tbl-ind_end,1);
+					ind_end = ind_end_tbl;
+				end
+				
+				% replace the 1st & last values with the original data's first
+				% and last values. These values are later used in a summary
+				% file to report the overall head movement. The filtering by
+				% resample pads the begining & end of the data with zeros, so
+				% there can be large inaccuracies at the begin & end.
+				resamp_head_ang(1) = h_head_ang_line.YData(1);
+				resamp_head_ang(end) = h_head_ang_line.YData(end);
+				
+				out_tbl.([sensor '_angle']) = resamp_head_ang(1:ind_end)';
+			end
+			
+			% 		% norm_corrected velocity line data
+			% 		h_vel_norm_line = findobj(handles.(axes_str), '-regexp', 'Tag', 'line_.*_vel_norm');
+			% 		out_tbl.([sensor '_gyro_corrected_velocity_norm']) = cell(height(out_tbl), 1);
+			% 		[resamp_vel_norm, resamp_t2] = resample(h_vel_norm_line.YData, h_vel_norm_line.XData, handles.eye_data.samp_freq);
+			% 		resamp_vel_norm = resamp_vel_norm(2:end);
+			% 		resamp_t2 = resamp_t2(2:end);
+			% 		ind_end = length(resamp_t2);
+			% 		t_diff = resamp_t2(end) - t_eye(end);
+			% 		if t_diff > eps
+			% 			ind_end = length(t_eye);
+			% 		elseif t_diff < eps
+			% 			ind_end_tbl = height(out_tbl);
+			% 			resamp_t2(ind_end+1:ind_end_tbl) = nan(ind_end_tbl-ind_end,1);
+			% 			resamp_vel_norm(ind_end+1:ind_end_tbl) = nan(ind_end_tbl-ind_end,1);
+			% 			ind_end = ind_end_tbl;
+			% 		end
+			% 		out_tbl.([sensor '_gyro_corrected_velocity_norm']) = resamp_vel_norm(1:ind_end)';
+			
+			% moves for each sensor
+			move_beg_lines = findobj(handles.(axes_str), '-regexp', 'Tag', 'move_.*_begin$');
+			if ~isempty(move_beg_lines)
+				% add column for reach for for this sensor
+				out_tbl.([sensor '_moves']) = cell(height(out_tbl), 1);
+				
+				for r_num = 1:length(move_beg_lines)
+					beg_t = move_beg_lines(r_num).XData;
+					beg_line_tag = move_beg_lines(r_num).Tag;
+					end_line_tag = strrep(beg_line_tag, 'begin', 'end');
+					end_line = findobj(handles.(axes_str), 'Tag', end_line_tag);
+					end_t = end_line.XData;
+					% look for breakpoints
+					bp_line_tag = strrep(beg_line_tag, 'begin', 'bp');
+					bp_lines = findobj(handles.(axes_str), '-regexp', 'Tag', [bp_line_tag '.*']);
+					
+					% put the line tag into the table
+					row = find(out_tbl.t_sensors >= beg_t, 1, 'first');
+					out_tbl.([sensor '_moves']){row} = beg_line_tag;
+					%                 if is_head
+					%                     ind = find(h_head_ang_line.XData >= beg_t, 1, 'first');
+					%                     out_tbl.([sensor '_angle2']){row} = h_head_ang_line.YData(ind);
+					%                 end
+					row = find(out_tbl.t_sensors >= end_t, 1, 'first');
+					out_tbl.([sensor '_moves']){row} = end_line_tag;
+					%                 if is_head
+					%                     ind = find(h_head_ang_line.XData >= end_t, 1, 'first');
+					%                     out_tbl.([sensor '_angle2']){row} = h_head_ang_line.YData(ind);
+					%                 end
+					if ~isempty(bp_lines)
+						for bp_cnt = 1:length(bp_lines)
+							row = find(out_tbl.t_sensors >= bp_lines(bp_cnt).XData, 1, 'first');
+							out_tbl.([sensor '_moves']){row} = bp_lines(bp_cnt).Tag;
+							if is_head
+								ind = find(h_head_ang_line.XData >= bp_lines(bp_cnt).XData, 1, 'first');
+								out_tbl.([sensor '_angle2']){row} = h_head_ang_line.YData(ind);
+							end
+						end
+					end
+				end
 			end
 		end
-	end
-end % apdm_data.sensor
+	end % apdm_data.sensor
 end % apdm_data
 
 h_stop_evt_line = findobj('Tag', 'Receivedexternaltriggerstopevent');
@@ -2461,9 +2540,9 @@ xdata = cell2mat(get(line_list, 'XData'));
 % 	h_lines = findobj('Tag', mark_list{mark_num});
 %	xdata = cell2mat(get(h_lines, 'XData'));
 for row_cnt = 1:size(xdata,1)
-   ind = find(out_tbl.t_sensors >= xdata(row_cnt), 1, 'first');
-   % 		out_tbl.annotation(ind) = mark_list(mark_num);
-   out_tbl.annotation(ind) = {strrep(line_list(row_cnt).Tag, 'annotation_', '')};
+	ind = find(out_tbl.t_sensors >= xdata(row_cnt), 1, 'first');
+	% 		out_tbl.annotation(ind) = mark_list(mark_num);
+	out_tbl.annotation(ind) = {strrep(line_list(row_cnt).Tag, 'annotation_', '')};
 end
 %end
 
@@ -2553,7 +2632,7 @@ if isfield(handles, 'target_pos') && strcmp(handles.target_pos.type, 'sacc')
 		out_tbl.target_y_pos{row} = handles.target_pos.y_pos(t_cnt);
 		out_tbl.target_x_deg{row} = handles.target_pos.x_deg(t_cnt);
 		out_tbl.target_y_deg{row} = handles.target_pos.y_deg(t_cnt);
-
+		
 		if isfield(handles.target_pos, 't_end')
 			row = find(out_tbl.t_eye >= handles.target_pos.t_end(t_cnt), 1, 'first');
 			out_tbl.target_on_off{row} = 'off';
@@ -2564,7 +2643,7 @@ end % target_pos sacc
 
 % smooth pursuit info
 if isfield(handles, 'target_pos') && strcmp(handles.target_pos.type, 'smoothp')
-
+	
 	out_tbl.target_t = handles.target_data.t';
 	out_tbl.target_x_deg = handles.target_data.x';
 	out_tbl.target_y_deg = handles.target_data.y';
@@ -2574,14 +2653,14 @@ if isfield(handles, 'target_pos') && strcmp(handles.target_pos.type, 'smoothp')
 	x_vel = delta_x' ./ delta_t';
 	y_vel = delta_y' ./ delta_t';
 	% smooth velocity - lp filter at 1Hz
-	out_tbl.target_xvel_deg_s = lpf(x_vel, 4, 1, handles.eye_data.samp_freq); 
+	out_tbl.target_xvel_deg_s = lpf(x_vel, 4, 1, handles.eye_data.samp_freq);
 	out_tbl.target_yvel_deg_s = lpf(y_vel, 4, 1, handles.eye_data.samp_freq);
 	
 	% head velocity threshold line
 	thresh_line = findobj(handles.axes_sensor1, 'Tag', 'head_vel_threshold_line');
-    if ~isempty(thresh_line)
-        out_tbl.HEAD_below_threshold = out_tbl.HEAD_gyro_corrected_velocity_norm < thresh_line.YData(1);
-    end
+	if ~isempty(thresh_line)
+		out_tbl.HEAD_below_threshold = out_tbl.HEAD_gyro_corrected_velocity_norm < thresh_line.YData(1);
+	end
 	
 end % target_pos smoothp
 
@@ -2614,11 +2693,11 @@ if isfield(handles, 'click_data_tbl')
 				out_tbl.mouse_click_x_deg{row} = (click_coords.x-handles.eye_data.h_pix_z) / 30;
 				out_tbl.mouse_click_y_deg{row} = -(click_coords.y-handles.eye_data.v_pix_z) / 30;
 			end
-
-	% 		['mouse click: pixel_pos = ' ...
-	% 			num2str(click_coords.x) ', ' num2str(click_coords.y) ...
-	% 			'; deg = ' num2str((click_coords.x-handles.eye_data.h_pix_z) / 30) ', ' ...
-	% 			num2str(-(click_coords.y-handles.eye_data.v_pix_z) / 30)];
+			
+			% 		['mouse click: pixel_pos = ' ...
+			% 			num2str(click_coords.x) ', ' num2str(click_coords.y) ...
+			% 			'; deg = ' num2str((click_coords.x-handles.eye_data.h_pix_z) / 30) ', ' ...
+			% 			num2str(-(click_coords.y-handles.eye_data.v_pix_z) / 30)];
 		end
 	end
 end % click data
@@ -2630,42 +2709,42 @@ waitbar(0.5, h_wait, 'Excluding data');
 % remove excluded data
 h_exclude_patches = findobj(handles.axes_eye, '-regexp', 'Tag', 'exclude_id#\d*_patch');
 if ~isempty(h_exclude_patches)
-   for seg_num = 1:length(h_exclude_patches)
-      % begin exclusion
-      excl_beg = h_exclude_patches(seg_num).XData(1);
-      % end exclusion
-      excl_end = h_exclude_patches(seg_num).XData(4);
-      
-      ind_excl_beg = find(out_tbl.t_eye >= excl_beg(1), 1, 'first');
-      if isempty(ind_excl_beg)
-         ind_excl_beg = 1;
-      end
-      ind_excl_end = find(out_tbl.t_eye >= excl_end(1), 1, 'first');
-      if isempty(ind_excl_end)
-         ind_excl_end = height(out_tbl);
-      end
-      % add an annotation
-      out_tbl.annotation(ind_excl_beg) = {'begin excluding data'};
-      out_tbl.annotation(ind_excl_end) = {'end excluding data'};
-      
-	  % remove data from out_tbl
-      out_tbl = out_tbl([1:ind_excl_beg, ind_excl_end:height(out_tbl)], :);
-	  % remove data from summ_filename(summ_fname_cnt)
-	  for sf_cnt = 1:summ_fname_cnt
-		remove_data_summ_file(summ_filename{sf_cnt}, excl_beg, excl_end);
-	  end
-   end
+	for seg_num = 1:length(h_exclude_patches)
+		% begin exclusion
+		excl_beg = h_exclude_patches(seg_num).XData(1);
+		% end exclusion
+		excl_end = h_exclude_patches(seg_num).XData(4);
+		
+		ind_excl_beg = find(out_tbl.t_eye >= excl_beg(1), 1, 'first');
+		if isempty(ind_excl_beg)
+			ind_excl_beg = 1;
+		end
+		ind_excl_end = find(out_tbl.t_eye >= excl_end(1), 1, 'first');
+		if isempty(ind_excl_end)
+			ind_excl_end = height(out_tbl);
+		end
+		% add an annotation
+		out_tbl.annotation(ind_excl_beg) = {'begin excluding data'};
+		out_tbl.annotation(ind_excl_end) = {'end excluding data'};
+		
+		% remove data from out_tbl
+		out_tbl = out_tbl([1:ind_excl_beg, ind_excl_end:height(out_tbl)], :);
+		% remove data from summ_filename(summ_fname_cnt)
+		for sf_cnt = 1:summ_fname_cnt
+			remove_data_summ_file(summ_filename{sf_cnt}, excl_beg, excl_end);
+		end
+	end
 end
 
-% remove blinks 
+% remove blinks
 waitbar(0.6, h_wait, 'Removing blinks from data');
 h_blinks = findobj(handles.axes_eye, '-regexp', 'Tag', 'blink_id#\d*_patch');
 if ~isempty(h_blinks)
 	out_tbl.blinks = cell(height(out_tbl), 1);
 	for blink_num = 1:length(h_blinks) % HERE
-		beg_t = min(h_blinks(blink_num).XData); 
+		beg_t = min(h_blinks(blink_num).XData);
 		beg_txt = ['blink_#' num2str(blink_num) '_begin'];
-		end_t = max(h_blinks(blink_num).XData); 
+		end_t = max(h_blinks(blink_num).XData);
 		end_txt = ['blink_#' num2str(blink_num) '_end'];
 		% put the line tag into the table
 		row_beg = find(out_tbl.t_eye >= beg_t, 1, 'first');
@@ -2704,7 +2783,7 @@ if handles.chbx_analyze_1.Value || handles.chbx_analyze_2.Value || handles.chbx_
 	waitbar(0.75, h_wait, 'Extracting Analysis Data')
 	for an_ind = 1:3
 		if handles.(['chbx_analyze_' num2str(an_ind)]).Value
-% 			disp(an_ind)
+			% 			disp(an_ind)
 			anal_tag = ['analysis_' num2str(an_ind) '_id#\d*_patch'];
 			h_analysis_patches = findobj(handles.axes_eye, '-regexp', 'Tag', anal_tag);
 			for seg_num = 1:length(h_analysis_patches)
@@ -2830,9 +2909,9 @@ eye_str = [r_or_l(1) h_or_v(1)];
 tag_search_str = ['^fixation_' eye_str '.*'];
 line_list = findobj(h.figure1,'-regexp', 'Tag', tag_search_str);
 if isempty(line_list)
-   createFixLines(h, r_or_l, h_or_v);
+	createFixLines(h, r_or_l, h_or_v);
 else
-   set(line_list, 'Visible', 'on');
+	set(line_list, 'Visible', 'on');
 end
 % txt_beg_str = ['txt_fixation_' r_or_l '_begin'];
 % h.(txt_beg_str).Visible = 'on';
@@ -2845,7 +2924,7 @@ eye_str = [r_or_l(1) h_or_v(1)];
 tag_search_str = ['fixation_' eye_str '.*'];
 line_list = findobj(h.figure1,'-regexp', 'Tag', tag_search_str);
 if ~isempty(line_list)
-   set(line_list, 'Visible', 'off');
+	set(line_list, 'Visible', 'off');
 end
 return
 
@@ -2859,18 +2938,18 @@ samp_freq = h.eye_data.samp_freq;
 % line_color_end = getLineColor(h, ['fixation_' r_or_l '_end']);
 
 for fix_num = 1:length(h.eye_data.(eye_str).fixation.fixlist.start)
-   time1 = (h.eye_data.(eye_str).fixation.fixlist.start(fix_num) - start_ms)/1000;
-   %line([time1 time1], ylims, 'Tag', ['fixation_' eye_str '_begin'], 'Color', line_color_beg);
-   time2 = (h.eye_data.(eye_str).fixation.fixlist.end(fix_num) - start_ms)/1000;
-   %line([time2 time2], ylims, 'Tag', ['fixation_' eye_str '_end'], 'Color', line_color_end);
-   
-   fix_start_ind = round(time1*samp_freq);
-   fix_stop_ind  = round(time2*samp_freq);
-   tempdata = h.eye_data.(eye_str).pos;
-   segment = tempdata(fix_start_ind:fix_stop_ind);
-   time3 = maket(segment)+time1;
-   line(time3, segment,'Tag', ['fixation_' eye_str '_#' num2str(fix_num)], 'Color','b' , ...
-      'Linewidth', 1.5)   
+	time1 = (h.eye_data.(eye_str).fixation.fixlist.start(fix_num) - start_ms)/1000;
+	%line([time1 time1], ylims, 'Tag', ['fixation_' eye_str '_begin'], 'Color', line_color_beg);
+	time2 = (h.eye_data.(eye_str).fixation.fixlist.end(fix_num) - start_ms)/1000;
+	%line([time2 time2], ylims, 'Tag', ['fixation_' eye_str '_end'], 'Color', line_color_end);
+	
+	fix_start_ind = round(time1*samp_freq);
+	fix_stop_ind  = round(time2*samp_freq);
+	tempdata = h.eye_data.(eye_str).pos;
+	segment = tempdata(fix_start_ind:fix_stop_ind);
+	time3 = maket(segment)+time1;
+	line(time3, segment,'Tag', ['fixation_' eye_str '_#' num2str(fix_num)], 'Color','b' , ...
+		'Linewidth', 1.5)
 end
 return
 
@@ -2881,10 +2960,10 @@ sacc_source = lower(h.popmenuSaccType.String{h.popmenuSaccType.Value});
 tag_search_str = ['^saccade_' sacc_source '_' eye_str '.*'];
 line_list = findobj(h.figure1,'-regexp', 'Tag', tag_search_str);
 if isempty(line_list)
-   createSaccLines(h, r_or_l, h_or_v);
+	createSaccLines(h, r_or_l, h_or_v);
 else
-   set(line_list, 'Visible', 'on');
-   uistack(line_list, 'top')
+	set(line_list, 'Visible', 'on');
+	uistack(line_list, 'top')
 end
 % txt_beg_str = ['txt_saccade_' r_or_l '_begin'];
 % h.(txt_beg_str).Visible = 'on';
@@ -2900,7 +2979,7 @@ end
 tag_search_str = ['^saccade_' sacc_source '_' eye_str '.*'];
 line_list = findobj(h.figure1,'-regexp', 'Tag', tag_search_str);
 if ~isempty(line_list)
-   set(line_list, 'Visible', 'off');
+	set(line_list, 'Visible', 'off');
 end
 return
 
@@ -2947,57 +3026,57 @@ end
 
 
 for sacc_num = 1:num_saccs
-   % saccade begin
-   time1 = (h.eye_data.(eye_str).saccades(sacc_type_num).sacclist.start(sacc_num) - start_ms)/1000; %in seconds
-   y = eye_data(round(time1*samp_freq));
-   h_beg_line = line( time1, y, 'Tag', ['saccade_' sacc_source '_' eye_str '_#' num2str(sacc_num) '_begin'], ...
-      'Color', beg_line_color, 'Marker', 'o', 'MarkerSize', 15);
-   eye_m = uicontextmenu;
-   h_beg_line.UIContextMenu = eye_m;
-   uimenu(eye_m, 'Label', 'Disable Saccade', 'Callback', @disableSaccade, ...
-      'Tag', ['menu_saccade_' sacc_source '_' eye_str '_#' num2str(sacc_num) '_begin']);
-   uimenu(eye_m, 'Label', 'Pre-Task', 'Callback',  {@labelSaccade, 'PreTask'}, ...
-      'Tag', ['menu_saccade_' sacc_source '_' eye_str '_#' num2str(sacc_num) '_begin']);
-   uimenu(eye_m, 'Label', 'Task', 'Callback', {@labelSaccade, 'Task'}, ...
-      'Tag', ['menu_saccade_' sacc_source '_' eye_str '_#' num2str(sacc_num) '_begin']);
-   uimenu(eye_m, 'Label', 'Post-Task', 'Callback',  {@labelSaccade, 'PostTask'}, ...
-      'Tag', ['menu_saccade_' sacc_source '_' eye_str '_#' num2str(sacc_num) '_begin']);
-  uimenu(eye_m, 'Label', 'Catch-Up', 'Callback',  {@labelSaccade, 'CatchUp'}, ...
-      'Tag', ['menu_saccade_' sacc_source '_' eye_str '_#' num2str(sacc_num) '_begin']);
-  uimenu(eye_m, 'Label', 'Pure Vergence', 'Callback',  {@labelSaccade, 'PureVergence'}, ...
-      'Tag', ['menu_saccade_' sacc_source '_' eye_str '_#' num2str(sacc_num) '_begin']);
-   uimenu(eye_m, 'Label', 'Pure Saccade', 'Callback',  {@labelSaccade, 'PureSaccade'}, ...
-      'Tag', ['menu_saccade_' sacc_source '_' eye_str '_#' num2str(sacc_num) '_begin']);
-  uimenu(eye_m, 'Label', 'Combined Vergence-Saccade', 'Callback',  {@labelSaccade, 'CombinedVergenceSaccade'}, ...
-      'Tag', ['menu_saccade_' sacc_source '_' eye_str '_#' num2str(sacc_num) '_begin']);
-  if isfield(h.eye_data.(eye_str).saccades(sacc_type_num).sacclist, 'swj')
-	  swj_num = h.eye_data.(eye_str).saccades(sacc_type_num).sacclist.swj(sacc_num);
-	  if ~isnan(swj_num)
-		  % add menu label with swj number
-		  uimenu(eye_m, 'Label', ['SWJ #' num2str(swj_num)], 'Callback',  {@labelSaccade, 'SWJ'}, ...
-			'Tag', ['menu_saccade_' sacc_source '_' eye_str '_#' num2str(sacc_num) '_begin']);
-		  h_beg_line.Marker = 's';
-	  end % swj is not nan
-  end % swj is a field of sacclist struct
-  
-   % saccade end
-   time2 = (h.eye_data.(eye_str).saccades(sacc_type_num).sacclist.end(sacc_num) - start_ms)/1000;
-   y = eye_data(round(time2*samp_freq));
-   h_end_line = line( time2, y, 'Tag', ['saccade_' sacc_source '_' eye_str '_#' num2str(sacc_num) '_end'], ...
-      'Color', end_line_color, 'Marker', 'o', 'MarkerSize', 15);
-   eye_m2 = uicontextmenu;
-   h_end_line.UIContextMenu = eye_m2;
-   uimenu(eye_m2, 'Label', 'Add analysis segments', 'Callback', @addAnalSegs, ...
-      'Tag', ['menu_saccade_' sacc_source '_' eye_str '_#' num2str(sacc_num) '_end']);
-   
-   % saccade segment
-   sac_start_ind = round(time1*samp_freq);
-   sac_stop_ind  = round(time2*samp_freq);
-%    tempdata = h.eye_data.(eye_str).pos;
-   segment = eye_data(sac_start_ind:sac_stop_ind);
-   time3 = maket(segment)+time1 - 1/samp_freq;
-   line(time3, segment,'Tag', ['saccade_' sacc_source '_' eye_str '_#' num2str(sacc_num) ], 'Color','b' , ...
-      'Linewidth', 1.5)
+	% saccade begin
+	time1 = (h.eye_data.(eye_str).saccades(sacc_type_num).sacclist.start(sacc_num) - start_ms)/1000; %in seconds
+	y = eye_data(round(time1*samp_freq));
+	h_beg_line = line( time1, y, 'Tag', ['saccade_' sacc_source '_' eye_str '_#' num2str(sacc_num) '_begin'], ...
+		'Color', beg_line_color, 'Marker', 'o', 'MarkerSize', 15);
+	eye_m = uicontextmenu;
+	h_beg_line.UIContextMenu = eye_m;
+	uimenu(eye_m, 'Label', 'Disable Saccade', 'Callback', @disableSaccade, ...
+		'Tag', ['menu_saccade_' sacc_source '_' eye_str '_#' num2str(sacc_num) '_begin']);
+	uimenu(eye_m, 'Label', 'Pre-Task', 'Callback',  {@labelSaccade, 'PreTask'}, ...
+		'Tag', ['menu_saccade_' sacc_source '_' eye_str '_#' num2str(sacc_num) '_begin']);
+	uimenu(eye_m, 'Label', 'Task', 'Callback', {@labelSaccade, 'Task'}, ...
+		'Tag', ['menu_saccade_' sacc_source '_' eye_str '_#' num2str(sacc_num) '_begin']);
+	uimenu(eye_m, 'Label', 'Post-Task', 'Callback',  {@labelSaccade, 'PostTask'}, ...
+		'Tag', ['menu_saccade_' sacc_source '_' eye_str '_#' num2str(sacc_num) '_begin']);
+	uimenu(eye_m, 'Label', 'Catch-Up', 'Callback',  {@labelSaccade, 'CatchUp'}, ...
+		'Tag', ['menu_saccade_' sacc_source '_' eye_str '_#' num2str(sacc_num) '_begin']);
+	uimenu(eye_m, 'Label', 'Pure Vergence', 'Callback',  {@labelSaccade, 'PureVergence'}, ...
+		'Tag', ['menu_saccade_' sacc_source '_' eye_str '_#' num2str(sacc_num) '_begin']);
+	uimenu(eye_m, 'Label', 'Pure Saccade', 'Callback',  {@labelSaccade, 'PureSaccade'}, ...
+		'Tag', ['menu_saccade_' sacc_source '_' eye_str '_#' num2str(sacc_num) '_begin']);
+	uimenu(eye_m, 'Label', 'Combined Vergence-Saccade', 'Callback',  {@labelSaccade, 'CombinedVergenceSaccade'}, ...
+		'Tag', ['menu_saccade_' sacc_source '_' eye_str '_#' num2str(sacc_num) '_begin']);
+	if isfield(h.eye_data.(eye_str).saccades(sacc_type_num).sacclist, 'swj')
+		swj_num = h.eye_data.(eye_str).saccades(sacc_type_num).sacclist.swj(sacc_num);
+		if ~isnan(swj_num)
+			% add menu label with swj number
+			uimenu(eye_m, 'Label', ['SWJ #' num2str(swj_num)], 'Callback',  {@labelSaccade, 'SWJ'}, ...
+				'Tag', ['menu_saccade_' sacc_source '_' eye_str '_#' num2str(sacc_num) '_begin']);
+			h_beg_line.Marker = 's';
+		end % swj is not nan
+	end % swj is a field of sacclist struct
+	
+	% saccade end
+	time2 = (h.eye_data.(eye_str).saccades(sacc_type_num).sacclist.end(sacc_num) - start_ms)/1000;
+	y = eye_data(round(time2*samp_freq));
+	h_end_line = line( time2, y, 'Tag', ['saccade_' sacc_source '_' eye_str '_#' num2str(sacc_num) '_end'], ...
+		'Color', end_line_color, 'Marker', 'o', 'MarkerSize', 15);
+	eye_m2 = uicontextmenu;
+	h_end_line.UIContextMenu = eye_m2;
+	uimenu(eye_m2, 'Label', 'Add analysis segments', 'Callback', @addAnalSegs, ...
+		'Tag', ['menu_saccade_' sacc_source '_' eye_str '_#' num2str(sacc_num) '_end']);
+	
+	% saccade segment
+	sac_start_ind = round(time1*samp_freq);
+	sac_stop_ind  = round(time2*samp_freq);
+	%    tempdata = h.eye_data.(eye_str).pos;
+	segment = eye_data(sac_start_ind:sac_stop_ind);
+	time3 = maket(segment)+time1 - 1/samp_freq;
+	line(time3, segment,'Tag', ['saccade_' sacc_source '_' eye_str '_#' num2str(sacc_num) ], 'Color','b' , ...
+		'Linewidth', 1.5)
 end
 guidata(h.figure1, h)
 return
@@ -3012,7 +3091,7 @@ saccade_tag = strrep(source.Tag, 'menu_', '');
 saccade_tag_no_beg_end = strrep(saccade_tag, '_end', '');
 srch_str = ['^' saccade_tag_no_beg_end '_((begin)|(end))$'];
 saccade_beg_end_lines = findobj(handles.axes_eye, '-regexp', 'Tag', srch_str);
-% change the marker style 
+% change the marker style
 % set(saccade_beg_end_lines, 'MarkerFaceColor', saccade_beg_end_lines(1).Color)
 
 h_sacc_end = findobj(handles.axes_eye, '-regexp', 'Tag', saccade_tag);
@@ -3056,14 +3135,14 @@ return
 % saccade_tag_no_beg_end = strrep(saccade_tag, '_begin', '');
 % srch_str = ['^' saccade_tag_no_beg_end '_((begin)|(end))$'];
 % saccade_beg_end_lines = findobj(handles.axes_eye, '-regexp', 'Tag', srch_str);
-% % change the marker style 
+% % change the marker style
 % set(saccade_beg_end_lines, 'Marker', 'x')
 
 % % and the line in between begin & end markers
 % srch_str = ['^' saccade_tag_no_beg_end '$' ];
 % saccade_line = findobj(handles.axes_eye, '-regexp', 'Tag', srch_str);
-% % change the marker style 
-% set(saccade_line, 'LineStyle',':') 
+% % change the marker style
+% set(saccade_line, 'LineStyle',':')
 
 % % set the menu to enable
 % set(source, 'Label', 'Enable Saccade', 'Callback', @enableSaccade)
@@ -3080,14 +3159,14 @@ return
 % saccade_tag_no_beg_end = strrep(saccade_tag, '_begin', '');
 % srch_str = ['^' saccade_tag_no_beg_end '_((begin)|(end))$'];
 % saccade_beg_end_lines = findobj(handles.axes_eye, '-regexp', 'Tag', srch_str);
-% % change the marker style 
+% % change the marker style
 % set(saccade_beg_end_lines, 'Marker', 'o')
 
 % % and the line in between begin & end markers
 % srch_str = ['^' saccade_tag_no_beg_end '$' ];
 % saccade_line = findobj(handles.axes_eye, '-regexp', 'Tag', srch_str);
-% % change the marker style 
-% set(saccade_line, 'LineStyle','-') 
+% % change the marker style
+% set(saccade_line, 'LineStyle','-')
 
 % % set the menu to enable
 % set(source, 'Label', 'Disable Saccade', 'Callback', @disableSaccade)
@@ -3117,9 +3196,9 @@ function showBlinks(h)
 tag_search_str = 'blink_.*';
 patch_list = findobj(h.figure1,'-regexp', 'Tag', tag_search_str);
 if isempty(patch_list)
-   createBlinkPatches(h);
+	createBlinkPatches(h);
 else
-   set(patch_list, 'Visible', 'on'); 
+	set(patch_list, 'Visible', 'on');
 end
 return
 
@@ -3127,7 +3206,7 @@ function hideBlinks(h)
 tag_search_str = 'blink_.*';
 patch_list = findobj(h.figure1,'-regexp', 'Tag', tag_search_str);
 if ~isempty(patch_list)
-   set(patch_list, 'Visible', 'off');
+	set(patch_list, 'Visible', 'off');
 end
 return
 
@@ -3158,13 +3237,13 @@ blinks = joinBlinks(blinks);
 % change absolute ms values to relative to eye_data start time seconds
 % and add an extra 350 ms to beginning & end
 for cnt = 1:length(blinks.start)
-   blinks.start(cnt) = (blinks.start(cnt) - start_ms) / 1000 - 0.350;
-   blinks.end(cnt) = (blinks.end(cnt) - start_ms) / 1000 + 0.350;
+	blinks.start(cnt) = (blinks.start(cnt) - start_ms) / 1000 - 0.350;
+	blinks.end(cnt) = (blinks.end(cnt) - start_ms) / 1000 + 0.350;
 end
 
 % createBox
 for cnt = 1:length(blinks.start)
-   createBox([], [], [blinks.start(cnt) blinks.end(cnt)], 'blink')
+	createBox([], [], [blinks.start(cnt) blinks.end(cnt)], 'blink')
 end
 return
 
@@ -3177,32 +3256,32 @@ out_blinks.start = [];
 out_blinks.end = [];
 
 while ~isempty(in_blinks.start)
-   bl_start = in_blinks.start(1);
-   bl_end = in_blinks.end(1);
-   in_blinks.start(1) = [];
-   in_blinks.end(1) = [];
-   out_blink_cnt = out_blink_cnt + 1;
-   % check if this blink overlaps any others
-   
-   out_blinks.start(out_blink_cnt) = bl_start;
-   out_blinks.end(out_blink_cnt) = bl_end;
-   
-   overlap_inds = [];
-   for ind = 1:length(in_blinks.start)
-      
-      if  (bl_start >= in_blinks.start(ind) && bl_start <= in_blinks.end(ind)) ... % bl_start is within another blink
-            || (bl_end >= in_blinks.start(ind) && bl_end <= in_blinks.end(ind)) ... % bl_end is within another blink
-            || (bl_start <= in_blinks.start(ind) && bl_end >= in_blinks.end(ind)) % another blink is fully within this blink
-         % start or end overlaps another blink
-         overlap_inds = [overlap_inds ind];
-         out_blinks.start(out_blink_cnt) = min([out_blinks.start(out_blink_cnt) bl_start in_blinks.start(ind)]);
-         out_blinks.end(out_blink_cnt) = max([out_blinks.end(out_blink_cnt) bl_end in_blinks.end(ind)]);
-      end
-   end
-   % remove the overlapping blinks
-   in_blinks.start(overlap_inds) = [];
-   in_blinks.end(overlap_inds) = [];
-   
+	bl_start = in_blinks.start(1);
+	bl_end = in_blinks.end(1);
+	in_blinks.start(1) = [];
+	in_blinks.end(1) = [];
+	out_blink_cnt = out_blink_cnt + 1;
+	% check if this blink overlaps any others
+	
+	out_blinks.start(out_blink_cnt) = bl_start;
+	out_blinks.end(out_blink_cnt) = bl_end;
+	
+	overlap_inds = [];
+	for ind = 1:length(in_blinks.start)
+		
+		if  (bl_start >= in_blinks.start(ind) && bl_start <= in_blinks.end(ind)) ... % bl_start is within another blink
+				|| (bl_end >= in_blinks.start(ind) && bl_end <= in_blinks.end(ind)) ... % bl_end is within another blink
+				|| (bl_start <= in_blinks.start(ind) && bl_end >= in_blinks.end(ind)) % another blink is fully within this blink
+			% start or end overlaps another blink
+			overlap_inds = [overlap_inds ind];
+			out_blinks.start(out_blink_cnt) = min([out_blinks.start(out_blink_cnt) bl_start in_blinks.start(ind)]);
+			out_blinks.end(out_blink_cnt) = max([out_blinks.end(out_blink_cnt) bl_end in_blinks.end(ind)]);
+		end
+	end
+	% remove the overlapping blinks
+	in_blinks.start(overlap_inds) = [];
+	in_blinks.end(overlap_inds) = [];
+	
 end
 return
 % -------------------------------
@@ -3267,12 +3346,12 @@ axes(h_line.Parent)
 cursor_loc = get(h_line.Parent, 'CurrentPoint');
 cursor_x = cursor_loc(1);
 
-% type of reach - single or triple 
-r_type = 1; % single 
+% type of reach - single or triple
+r_type = 1; % single
 if handles.rbTriple.Value
 	r_type = 3; % triple
 end
-	
+
 [move_beg, move_end] = detectReach(h_line, cursor_x, r_type);
 % if r_type > than 1 hump, find and add the points at the minima between the humps
 reach_bps = findReachBreakPoints(h_line, move_beg, move_end, r_type);
@@ -3299,22 +3378,22 @@ vel_data = norm_vel_line.YData;
 approx_ind = find(time_data >= approx_time, 1, 'first');
 
 % find the last vel=0 point before the approx time
-move_beg_ind = find(vel_data(1:approx_ind) < eps, 1, 'last'); 
+move_beg_ind = find(vel_data(1:approx_ind) < eps, 1, 'last');
 if ~isempty(move_beg_ind)
-   move_beg = time_data(move_beg_ind);
+	move_beg = time_data(move_beg_ind);
 end
 
 % and the first vel=0 point after the approx time
-move_end_ind = approx_ind-1 + find(vel_data(approx_ind:end) < eps, 1, 'first'); 
+move_end_ind = approx_ind-1 + find(vel_data(approx_ind:end) < eps, 1, 'first');
 if ~isempty(move_end_ind)
-   move_end = time_data(move_end_ind);
+	move_end = time_data(move_end_ind);
 end
 % make sure begin and end are not the same, if they are, then it is not a
 % reach
 if move_end - move_beg < eps
 	msg = sprintf('no reach detected at t = %f', approx_time);
 	disp(msg)
-	move_beg = []; 
+	move_beg = [];
 	move_end = [];
 	return
 end
@@ -3330,11 +3409,11 @@ if found_hump_num < num_humps
 		vel_data(tmp_beg_ind:tmp_end_ind), num_humps, approx_time);
 	approx_beg_ind = find(time_data >= approx_move_beg, 1, 'first');
 	approx_end_ind = find(time_data >= approx_move_end, 1, 'first');
-	move_beg_ind = find(vel_data(approx_beg_ind:approx_end_ind) > eps, 1, 'first') + approx_beg_ind-1; 
+	move_beg_ind = find(vel_data(approx_beg_ind:approx_end_ind) > eps, 1, 'first') + approx_beg_ind-1;
 	if ~isempty(move_beg_ind)
 		move_beg = time_data(move_beg_ind);
 	end
-	move_end_ind = find(vel_data(approx_end_ind:end) < eps, 1, 'first') + approx_end_ind-1; 
+	move_end_ind = find(vel_data(approx_end_ind:end) < eps, 1, 'first') + approx_end_ind-1;
 	if ~isempty(move_end_ind)
 		move_end = time_data(move_end_ind);
 	end
@@ -3366,7 +3445,7 @@ reach_vel_data = vel_data(time_data>=move_beg & time_data<=move_end);
 % maxima
 [xmax,imax,xmin,imin]=extrema(reach_vel_data);
 if length(xmax) > num_humps
-	smoothing_pts = 5;	
+	smoothing_pts = 5;
 	while length(xmax) > num_humps && smoothing_pts < length(reach_vel_data)
 		smooth_data = smooth(reach_vel_data, smoothing_pts, 'sgolay');
 		[xmax,imax,xmin,imin]=extrema(smooth_data);
@@ -3374,7 +3453,7 @@ if length(xmax) > num_humps
 	end
 end
 
-% find the minima in between the maxima from the unsmoothed data 
+% find the minima in between the maxima from the unsmoothed data
 imax = sort(imax);	% extrema returns values in sorted order of the max value, not index order
 min_vals = nan(1, length(imax)-1);
 min_inds = nan(1, length(imax)-1);
@@ -3395,7 +3474,7 @@ bp_line_color = getLineColor(handles, 'move_bp');
 % handles contains the number of reaches turned into lines, so they can be
 % uniquely tagged
 if ~isfield(handles, 'move_id_list')
-   handles.move_id_list = [];
+	handles.move_id_list = [];
 end
 move_id = unique_id(handles.move_id_list);
 handles.move_id_list = [handles.move_id_list move_id];
@@ -3409,14 +3488,14 @@ vel_data = norm_vel_line.YData;
 % y = vel_data(time_data == move_beg);
 y = get_y_val(time_data, vel_data, move_beg);
 h_line=line( move_beg, y, 'Tag', ['move_#' num2str(move_id) '_begin'], 'Color', beg_line_color, ...
-   'Marker', 'o', 'Markersize', 12, 'MarkerFaceColor', beg_line_color);
+	'Marker', 'o', 'Markersize', 12, 'MarkerFaceColor', beg_line_color);
 draggable(h_line, @reachLineMotionFcn)
 
 % marker at end
 %y = vel_data(time_data == move_end);
 y = get_y_val(time_data, vel_data, move_end);
 h_line = line( move_end, y, 'Tag', ['move_#' num2str(move_id) '_end'], 'Color', end_line_color, ...
-   'Marker', 'o', 'Markersize', 12, 'MarkerFaceColor', end_line_color);
+	'Marker', 'o', 'Markersize', 12, 'MarkerFaceColor', end_line_color);
 draggable(h_line, @reachLineMotionFcn)
 
 % markers for breakpoints
@@ -3429,7 +3508,7 @@ if ~isempty(move_bps)
 		draggable(h_line, @reachLineMotionFcn)
 	end
 end
-	
+
 % interval line
 y = vel_data(time_data > move_beg & time_data < move_end);
 t = time_data(time_data > move_beg & time_data < move_end);
@@ -3468,53 +3547,53 @@ vel_data = norm_vel_line.YData;
 % h_line y data must stay on the norm_vel_line
 t_ind = find(time_data >= h_line.XData, 1, 'first'); % time index of the moved begin or end line
 if isempty(t_ind)
-   if h_line.XData < time_data(1)
-      t_ind = 1;
-   elseif h_line.XData > time_data(end)
-      t_ind = length(time_data);
-   end
+	if h_line.XData < time_data(1)
+		t_ind = 1;
+	elseif h_line.XData > time_data(end)
+		t_ind = length(time_data);
+	end
 end
 h_line.YData = vel_data(t_ind);
-   
+
 % shrink or grow the inteval line as needed
 switch beg_or_end{:}
-   case 'begin'     
-      if time_data(t_ind) < h_line_interval.XData(1)
-         % add points to the beginning
-         add_inds = find(time_data > time_data(t_ind) & time_data < h_line_interval.XData(1));
-         set(h_line_interval, 'XData', [time_data(add_inds) h_line_interval.XData], ...
-            'YData', [vel_data(add_inds) h_line_interval.YData]);
-      else
-         % take points away from beginning
-         shorter_line_inds = find(h_line_interval.XData > time_data(t_ind));
-         if ~isempty(shorter_line_inds)
-            set(h_line_interval, 'XData', h_line_interval.XData(shorter_line_inds), ...
-               'YData', h_line_interval.YData(shorter_line_inds));
-         else
-            % don't allow the line to move beyond the end
-            h_line.XData = h_line_interval.XData(end);
-            h_line.YData = h_line_interval.YData(end);
-         end
-      end
-   case 'end'
-      if time_data(t_ind) > h_line_interval.XData(end)
-         % add points to the end
-         add_inds = find(time_data > h_line_interval.XData(end) & time_data < time_data(t_ind));
-         set(h_line_interval, 'XData', [ h_line_interval.XData time_data(add_inds)], ...
-            'YData', [h_line_interval.YData vel_data(add_inds) ]);
-      else
-         % take points away from end
-         shorter_line_inds = find(h_line_interval.XData < time_data(t_ind));
-         if ~isempty(shorter_line_inds)
-            set(h_line_interval, 'XData', h_line_interval.XData(shorter_line_inds), ...
-               'YData', h_line_interval.YData(shorter_line_inds));
-         else
-            % don't allow the line to move beyond the beginning
-            h_line.XData = h_line_interval.XData(1);
-            h_line.YData = h_line_interval.YData(1);
-         end
-      end
-      
+	case 'begin'
+		if time_data(t_ind) < h_line_interval.XData(1)
+			% add points to the beginning
+			add_inds = find(time_data > time_data(t_ind) & time_data < h_line_interval.XData(1));
+			set(h_line_interval, 'XData', [time_data(add_inds) h_line_interval.XData], ...
+				'YData', [vel_data(add_inds) h_line_interval.YData]);
+		else
+			% take points away from beginning
+			shorter_line_inds = find(h_line_interval.XData > time_data(t_ind));
+			if ~isempty(shorter_line_inds)
+				set(h_line_interval, 'XData', h_line_interval.XData(shorter_line_inds), ...
+					'YData', h_line_interval.YData(shorter_line_inds));
+			else
+				% don't allow the line to move beyond the end
+				h_line.XData = h_line_interval.XData(end);
+				h_line.YData = h_line_interval.YData(end);
+			end
+		end
+	case 'end'
+		if time_data(t_ind) > h_line_interval.XData(end)
+			% add points to the end
+			add_inds = find(time_data > h_line_interval.XData(end) & time_data < time_data(t_ind));
+			set(h_line_interval, 'XData', [ h_line_interval.XData time_data(add_inds)], ...
+				'YData', [h_line_interval.YData vel_data(add_inds) ]);
+		else
+			% take points away from end
+			shorter_line_inds = find(h_line_interval.XData < time_data(t_ind));
+			if ~isempty(shorter_line_inds)
+				set(h_line_interval, 'XData', h_line_interval.XData(shorter_line_inds), ...
+					'YData', h_line_interval.YData(shorter_line_inds));
+			else
+				% don't allow the line to move beyond the beginning
+				h_line.XData = h_line_interval.XData(1);
+				h_line.YData = h_line_interval.YData(1);
+			end
+		end
+		
 end
 
 return
@@ -3523,14 +3602,14 @@ return
 function showAnnotations(h)
 line_list = findobj(h.figure1,'-regexp', 'Tag', 'annotation_.*');
 if ~isempty(line_list)
-   set(line_list, 'Visible', 'on');
+	set(line_list, 'Visible', 'on');
 end
 return
 
 function hideAnnotations(h)
 line_list = findobj(h.figure1,'-regexp', 'Tag', 'annotation_.*');
 if ~isempty(line_list)
-   set(line_list, 'Visible', 'off');
+	set(line_list, 'Visible', 'off');
 end
 return
 
@@ -3567,7 +3646,7 @@ updateScrubLine(handles, time);
 show_video_frame(handles, time);
 
 % --- Executes during object creation, after setting all properties.
-function edTime_CreateFcn(hObject, eventdata, handles)
+function edTime_CreateFcn(hObject, eventdata, handles) %#ok<INUSD>
 % hObject    handle to edTime (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
@@ -3575,7 +3654,7 @@ function edTime_CreateFcn(hObject, eventdata, handles)
 % Hint: edit controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-   set(hObject,'BackgroundColor','white');
+	set(hObject,'BackgroundColor','white');
 end
 
 
@@ -3586,9 +3665,9 @@ function tbFixationsRightHoriz_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 if get(hObject,'Value') % returns toggle state of tbFixations
-   showFixations(handles, 'right', 'horizontal');
+	showFixations(handles, 'right', 'horizontal');
 else
-   hideFixations(handles, 'right', 'horizontal');
+	hideFixations(handles, 'right', 'horizontal');
 end
 return
 % --- Executes on button press in tbFixationsRightVert.
@@ -3598,9 +3677,9 @@ function tbFixationsRightVert_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 if get(hObject,'Value') % returns toggle state of tbFixations
-   showFixations(handles, 'right', 'vertical');
+	showFixations(handles, 'right', 'vertical');
 else
-   hideFixations(handles, 'right', 'vertical');
+	hideFixations(handles, 'right', 'vertical');
 end
 return
 
@@ -3612,9 +3691,9 @@ function tbFixationsLeftHoriz_Callback(hObject, eventdata, handles)
 
 % Hint: get(hObject,'Value') returns toggle state of tbFixationsLeftHoriz
 if get(hObject,'Value') % returns toggle state of tbFixations
-   showFixations(handles, 'left', 'horizontal');
+	showFixations(handles, 'left', 'horizontal');
 else
-   hideFixations(handles, 'left', 'horizontal');
+	hideFixations(handles, 'left', 'horizontal');
 end
 return
 
@@ -3624,9 +3703,9 @@ function tbFixationsLeftVert_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 if get(hObject,'Value') % returns toggle state of tbFixations
-   showFixations(handles, 'left','vertical');
+	showFixations(handles, 'left','vertical');
 else
-   hideFixations(handles, 'left','vertical');
+	hideFixations(handles, 'left','vertical');
 end
 % Hint: get(hObject,'Value') returns toggle state of tbFixationsLeftVert
 
@@ -3637,9 +3716,9 @@ function tbSaccadesRightHoriz_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 if get(hObject,'Value') % returns toggle state of tbSaccades
-   showSaccades(handles, 'right','horizontal');
+	showSaccades(handles, 'right','horizontal');
 else
-   hideSaccades(handles, 'right','horizontal');
+	hideSaccades(handles, 'right','horizontal');
 end
 return
 
@@ -3650,9 +3729,9 @@ function tbSaccadesRightVert_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 if get(hObject,'Value') % returns toggle state of tbFixations
-   showSaccades(handles, 'right','vertical');
+	showSaccades(handles, 'right','vertical');
 else
-   hideSaccades(handles, 'right','vertical');
+	hideSaccades(handles, 'right','vertical');
 end
 return
 
@@ -3664,9 +3743,9 @@ function tbSaccadesLeftHoriz_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 if get(hObject,'Value') % returns toggle state of tbFixations
-   showSaccades(handles, 'left', 'horizontal');
+	showSaccades(handles, 'left', 'horizontal');
 else
-   hideSaccades(handles, 'left', 'horizontal');
+	hideSaccades(handles, 'left', 'horizontal');
 end
 return
 
@@ -3677,9 +3756,9 @@ function tbSaccadesLeftVert_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 if get(hObject,'Value') % returns toggle state of tbFixations
-   showSaccades(handles, 'left', 'vertical');
+	showSaccades(handles, 'left', 'vertical');
 else
-   hideSaccades(handles, 'left', 'vertical');
+	hideSaccades(handles, 'left', 'vertical');
 end
 return
 
@@ -3689,9 +3768,9 @@ function tbShowRH_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 if get(hObject,'Value') % returns toggle state of tbShowRH
-   set(handles.line_rh, 'Visible', 'on')
+	set(handles.line_rh, 'Visible', 'on')
 else
-   set(handles.line_rh, 'Visible', 'off')
+	set(handles.line_rh, 'Visible', 'off')
 end
 return
 
@@ -3701,9 +3780,9 @@ function tbShowLH_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 if get(hObject,'Value') % returns toggle state of tbShowLH
-   set(handles.line_lh, 'Visible', 'on')
+	set(handles.line_lh, 'Visible', 'on')
 else
-   set(handles.line_lh, 'Visible', 'off')
+	set(handles.line_lh, 'Visible', 'off')
 end
 return
 
@@ -3714,9 +3793,9 @@ function tbShowRV_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 if get(hObject,'Value') % returns toggle state of tbShowRV
-   set(handles.line_rv, 'Visible', 'on')
+	set(handles.line_rv, 'Visible', 'on')
 else
-   set(handles.line_rv, 'Visible', 'off')
+	set(handles.line_rv, 'Visible', 'off')
 end
 return
 
@@ -3728,9 +3807,9 @@ function tbShowLV_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 if get(hObject,'Value') % returns toggle state of tbShowLV
-   set(handles.line_lv, 'Visible', 'on')
+	set(handles.line_lv, 'Visible', 'on')
 else
-   set(handles.line_lv, 'Visible', 'off')
+	set(handles.line_lv, 'Visible', 'off')
 end
 return
 
@@ -3741,9 +3820,9 @@ function tbExcludeBlinks_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 if get(hObject,'Value') %returns toggle state of tbExcludeBlinks
-   showBlinks(handles)
+	showBlinks(handles)
 else
-   hideBlinks(handles)
+	hideBlinks(handles)
 end
 return
 
@@ -3754,11 +3833,11 @@ function tbAnnotations_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 if get(hObject,'Value') % returns toggle state of tbFixations
-   showAnnotations(handles);
-   hObject.String = 'Hide Annotations';
+	showAnnotations(handles);
+	hObject.String = 'Hide Annotations';
 else
-   hideAnnotations(handles);
-   hObject.String = 'Show Annotations';
+	hideAnnotations(handles);
+	hObject.String = 'Show Annotations';
 end
 return
 
@@ -3777,8 +3856,8 @@ fell_off_edge     = time + (samp_tweak-1)/samp_freq <= 1/samp_freq;
 fell_out_of_frame = abs(samp_tweak) > fix(samp_freq/vid_f_rate);
 
 if fell_off_edge || fell_out_of_frame
-   handles.samp_tweak.String = num2str( 0 );
-   return;
+	handles.samp_tweak.String = num2str( 0 );
+	return;
 end
 handles.samp_tweak.String = num2str(samp_tweak-1);
 show_video_frame(handles, time)
@@ -3797,9 +3876,9 @@ fell_off_edge     = (time + (samp_tweak+1)/samp_freq >= max_t);
 fell_out_of_frame = abs(samp_tweak) > fix(samp_freq/vid_f_rate);
 
 if fell_off_edge || fell_out_of_frame
-   handles.samp_tweak.String = num2str( 0 );
-   show_video_frame(handles, time)
-   return;
+	handles.samp_tweak.String = num2str( 0 );
+	show_video_frame(handles, time)
+	return;
 end
 handles.samp_tweak.String = num2str(samp_tweak+1);
 show_video_frame(handles, time)
@@ -3821,27 +3900,27 @@ function tbPlayPause_Callback(hObject, eventdata, handles)
 
 play_pause = get(hObject,'Value'); % returns toggle state of tbPlayPause
 if play_pause
-    % value = 1 = just set to pause
-    % change button text to play
-    hObject.String = 'Play';
+	% value = 1 = just set to pause
+	% change button text to play
+	hObject.String = 'Play';
 else
-    % value = 0 = just set to play
-    % change button to pause
-    hObject.String = 'Pause';
+	% value = 0 = just set to play
+	% change button to pause
+	hObject.String = 'Pause';
 end
 
 playback_speed = str2double(get(handles.edPlaybackSpeed, 'String'));
 h_scrub_line = findobj(handles.axes_eye, 'Tag', 'scrub_line_eye');
 incr = 0.1 * playback_speed;
 while strcmp(hObject.String, 'Pause') && h_scrub_line.XData(1) <= max(handles.line_rh.XData)
-   h_scrub_line.XData = h_scrub_line.XData + incr;
-   scrubLineMotionFcn(h_scrub_line)
-   drawnow
+	h_scrub_line.XData = h_scrub_line.XData + incr;
+	scrubLineMotionFcn(h_scrub_line)
+	drawnow
 end
 
 % stop if we reach the end of the data
 if h_scrub_line.XData >= max(handles.line_rh.XData)
-   hObject.String = 'Play';
+	hObject.String = 'Play';
 end
 
 % --- Executes on key press with focus on figure1 and none of its controls.
@@ -3853,19 +3932,19 @@ function figure1_KeyPressFcn(hObject, eventdata, handles)
 %	Modifier: name(s) of the modifier key(s) (i.e., control, shift) pressed
 % handles    structure with handles and user data (see GUIDATA)
 switch eventdata.Key
-    case 'w'	% close window
-        if length(eventdata.Modifier) == 1
-            switch eventdata.Modifier{1}
-                case 'command'
+	case 'w'	% close window
+		if length(eventdata.Modifier) == 1
+			switch eventdata.Modifier{1}
+				case 'command'
 					delete(hObject);
-
-            end
-        end
+					
+			end
+		end
 	case 'r'	% recalc lines
-% 		pbReCalc_Callback(handles.pbReCalc, eventdata, handles)
-    case 'rightarrow'	% next epoch
+		% 		pbReCalc_Callback(handles.pbReCalc, eventdata, handles)
+	case 'rightarrow'	% next epoch
 		pbForward_Callback(handles.pbForward, eventdata, handles)
-    case 'leftarrow'	% previous epoch
+	case 'leftarrow'	% previous epoch
 		pbBack_Callback(handles.pbBack, eventdata, handles)
 end
 
@@ -3889,7 +3968,7 @@ function edPlaybackSpeed_CreateFcn(hObject, eventdata, handles)
 % Hint: edit controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
+	set(hObject,'BackgroundColor','white');
 end
 
 
@@ -3949,7 +4028,7 @@ function save_state(handles)
 % set a default location
 filename = strrep(handles.bin_filename, '.bin', '_gui.mat');
 
-% request where to save 
+% request where to save
 [filename, pathname] = uiputfile(filename, 'Save as');
 if isequal(filename, 0) || isequal(pathname, 0)
 	disp('Not saving. User canceled.');
@@ -4033,7 +4112,7 @@ state.blinks = cell(length(blink_patches));
 for b_cnt = 1:length(blink_patches)
 	state.blinks{b_cnt} = blink_patches(b_cnt).Vertices([1 3]);
 end
-% annotations 
+% annotations
 state.annots = [];
 if isfield(handles, 'axes_hand')
 	annots = findobj(handles.axes_sensor1, 'Tag', 'annotation_mistake');
@@ -4108,18 +4187,18 @@ function handles = read_restore_state(handles, varargin)
 % will not be displayed
 
 if nargin > 1
-    filename = varargin{1};
+	filename = varargin{1};
 else
-    [filename, pathname] = uigetfile('*.mat', 'Load GUI Data');
-    if isequal(filename, 0) || isequal(pathname, 0)
-        disp('Not saving. User canceled.');
-        return;
-    end
-    filename = fullfile(pathname,filename);
+	[filename, pathname] = uigetfile('*.mat', 'Load GUI Data');
+	if isequal(filename, 0) || isequal(pathname, 0)
+		disp('Not saving. User canceled.');
+		return;
+	end
+	filename = fullfile(pathname,filename);
 end
 if ~exist(filename, 'file')
-    disp(['Error loading gui mat file ' filename])
-    return
+	disp(['Error loading gui mat file ' filename])
+	return
 end
 disp(['Loading gui state and data from ' filename])
 load(filename);
@@ -4227,8 +4306,8 @@ end
 
 % restore the saccade begin menus/labels
 if ~isempty(handles.restore_data.sacc_disabled) || ~isempty(handles.restore_data.sacc_labels)
-% 	sacc_lines = findobj(handles.axes_eye, '-regexp', 'Tag',  'sacc.*begin');
-	for ds_cnt = 1:length(handles.restore_data.sacc_disabled)		
+	% 	sacc_lines = findobj(handles.axes_eye, '-regexp', 'Tag',  'sacc.*begin');
+	for ds_cnt = 1:length(handles.restore_data.sacc_disabled)
 		hs_line = findobj(handles.figure1,'xdata',handles.restore_data.sacc_disabled(ds_cnt).xdata,...
 			'-regexp','Tag',['.*' handles.restore_data.sacc_disabled(ds_cnt).type '.*']);
 		hs_menu_disable = findobj(hs_line.UIContextMenu.Children, 'Label', 'Disable Saccade');
@@ -4245,31 +4324,31 @@ end
 
 % blinks
 for b_cnt = 1:length(handles.restore_data.blinks)
-	 createBox([], [], handles.restore_data.blinks{b_cnt}, 'blink')
-	 if ~handles.tbExcludeBlinks.Value
-		 hideBlinks(handles)
-	 end
+	createBox([], [], handles.restore_data.blinks{b_cnt}, 'blink')
+	if ~handles.tbExcludeBlinks.Value
+		hideBlinks(handles)
+	end
 end
 
 % annotations (mistakes)
 if isfield(handles, 'axes_hand')
 	for a_cnt = 1:length(handles.restore_data.annots)
-      handles = addAxesLine(handles, handles.restore_data.annots(a_cnt).xdata, handles.restore_data.annots(a_cnt).txt, 'on');
+		handles = addAxesLine(handles, handles.restore_data.annots(a_cnt).xdata, handles.restore_data.annots(a_cnt).txt, 'on');
 	end
 end
 guidata(handles.figure1, handles)
 
 % exclude patches
 for b_cnt = 1:length(handles.restore_data.excludes)
-	 createBox([], [], handles.restore_data.excludes{b_cnt}, 'exclude')
-	 handles = guidata(handles.figure1);
+	createBox([], [], handles.restore_data.excludes{b_cnt}, 'exclude')
+	handles = guidata(handles.figure1);
 end
 
 % analyze patches
 for b_cnt = 1:length(handles.restore_data.analysis)
-	 createBox([], [], handles.restore_data.analysis(b_cnt).Vertices, ...
-		 ['analysis' char(handles.restore_data.analysis(b_cnt).type) ])
-	 handles = guidata(handles.figure1);
+	createBox([], [], handles.restore_data.analysis(b_cnt).Vertices, ...
+		['analysis' char(handles.restore_data.analysis(b_cnt).type) ])
+	handles = guidata(handles.figure1);
 end
 
 % moves/reaches
@@ -4287,7 +4366,7 @@ if isfield(handles.restore_data, 'target_data')
 	axes(handles.axes_eye)
 	handles.line_target_x = line(handles.target_data.t, handles.target_data.x, 'Tag', 'line_target_x', 'Color', 'b');
 	handles.line_target_y = line(handles.target_data.t, handles.target_data.y, 'Tag', 'line_target_y', 'Color', 'c');
-
+	
 	if ~handles.tbTargetH.Value
 		set(handles.line_target_x, 'Visible', 'off')
 	end
@@ -4303,7 +4382,7 @@ if isfield(handles.restore_data, 'click_data_tbl')
 	handles.im_data = handles.restore_data.im_data;
 	
 	imshow(handles.im_data, 'Parent', handles.axes_video, 'XData', [0 1024], 'YData', [0 768] )
-
+	
 	% eye position overlay on pciture
 	handles.axes_video_overlay.Color = 'none';
 	handles.axes_video_overlay.Visible = 'off';
@@ -4314,7 +4393,7 @@ if isfield(handles.restore_data, 'click_data_tbl')
 	display_eye_pos_overlay(handles, 1/handles.eye_data.samp_freq)
 	% scrub line
 	handles = add_scrub_lines(handles, handles.restore_data.scrub_line_eye.XData(1));
-
+	
 	% mouse clicks
 	handles = display_mouse_clicks(handles);
 end
@@ -4344,10 +4423,10 @@ function tbTargetV_Callback(hObject, eventdata, handles)
 % hObject    handle to tbTargetV (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-if get(hObject,'Value') % returns toggle state 
-   set(handles.line_target_y, 'Visible', 'on')
+if get(hObject,'Value') % returns toggle state
+	set(handles.line_target_y, 'Visible', 'on')
 else
-   set(handles.line_target_y, 'Visible', 'off')
+	set(handles.line_target_y, 'Visible', 'off')
 end
 return
 
@@ -4356,10 +4435,10 @@ function tbTargetH_Callback(hObject, eventdata, handles)
 % hObject    handle to tbTargetH (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-if get(hObject,'Value') % returns toggle state 
-   set(handles.line_target_x, 'Visible', 'on')
+if get(hObject,'Value') % returns toggle state
+	set(handles.line_target_x, 'Visible', 'on')
 else
-   set(handles.line_target_x, 'Visible', 'off')
+	set(handles.line_target_x, 'Visible', 'off')
 end
 return
 
@@ -4387,7 +4466,7 @@ for s_cnt = 1:length(handles.eye_data.rh.saccades)
 end
 
 if ~have_this_type % don't have this type
-	% read them in 
+	% read them in
 	handles = get_saccades(handles, sacc_type_str);
 	% enable all saccades
 	handles.eye_data = enable_all_saccades(handles.eye_data);
@@ -4426,7 +4505,7 @@ function popmenuSaccType_CreateFcn(hObject, eventdata, handles)
 % Hint: popupmenu controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
+	set(hObject,'BackgroundColor','white');
 end
 hObject.UserData.prev_choice = lower(hObject.String{hObject.Value});
 return
@@ -4525,7 +4604,7 @@ function editLPFilt_CreateFcn(hObject, eventdata, handles)
 % Hint: edit controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
+	set(hObject,'BackgroundColor','white');
 end
 
 
