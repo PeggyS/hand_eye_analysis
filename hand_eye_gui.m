@@ -22,7 +22,7 @@ function varargout = hand_eye_gui(varargin)
 
 % Edit the above text to modify the response to help hand_eye_gui
 
-% Last Modified by GUIDE v2.5 05-May-2019 19:16:19
+% Last Modified by GUIDE v2.5 14-Nov-2019 20:59:21
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 0;
@@ -402,6 +402,10 @@ switch choice_num
 			save('missing_im_data.mat', handles)
 			disp('Error: im_data is missing. Handles struct is saved in the file missing_im_data.mat. Send to Peggy to troubleshoot.')
 			return
+		end
+		if isfield(handles, 'im_prior_data')
+			handles.prior_img = imshow(handles.im_prior_data, 'Parent', handles.axes_pict_diff_prior, 'XData', [0 1024], 'YData', [0 768] );
+			handles.prior_img.Visible = 'off';
 		end
 		% 		handles.axes_video.Visible = 'on';
 		obj_list = [handles.txtVergence, handles.tbConjugate, handles.tbVergence, handles.tbVergenceVelocity];
@@ -4649,3 +4653,23 @@ function chkbx_left_hand_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 handles = resizeAxes(handles);
 guidata(handles.figure1, handles)
+
+
+% --- Executes on button press in chkbxPrior.
+function chkbxPrior_Callback(hObject, eventdata, handles)
+% hObject    handle to chkbxPrior (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of chkbxPrior
+if hObject.Value
+	% display prior overlay
+	if isfield(handles, 'prior_img')
+		handles.prior_img.Visible = 'on';
+	end
+else
+	% don't display
+	if isfield(handles, 'prior_img')
+		handles.prior_img.Visible = 'off';
+	end
+end

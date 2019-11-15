@@ -52,7 +52,7 @@ if any(strcmp(handles.click_data_tbl.Properties.VariableNames, 'trial_sequence_n
 	if ~isempty(row_inds)
 		click_tbl_row = row_inds(1);
 	else
-		disp(['There are no mouse clicks for this trial. Cannot determine the image to display.'])
+		disp('There are no mouse clicks for this trial. Cannot determine the image to display.')
 		click_tbl_row = 1;
 		reply = input('There are no clicks recorded. Is there an image to display? y/n [y]:','s');
 		if isempty(reply)
@@ -84,78 +84,119 @@ end
 
 
 if ~found_img
-	if exist(fullfile(pnSave, char(handles.click_data_tbl.image(click_tbl_row))),'file')
-		handles.im_filename = fullfile(pnSave, char(handles.click_data_tbl.image(click_tbl_row)));
+	img_fname = char(handles.click_data_tbl.image(click_tbl_row));
+	if exist(fullfile(pnSave, img_fname),'file')
+		handles.im_filename = fullfile(pnSave,img_fname);
 		handles.im_data = imread(handles.im_filename);
 	else
-
-		% look in this folder and in parent folders
-		if exist(strrep(char(handles.click_data_tbl.image(click_tbl_row)), '_', ' '),'file')
-			handles.im_filename = fullfile(pwd,strrep(char(handles.click_data_tbl.image(click_tbl_row)), '_', ' '));
+		
+		% look in this folder
+		if exist(strrep(img_fname, '_', ' '),'file')
+			handles.im_filename = fullfile(pwd,strrep(img_fname), '_', ' ');
 			handles.im_data = imread(handles.im_filename);
-			found_img = true;
+% 			found_img = true;
 		else
-			% go up 2 folders and look for the image in 'picture_diff' folder
-			cur_dir = pwd;
-			cd(['..'])
-			if exist('picture_diff','dir')
-				cd 'picture_diff'
-				if exist(strrep(char(handles.click_data_tbl.image(click_tbl_row)), '_', ' '),'file')
-					handles.im_filename = fullfile(pwd,strrep(char(handles.click_data_tbl.image(click_tbl_row)), '_', ' '));
-					handles.im_data = imread(handles.im_filename);
-					found_img = true;
-				elseif exist(char(handles.click_data_tbl.image(click_tbl_row)),'file')
-					handles.im_filename = fullfile(pwd,char(handles.click_data_tbl.image(click_tbl_row)));
-					handles.im_data = imread(handles.im_filename);
-					found_img = true;
-				end
-			else
-				cd(['..'])
-				if exist('picture_diff','dir')
-					cd 'picture_diff'
-					if exist(strrep(char(handles.click_data_tbl.image(click_tbl_row)), '_', ' '),'file')
-						handles.im_filename = fullfile(pwd,strrep(char(handles.click_data_tbl.image(click_tbl_row)), '_', ' '));
-						handles.im_data = imread(handles.im_filename);
-						found_img = true;
-					elseif exist(char(handles.click_data_tbl.image(click_tbl_row)),'file')
-						handles.im_filename = fullfile(pwd,char(handles.click_data_tbl.image(click_tbl_row)));
-						handles.im_data = imread(handles.im_filename);
-						found_img = true;
-					end
-				else
-					% request file location
-					disp(['choose image file ' char(handles.click_data_tbl.image(click_tbl_row))])
-					[fnImg, pnImg] = uigetfile({'*.*'}, 'Choose image file ...');
-					if isequal(fnImg,0) || isequal(pnImg,0)
-						disp('no image file')
-						return
-					else
-						handles.im_filename = fullfile(pnImg,fnImg);
-						handles.im_data = imread(handles.im_filename);
-						found_img = true;
-					end
-				end
-			end
-			cd(cur_dir)
-
-			if ~found_img
-				% still not finding the image ...
-				disp(['Choose image file: ' char(handles.click_data_tbl.image(click_tbl_row)) ])
+			% go up 3 folders and look for the image
+			[pathname,filename] = findfilepath(img_fname, '../../..');
+			if isempty(pathname)
+				% request file location
+				disp('choose image file ...')
 				[fnImg, pnImg] = uigetfile({'*.*'}, 'Choose image file ...');
 				if isequal(fnImg,0) || isequal(pnImg,0)
-					disp('no image file - will display gray image')
-					handles.im_filename = 'gray.png';
-					handles.im_data = imread('gray.png');
+					disp('no image file')
+					return
 				else
 					handles.im_filename = fullfile(pnImg,fnImg);
 					handles.im_data = imread(handles.im_filename);
 				end
+			else
+				handles.im_filename = fullfile(pathname,filename);
+				handles.im_data = imread(handles.im_filename);
 			end
+% 			cur_dir = pwd;
+% 			cd(['..'])
+% 			if exist('picture_diff','dir')
+% 				cd 'picture_diff'
+% 				if exist(strrep(char(handles.click_data_tbl.image(click_tbl_row)), '_', ' '),'file')
+% 					handles.im_filename = fullfile(pwd,strrep(char(handles.click_data_tbl.image(click_tbl_row)), '_', ' '));
+% 					handles.im_data = imread(handles.im_filename);
+% 					found_img = true;
+% 				elseif exist(char(handles.click_data_tbl.image(click_tbl_row)),'file')
+% 					handles.im_filename = fullfile(pwd,char(handles.click_data_tbl.image(click_tbl_row)));
+% 					handles.im_data = imread(handles.im_filename);
+% 					found_img = true;
+% 				end
+% 			else
+% 				cd(['..'])
+% 				if exist('picture_diff','dir')
+% 					cd 'picture_diff'
+% 					if exist(strrep(char(handles.click_data_tbl.image(click_tbl_row)), '_', ' '),'file')
+% 						handles.im_filename = fullfile(pwd,strrep(char(handles.click_data_tbl.image(click_tbl_row)), '_', ' '));
+% 						handles.im_data = imread(handles.im_filename);
+% 						found_img = true;
+% 					elseif exist(char(handles.click_data_tbl.image(click_tbl_row)),'file')
+% 						handles.im_filename = fullfile(pwd,char(handles.click_data_tbl.image(click_tbl_row)));
+% 						handles.im_data = imread(handles.im_filename);
+% 						found_img = true;
+% 					end
+% 				else
+% 					% request file location
+% 					disp(['choose image file ' char(handles.click_data_tbl.image(click_tbl_row))])
+% 					[fnImg, pnImg] = uigetfile({'*.*'}, 'Choose image file ...');
+% 					if isequal(fnImg,0) || isequal(pnImg,0)
+% 						disp('no image file')
+% 						return
+% 					else
+% 						handles.im_filename = fullfile(pnImg,fnImg);
+% 						handles.im_data = imread(handles.im_filename);
+% 						found_img = true;
+% 					end
+% 				end
+% 			end
+% 			cd(cur_dir)
+
+% 			if ~found_img
+% 				% still not finding the image ...
+% 				disp(['Choose image file: ' char(handles.click_data_tbl.image(click_tbl_row)) ])
+% 				[fnImg, pnImg] = uigetfile({'*.*'}, 'Choose image file ...');
+% 				if isequal(fnImg,0) || isequal(pnImg,0)
+% 					disp('no image file - will display gray image')
+% 					handles.im_filename = 'gray.png';
+% 					handles.im_data = imread('gray.png');
+% 				else
+% 					handles.im_filename = fullfile(pnImg,fnImg);
+% 					handles.im_data = imread(handles.im_filename);
+% 				end
+% 			end
 		end
 	end
 end
 if isfield(handles, 'im_filename')
 	disp(['image file: ' handles.im_filename])
+	% with an image file, now look for a priors image file
+	[~, prior_img_file, ~] = fileparts(handles.im_filename);
+	prior_img_file = [prior_img_file, '_prior.png'];
+	% go up 3 folders and look for the image
+	[pathname,filename] = findfilepath(prior_img_file, '../../..');
+	if isempty(pathname)
+		% request file location
+		disp('choose priors file ...')
+		[fnImg, pnImg] = uigetfile({'*.*'}, 'Choose priors file ...');
+		if isequal(fnImg,0) || isequal(pnImg,0)
+			disp('no priors file')
+		else
+			handles.im_prior_filename = fullfile(pnImg,fnImg);
+			handles.im_prior_data = imread(handles.im_prior_filename);
+			disp(['priors: ' handles.im_prior_filename])
+			handles.chkbxPrior.Visible = 'on';
+		end
+	else
+		handles.im_prior_filename = fullfile(pathname,filename);
+		handles.im_prior_data = imread(handles.im_prior_filename);
+		disp(['priors: ' handles.im_prior_filename])
+		handles.chkbxPrior.Visible = 'on';
+	end
+	
 end
 
 
