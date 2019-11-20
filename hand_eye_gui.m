@@ -2028,18 +2028,22 @@ if isfield(handles, 'prior_img')
 	ylims = handles.axes_video_overlay.YLim;
 	out_tbl.le_prior = cell(height(out_tbl), 1);
 	out_tbl.re_prior = cell(height(out_tbl), 1);
+	out_tbl.hr_pixel = cell(height(out_tbl), 1);
+	out_tbl.vr_pixel = cell(height(out_tbl), 1);
+	out_tbl.hl_pixel = cell(height(out_tbl), 1);
+	out_tbl.vl_pixel = cell(height(out_tbl), 1);
 	for row_cnt = 1:height(out_tbl)
-		hr_eye_pixel = round((out_tbl.rh(row_cnt) + xlims(2)) * 30);
-		vr_eye_pixel = round((ylims(2) - out_tbl.rv(row_cnt)) * 30);
-		if hr_eye_pixel <= size(handles.prior_img.CData,2) && ...
-				vr_eye_pixel <= size(handles.prior_img.CData,1)
-			out_tbl.re_prior{row_cnt} = handles.prior_img.CData(vr_eye_pixel, hr_eye_pixel, 1);
+		out_tbl.hr_pixel{row_cnt} = round((out_tbl.rh(row_cnt) + xlims(2)) * 30);
+		out_tbl.vr_pixel{row_cnt} = round((ylims(2) - out_tbl.rv(row_cnt)) * 30);
+		if out_tbl.hr_pixel{row_cnt} <= size(handles.prior_img.CData,2) && ...
+				out_tbl.vr_pixel{row_cnt} <= size(handles.prior_img.CData,1)
+			out_tbl.re_prior{row_cnt} = handles.prior_img.CData(out_tbl.vr_pixel{row_cnt}, out_tbl.hr_pixel{row_cnt}, 1);
 		end
-		hl_eye_pixel = round((out_tbl.lh(row_cnt) + xlims(2)) * 30);
-		vl_eye_pixel = round((ylims(2) - out_tbl.lv(row_cnt)) * 30);
-		if hl_eye_pixel <= size(handles.prior_img.CData,2) && ...
-				vl_eye_pixel <= size(handles.prior_img.CData,1)
-			out_tbl.le_prior{row_cnt} = handles.prior_img.CData(vl_eye_pixel, hl_eye_pixel, 1);
+		out_tbl.hl_pixel{row_cnt} = round((out_tbl.lh(row_cnt) + xlims(2)) * 30);
+		out_tbl.vl_pixel{row_cnt} = round((ylims(2) - out_tbl.lv(row_cnt)) * 30);
+		if out_tbl.hl_pixel{row_cnt} <= size(handles.prior_img.CData,2) && ...
+				out_tbl.vl_pixel{row_cnt} <= size(handles.prior_img.CData,1)
+			out_tbl.le_prior{row_cnt} = handles.prior_img.CData(out_tbl.vl_pixel{row_cnt}, out_tbl.hl_pixel{row_cnt}, 1);
 		end
 	end
 end
