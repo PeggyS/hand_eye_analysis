@@ -202,7 +202,8 @@ end
 
 % read in the msg file
 % the msg file name
-msg_fname = strrep(handles.bin_filename, '.bin', '_msgs.asc');
+% msg_fname = strrep(handles.bin_filename, '.bin', '_msgs.asc');
+msg_fname = regexprep(handles.bin_filename, '(_\d+.bin)|(.bin)', '_msgs.asc');
 if ~exist(msg_fname, 'file')
 	disp('Choose _msg.asc file ...')
 	[fnSave, pnSave] = uigetfile({'*.asc'}, 'Choose  _msg.asc file ...');
@@ -213,7 +214,13 @@ if ~exist(msg_fname, 'file')
 	msg_fname = fullfile(pnSave, fnSave);
 end
 % read in
+lastwarn('')  % clear last warning msg
 msgs = importdata(msg_fname, char(13)); % each line is read in as a cell
+% check for a new warning
+[warnMsg, warnId] = lastwarn;
+if ~isempty(warnMsg)
+	disp(['warning at line 217 - reading in msg_fname: ' msg_fname])
+end
 
 % add info to click_data_tbl to indicate the times relative to 
 % the start of data collection instead of the display's appearance

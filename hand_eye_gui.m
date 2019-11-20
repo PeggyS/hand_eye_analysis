@@ -2022,6 +2022,28 @@ if isfield(handles, 'grid_file') % reading task will have grid_file
 	out_tbl.roi_word = cell(height(out_tbl), 1);
 end
 
+% for pic diff, if there is a prior image
+if isfield(handles, 'prior_img')
+	xlims = handles.axes_video_overlay.XLim;
+	ylims = handles.axes_video_overlay.YLim;
+	out_tbl.le_prior = cell(height(out_tbl), 1);
+	out_tbl.re_prior = cell(height(out_tbl), 1);
+	for row_cnt = 1:height(out_tbl)
+		hr_eye_pixel = round((out_tbl.rh(row_cnt) + xlims(2)) * 30);
+		vr_eye_pixel = round((ylims(2) - out_tbl.rv(row_cnt)) * 30);
+		if hr_eye_pixel <= size(handles.prior_img.CData,2) && ...
+				vr_eye_pixel <= size(handles.prior_img.CData,1)
+			out_tbl.re_prior{row_cnt} = handles.prior_img.CData(vr_eye_pixel, hr_eye_pixel, 1);
+		end
+		hl_eye_pixel = round((out_tbl.lh(row_cnt) + xlims(2)) * 30);
+		vl_eye_pixel = round((ylims(2) - out_tbl.lv(row_cnt)) * 30);
+		if hl_eye_pixel <= size(handles.prior_img.CData,2) && ...
+				vl_eye_pixel <= size(handles.prior_img.CData,1)
+			out_tbl.le_prior{row_cnt} = handles.prior_img.CData(vl_eye_pixel, hl_eye_pixel, 1);
+		end
+	end
+end
+
 % for smooth pursuit add col if using data below head motion threshold
 
 
