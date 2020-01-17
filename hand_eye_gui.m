@@ -220,8 +220,12 @@ if choice_num == 15 || choice_num == 16 % vergence
 	% calibrate the data with the vergence cal_info
 	% look for the Left & Right_verg_cal.mat files
 	if ~isempty(handles.eye_data.rh.pos)
-		[~, rcal_fname] = system('mdfind -onlyin ../ -name Right_verg_cal.mat');
-		handles.rcal_fname = strtrim(rcal_fname);
+		if ismac
+			[~, rcal_fname] = system('mdfind -onlyin ../ -name Right_verg_cal.mat');
+			handles.rcal_fname = strtrim(rcal_fname);
+		else
+			handles.rcal_fname = '';
+		end
 		if isempty(handles.rcal_fname)
 			disp('Choose right eye vergence cal mat.')
 			[fnSave, pnSave] = uigetfile({'*.mat'},'Choose right eye vergence cal mat.');
@@ -243,8 +247,12 @@ if choice_num == 15 || choice_num == 16 % vergence
 	end
 	
 	if ~isempty(handles.eye_data.lh.pos)
-		[~, lcal_fname] = system('mdfind -onlyin ../ -name Left_verg_cal.mat');
-		handles.lcal_fname = strtrim(lcal_fname);
+		if ismac
+			[~, lcal_fname] = system('mdfind -onlyin ../ -name Left_verg_cal.mat');
+			handles.lcal_fname = strtrim(lcal_fname);
+		else
+			handles.lcal_fname = '';
+		end
 		if isempty(handles.lcal_fname)
 			disp('Choose left eye vergence cal mat.')
 			[fnSave, pnSave] = uigetfile({'*.mat'},'Choose left eye vergence cal mat.');

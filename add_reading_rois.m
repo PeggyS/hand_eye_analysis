@@ -25,7 +25,11 @@ if isempty(reply)
 end
 
 if strcmpi(reply, 'y')
-	[~, grid_fname] = system(['mdfind -onlyin ../../../ -name ' roi_fname]);
+	if ismac
+		[~, grid_fname] = system(['mdfind -onlyin ../../../ -name ' roi_fname]);
+	else
+		grid_fname = '';
+	end
 	[pn, fn] = findfilepath(roi_fname, '../../../');
 	grid_fname = fullfile(pn,fn);
 end
