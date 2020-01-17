@@ -1735,7 +1735,7 @@ ind_gt_5 = find(abs(h_line_velocity.YData(ind_lt_5:end))>=5, 1, 'first') + ind_l
 
 % at this point add a marker on the eye velocity line and the vergence line
 tmp = regexp(h_line_velocity.Tag, '(lh)|(rh)', 'match');
-if ~isempty(tmp).  strcmp(h_line_velocity.Tag, 'line_vergence_velocity') %#ok<*SEPEX>
+if ~isempty(tmp) && strcmp(h_line_velocity.Tag, 'line_vergence_velocity')
 	eye_str  = tmp{1};
 elseif strcmp(h_line_velocity.Tag, 'line_vergence_velocity')
 	eye_str = 'verg_vel';
