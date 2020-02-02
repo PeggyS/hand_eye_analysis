@@ -1730,8 +1730,36 @@ cursor_x = cursor_loc(1);
 ind_cursor = find(h_line_velocity.XData>=cursor_x, 1, 'first');
 ind_lt_5 = find(abs(h_line_velocity.YData(1:ind_cursor))<5, 1, 'last');
 
-% from this point look right for a abs value >= 5
-ind_gt_5 = find(abs(h_line_velocity.YData(ind_lt_5:end))>=5, 1, 'first') + ind_lt_5 - 1;
+% from this point look right for a abs value >= 5, but first exclude
+% saccades
+% get rh or lh to know which saccades to use
+if contains(h_line_velocity.Tag, 'rh')
+	eye_str = 'rh';
+else
+	eye_str = 'lh';
+end
+for s_cnt = 1:length(handles.eye_data.(eye_str).saccades)
+	if contains(handles.eye_data.(eye_str).saccades(s_cnt).paramtype, 'EDF')
+		sacclist = handles.eye_data.(eye_str).saccades(s_cnt).sacclist;
+		break;
+	end
+end
+beg_t_vec = (sacclist.start-handles.eye_data.start_times)/1000;
+end_t_vec = (sacclist.end-handles.eye_data.start_times)/1000;
+data_time_vec = h_line_velocity.XData;
+ydata = h_line_velocity.YData(ind_lt_5:end);
+% remove saccades from ydata (make data nan)
+sac_ind = find(beg_t_vec >= data_time_vec(ind_lt_5), 1, 'first');
+for s_cnt = sac_ind:length(beg_t_vec)
+	sac_msk = data_time_vec(ind_lt_5:end) >= beg_t_vec(s_cnt) & ...
+					data_time_vec(ind_lt_5:end) <= end_t_vec(s_cnt);
+	ydata(sac_msk) = nan;
+	% add draggable patch to adjust the exclusion area around the saccade
+	createBox([], [], beg_t_vec(s_cnt), end_t_vec(s_cnt),)
+end
+
+% find the next timepoint when ydata (velocity) exceeds 5 deg/s
+ind_gt_5 = find(abs(ydata)>=5, 1, 'first') + ind_lt_5 - 1;
 
 % at this point add a marker on the eye velocity line and the vergence line
 tmp = regexp(h_line_velocity.Tag, '(lh)|(rh)', 'match');
