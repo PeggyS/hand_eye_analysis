@@ -22,7 +22,7 @@ function varargout = hand_eye_gui(varargin)
 
 % Edit the above text to modify the response to help hand_eye_gui
 
-% Last Modified by GUIDE v2.5 14-Nov-2019 20:59:21
+% Last Modified by GUIDE v2.5 01-Feb-2020 20:02:16
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 0;
@@ -1121,6 +1121,8 @@ switch tag_str
 		p_color = [0.4 0.7 0.4];
 	case 'verg_analysis_seg2'
 		p_color = [0.4 0.4 0.75];
+	case 'exclude_verge_sacc'
+		p_color = [0.88 0.58 0.09];
 	otherwise
 		p_color = [0.7 0.75 0.2];
 end
@@ -1726,40 +1728,47 @@ axes(handles.axes_eye)
 cursor_loc = get(handles.axes_eye, 'CurrentPoint');
 cursor_x = cursor_loc(1);
 
-% from cursor_x, look left on h_line_velocity for a abs value < 5
-ind_cursor = find(h_line_velocity.XData>=cursor_x, 1, 'first');
-ind_lt_5 = find(abs(h_line_velocity.YData(1:ind_cursor))<5, 1, 'last');
+% first saccades
+% get the exclude saccade patches
+excl_patch_l_lines = findobj(handles.axes_eye, '-regexp', 'Tag', 'exclude_verge_sacc.*_l_line');
+excl_patch_r_lines = findobj(handles.axes_eye, '-regexp', 'Tag', 'exclude_verge_sacc.*_r_line');
+data_time_vec = h_line_velocity.XData;
+y_vel_data = h_line_velocity.YData;  
+h_verge_vel = findobj(handles.axes_eye, 'Tag', 'line_vergence_velocity');
+verge_vel_ydata = h_verge_vel.YData;
 
-% from this point look right for a abs value >= 5, but first exclude
-% saccades
-% get rh or lh to know which saccades to use
-if contains(h_line_velocity.Tag, 'rh')
-	eye_str = 'rh';
-else
-	eye_str = 'lh';
-end
-for s_cnt = 1:length(handles.eye_data.(eye_str).saccades)
-	if contains(handles.eye_data.(eye_str).saccades(s_cnt).paramtype, 'EDF')
-		sacclist = handles.eye_data.(eye_str).saccades(s_cnt).sacclist;
-		break;
+if ~isempty(excl_patch_l_lines)
+
+
+	for s_cnt = 1:length(excl_patch_l_lines)
+		% matching right side of patch line
+		h_r_line = findobj(excl_patch_r_lines, 'Tag', strrep(excl_patch_l_lines(s_cnt).Tag, 'l_line', 'r_line'));
+		sac_msk = data_time_vec >= excl_patch_l_lines(s_cnt).XData(1) & data_time_vec <= h_r_line.XData(1);
+		y_vel_data(sac_msk) = nan;
+		verge_vel_ydata(sac_msk) = nan;
+	%  	if excl_patch_l_lines(s_cnt).Xdata(1) 
+
+	%  	end
 	end
 end
-beg_t_vec = (sacclist.start-handles.eye_data.start_times)/1000;
-end_t_vec = (sacclist.end-handles.eye_data.start_times)/1000;
-data_time_vec = h_line_velocity.XData;
-ydata = h_line_velocity.YData(ind_lt_5:end);
-% remove saccades from ydata (make data nan)
-sac_ind = find(beg_t_vec >= data_time_vec(ind_lt_5), 1, 'first');
-for s_cnt = sac_ind:length(beg_t_vec)
-	sac_msk = data_time_vec(ind_lt_5:end) >= beg_t_vec(s_cnt) & ...
-					data_time_vec(ind_lt_5:end) <= end_t_vec(s_cnt);
-	ydata(sac_msk) = nan;
-	% add draggable patch to adjust the exclusion area around the saccade
-	createBox([], [], beg_t_vec(s_cnt), end_t_vec(s_cnt),)
-end
+% beg_t_vec = (sacclist.start-handles.eye_data.start_times)/1000;
+% end_t_vec = (sacclist.end-handles.eye_data.start_times)/1000;
+% % remove saccades from ydata (make data nan)
+% sac_beg_ind = find(beg_t_vec >= data_time_vec(ind_lt_5), 1, 'first');
+% sac_end_ind = find(beg_t_vec >= data_time_vec(ind_lt_5)+3, 1, 'first');
+% for s_cnt = sac_beg_ind:sac_end_ind
+% 	sac_msk = data_time_vec(ind_lt_5:end) >= beg_t_vec(s_cnt) & ...
+% 					data_time_vec(ind_lt_5:end) <= end_t_vec(s_cnt);
+% 	ydata(sac_msk) = nan;
+% end
 
+% from cursor_x, look left on h_line_velocity for a abs value < 5
+ind_cursor = find(h_line_velocity.XData>=cursor_x, 1, 'first');
+ind_lt_5 = find(abs(y_vel_data(1:ind_cursor))<5, 1, 'last');
+
+% from this point look right for a abs value >= 5
 % find the next timepoint when ydata (velocity) exceeds 5 deg/s
-ind_gt_5 = find(abs(ydata)>=5, 1, 'first') + ind_lt_5 - 1;
+ind_gt_5 = find(abs(y_vel_data)>=5, 1, 'first') + ind_lt_5 - 1;
 
 % at this point add a marker on the eye velocity line and the vergence line
 tmp = regexp(h_line_velocity.Tag, '(lh)|(rh)', 'match');
@@ -1786,29 +1795,30 @@ uimenu(eye_m, 'Label', 'Delete', 'Callback', {@deleteVergenceMark, h_beg_line}, 
 	'Tag', ['menu_vergence_' eye_str '_begin'])
 
 % add marker for vergence peak velocity
-h_verge_vel = findobj(handles.axes_eye, 'Tag', 'line_vergence_velocity');
-% from the begin of vergence, look in the next 0.5 sec for the max(abs(velocity))
-n_pts_to_look = 1/(h_verge_vel.XData(2)-h_verge_vel.XData(1)) * 0.5;
-[max_vel, rel_ind_max_vel] = nanmax(abs(h_verge_vel.YData(ind_gt_5:ind_gt_5+n_pts_to_look)));
+
+% from the begin of vergence, look in the next x sec for the max(abs(velocity))
+time_to_look_for_verge_end = 1.0; % sec
+n_pts_to_look = 1/(h_verge_vel.XData(2)-h_verge_vel.XData(1)) * time_to_look_for_verge_end;
+[max_vel, rel_ind_max_vel] = nanmax(abs(verge_vel_ydata(ind_gt_5:ind_gt_5+n_pts_to_look)));
 if length(rel_ind_max_vel) > 1, rel_ind_max_vel = rel_ind_max_vel(1); end % only use one (first) maximum
 ind_max_vel = ind_gt_5 + rel_ind_max_vel - 1;
 x = [h_line_velocity.XData(ind_max_vel) h_line_velocity.XData(ind_max_vel)];
-y = [h_verge_vel.YData(ind_max_vel) handles.line_vergence.YData(ind_max_vel)];
+y = [verge_vel_ydata(ind_max_vel) handles.line_vergence.YData(ind_max_vel)];
 h_peak_line = line(x, y, ...
 	'Tag', ['vergence_peak_velocity'], 'Color', 'k', 'Marker', 's', 'MarkerSize', 12); %#ok<*NBRAK>
 h_beg_line.UserData.h_peak_line = h_peak_line;
 
 % add marker for vergence end
 % from the peak vergence, look for the (abs(velocity)<5)
-n_pts_to_look = 1/(h_verge_vel.XData(2)-h_verge_vel.XData(1)) * 0.5;
-rel_ind_below_vel = find(abs(h_verge_vel.YData(ind_max_vel:ind_max_vel+n_pts_to_look)) < 5, 1, 'first');
+% n_pts_to_look = 1/(h_verge_vel.XData(2)-h_verge_vel.XData(1)) * time_to_look_for_verge_end;
+rel_ind_below_vel = find(abs(verge_vel_ydata(ind_max_vel:ind_max_vel+n_pts_to_look)) < 5, 1, 'first');
 if isempty(rel_ind_below_vel)
 	warning('no vergence end found for begin at t = %g', h_line_velocity.XData(ind_gt_5))
 	return
 end
 ind_below_vel = ind_max_vel + rel_ind_below_vel - 1;
 x = [h_line_velocity.XData(ind_below_vel) h_line_velocity.XData(ind_below_vel)];
-y = [h_verge_vel.YData(ind_below_vel) handles.line_vergence.YData(ind_below_vel)];
+y = [verge_vel_ydata(ind_below_vel) handles.line_vergence.YData(ind_below_vel)];
 h_end_line = line(x, y, ...
 	'Tag', ['vergence_' eye_str '_end'], 'Color', 'k', 'Marker', 'p', 'MarkerSize', 12);
 h_end_line.UserData.h_line_velocity = h_verge_vel;
@@ -3354,6 +3364,58 @@ while ~isempty(in_blinks.start)
 	
 end
 return
+
+% -------------------------------
+function exclude_saccades(h)
+tag_search_str = 'excl_sacc_.*';
+patch_list = findobj(h.figure1,'-regexp', 'Tag', tag_search_str);
+if isempty(patch_list)
+	create_excl_sacc_patches(h);
+else
+	set(patch_list, 'Visible', 'on');
+end
+return
+
+function dont_exclude_saccades(h)
+tag_search_str = 'excl_sacc_.*';
+patch_list = findobj(h.figure1,'-regexp', 'Tag', tag_search_str);
+if ~isempty(patch_list)
+	set(patch_list, 'Visible', 'off');
+end
+return
+
+function create_excl_sacc_patches(h)
+axes(h.axes_eye)
+ylims = h.axes_eye.YLim;
+start_ms = h.eye_data.start_times;
+samp_freq = h.eye_data.samp_freq;
+
+% get the viewing eye
+if h.rb_right_eye_viewing.Value
+	eye_str = 'rh';
+else
+	eye_str = 'lh';
+end
+% eye_list = {'rh' 'lh' 'rv' 'lv'};
+
+
+for s_cnt = 1:length(h.eye_data.(eye_str).saccades)
+	if contains(h.eye_data.(eye_str).saccades(s_cnt).paramtype, 'EDF')
+		sacclist = h.eye_data.(eye_str).saccades(s_cnt).sacclist;
+		break;
+	end
+end
+beg_t_vec = (sacclist.start-h.eye_data.start_times)/1000;
+end_t_vec = (sacclist.end-h.eye_data.start_times)/1000;
+
+
+% createBox
+for cnt = 1:length(beg_t_vec)
+	createBox([], [], [beg_t_vec(cnt) end_t_vec(cnt)], 'exclude_verge_sacc')
+end
+return
+
+
 % -------------------------------
 function scaleData(source, callbackdata, h_line)
 % scale this corrected velocity line to show in the axes
@@ -4738,4 +4800,17 @@ else
 	if isfield(handles, 'prior_img')
 		handles.prior_img.Visible = 'off';
 	end
+end
+
+
+% --- Executes on button press in chkbx_exclude_saccades.
+function chkbx_exclude_saccades_Callback(hObject, eventdata, handles)
+% hObject    handle to chkbx_exclude_saccades (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+if get(hObject,'Value')
+	exclude_saccades(handles)
+else
+	dont_exclude_saccades(handles)
 end
