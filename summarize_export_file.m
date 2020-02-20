@@ -521,7 +521,7 @@ if any(strcmp(tbl.Properties.VariableNames, 'vergence_target_label'))
 				verge_out_tbl.verge_vel_source{verge_tbl_row} = strrep(tbl.vergence_marks{vm_beg_ind}, '_begin', '');
 				
 				% find the viewing & nve chans
-				tmp = regexp(tbl.Properties.VariableNames, 've_(l|r)h', 'match');
+				tmp = regexp(tbl.Properties.VariableNames, '^ve_(l|r)h', 'match');
 				eye_chan = [];
 				tmp_cnt = 1;
 				while isempty(eye_chan)
