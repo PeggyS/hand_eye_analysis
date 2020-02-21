@@ -1728,29 +1728,30 @@ axes(handles.axes_eye)
 cursor_loc = get(handles.axes_eye, 'CurrentPoint');
 cursor_x = cursor_loc(1);
 
-% first saccades
-% get the exclude saccade patches
-excl_patch_l_lines = findobj(handles.axes_eye, '-regexp', 'Tag', 'exclude_verge_sacc.*_l_line');
-excl_patch_r_lines = findobj(handles.axes_eye, '-regexp', 'Tag', 'exclude_verge_sacc.*_r_line');
-data_time_vec = h_line_velocity.XData;
-y_vel_data = h_line_velocity.YData;  
+y_vel_data = h_line_velocity.YData;
 h_verge_vel = findobj(handles.axes_eye, 'Tag', 'line_vergence_velocity');
 verge_vel_ydata = h_verge_vel.YData;
 
-if ~isempty(excl_patch_l_lines)
+% if the exclude saccades checkbox is checked, exclude saccades - make
+% y_vel_data and verge_vel_ydata for the saccade intervals nans
+if handles.chkbx_exclude_saccades.Value
+	% get the exclude saccade patches
+	excl_patch_l_lines = findobj(handles.axes_eye, '-regexp', 'Tag', 'exclude_verge_sacc.*_l_line');
+	excl_patch_r_lines = findobj(handles.axes_eye, '-regexp', 'Tag', 'exclude_verge_sacc.*_r_line');
+	data_time_vec = h_line_velocity.XData;
+		
+	if ~isempty(excl_patch_l_lines)	
+		for s_cnt = 1:length(excl_patch_l_lines)
+			% matching right side of patch line
+			h_r_line = findobj(excl_patch_r_lines, 'Tag', strrep(excl_patch_l_lines(s_cnt).Tag, 'l_line', 'r_line'));
+			sac_msk = data_time_vec >= excl_patch_l_lines(s_cnt).XData(1) & data_time_vec <= h_r_line.XData(1);
+			y_vel_data(sac_msk) = nan;
+			verge_vel_ydata(sac_msk) = nan;
 
-
-	for s_cnt = 1:length(excl_patch_l_lines)
-		% matching right side of patch line
-		h_r_line = findobj(excl_patch_r_lines, 'Tag', strrep(excl_patch_l_lines(s_cnt).Tag, 'l_line', 'r_line'));
-		sac_msk = data_time_vec >= excl_patch_l_lines(s_cnt).XData(1) & data_time_vec <= h_r_line.XData(1);
-		y_vel_data(sac_msk) = nan;
-		verge_vel_ydata(sac_msk) = nan;
-	%  	if excl_patch_l_lines(s_cnt).Xdata(1) 
-
-	%  	end
+		end
 	end
 end
+
 % beg_t_vec = (sacclist.start-handles.eye_data.start_times)/1000;
 % end_t_vec = (sacclist.end-handles.eye_data.start_times)/1000;
 % % remove saccades from ydata (make data nan)
