@@ -891,7 +891,7 @@ num_sensors = head + right + left; % num sensors to display
 
 % if there is no sensor data
 if ~isfield(handles, 'apdm_data') || ~isfield(handles.apdm_data, 'sensor') ...
-		|| isempty(handles.apdm_data.sensor(1))
+		|| isempty(handles.apdm_data.sensor)
 	num_sensors = 0;
 end
 switch num_sensors
@@ -1027,10 +1027,16 @@ handles.dataPatches = [handles.dataPatches, patch_id];
 
 h_patch = patch([xlims(1) xlims(1) xlims(2) xlims(2)], ...
 	[ylims(1) ylims(2) ylims(2) ylims(1)], p_color, 'Tag', [tag_str '_id#' num2str(patch_id) '_patch']);
-set(h_patch, 'FaceAlpha', 0.5, ...
+set(h_patch, 'FaceAlpha', 0.25, ...
 	'LineStyle', 'none')
 createPatchMenu(h_patch);
-uistack(h_patch, 'bottom')
+tmp_before = uistack(h_patch, 'bottom');
+% but if it is a saccade exclude patch it should go above any analyze patches
+% so find all analyze patches and push them to the bottom
+h_anal_patches = findobj(gcf, '-regexp', 'Tag', 'analysis_.*_patch');
+if ~isempty(h_anal_patches)
+	tmp_after = uistack(h_anal_patches, 'bottom');
+end
 
 % left side of patch
 h_left_line = line([xlims(1) xlims(1)], ...
@@ -3368,7 +3374,7 @@ return
 
 % -------------------------------
 function exclude_saccades(h)
-tag_search_str = 'excl_sacc_.*';
+tag_search_str = 'exclude_verge_sacc_.*';
 patch_list = findobj(h.figure1,'-regexp', 'Tag', tag_search_str);
 if isempty(patch_list)
 	create_excl_sacc_patches(h);
@@ -3378,7 +3384,7 @@ end
 return
 
 function dont_exclude_saccades(h)
-tag_search_str = 'excl_sacc_.*';
+tag_search_str = 'exclude_verge_sacc_.*';
 patch_list = findobj(h.figure1,'-regexp', 'Tag', tag_search_str);
 if ~isempty(patch_list)
 	set(patch_list, 'Visible', 'off');
@@ -3391,21 +3397,69 @@ ylims = h.axes_eye.YLim;
 start_ms = h.eye_data.start_times;
 samp_freq = h.eye_data.samp_freq;
 
-% get the viewing eye
-if h.rb_right_eye_viewing.Value
-	eye_str = 'rh';
-else
-	eye_str = 'lh';
-end
-% eye_list = {'rh' 'lh' 'rv' 'lv'};
+% if there are any analyze patches, confine excluded saccades to the
+% patches
+anal_patches = findobj(h.axes_eye, '-regexp', 'Tag', 'analysis_.*_patch');
 
-
-for s_cnt = 1:length(h.eye_data.(eye_str).saccades)
-	if contains(h.eye_data.(eye_str).saccades(s_cnt).paramtype, 'EDF')
-		sacclist = h.eye_data.(eye_str).saccades(s_cnt).sacclist;
+% get rh & lh sacclists
+for s_cnt = 1:length(h.eye_data.rh.saccades)
+	if contains(h.eye_data.rh.saccades(s_cnt).paramtype, 'EDF')
+		rh_sacclist = h.eye_data.rh.saccades(s_cnt).sacclist;
 		break;
 	end
 end
+for s_cnt = 1:length(h.eye_data.lh.saccades)
+	if contains(h.eye_data.lh.saccades(s_cnt).paramtype, 'EDF')
+		lh_sacclist = h.eye_data.lh.saccades(s_cnt).sacclist;
+		break;
+	end
+end
+% combine the rh & lh sacclists into a single sacclist, restricted to the
+% analyze patches if they exist
+sacclist.start = [];
+sacclist.end = [];
+% starting with rh saccades, look for matching/overlapping lh saccades
+for s_cnt = 1:length(rh_sacclist.start)
+	for p_cnt = 1:length(anal_patches)
+		start_time = (rh_sacclist.start(s_cnt)-h.eye_data.start_times)/1000;
+		if start_time >=  anal_patches(p_cnt).Vertices(1,1) ...
+			&& start_time <= anal_patches(p_cnt).Vertices(3,1) 
+			% rh sacc start in within a patch
+			% find a matching or overlapping lh saccade
+			lh_sacc_ind = find_overlapping_saccade(rh_sacclist.start(s_cnt), rh_sacclist.end(s_cnt), lh_sacclist);
+			% combine into 1 sacc
+			if ~isempty(lh_sacc_ind)
+				sacclist.start = [sacclist.start min([rh_sacclist.start(s_cnt) lh_sacclist.start(lh_sacc_ind)])];
+				sacclist.end = [sacclist.end max([rh_sacclist.end(s_cnt) lh_sacclist.end(lh_sacc_ind)])];
+			else
+				% no match - just add the rh saccade
+				sacclist.start = [sacclist.start rh_sacclist.start(s_cnt)];
+				sacclist.end = [sacclist.end rh_sacclist.end(s_cnt)];
+			end
+		end
+	end
+end
+
+% repeat for lh saccades
+for s_cnt = 1:length(lh_sacclist.start)
+	for p_cnt = 1:length(anal_patches)
+		start_time = (lh_sacclist.start(s_cnt)-h.eye_data.start_times)/1000;
+		if start_time >=  anal_patches(p_cnt).Vertices(1,1) ...
+			&& start_time <= anal_patches(p_cnt).Vertices(3,1) 
+			% lh sacc start in within a patch
+			% find a matching or overlapping rh saccade
+			rh_sacc_ind = find_overlapping_saccade(lh_sacclist.start(s_cnt), lh_sacclist.end(s_cnt), rh_sacclist);
+			% If a match/overlap with rh saccade found. It should already have been added to the list
+			% so we only need to add non-matching lh saccs
+			if isempty(rh_sacc_ind)
+				% no match - just add the lh saccade
+				sacclist.start = [sacclist.start lh_sacclist.start(s_cnt)];
+				sacclist.end = [sacclist.end lh_sacclist.end(s_cnt)];
+			end
+		end
+	end
+end
+
 beg_t_vec = (sacclist.start-h.eye_data.start_times)/1000;
 end_t_vec = (sacclist.end-h.eye_data.start_times)/1000;
 
