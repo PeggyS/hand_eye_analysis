@@ -22,7 +22,7 @@ function varargout = hand_eye_gui(varargin)
 
 % Edit the above text to modify the response to help hand_eye_gui
 
-% Last Modified by GUIDE v2.5 01-Feb-2020 20:02:16
+% Last Modified by GUIDE v2.5 23-Feb-2020 15:12:40
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 0;
@@ -3384,10 +3384,14 @@ end
 return
 
 function dont_exclude_saccades(h)
-tag_search_str = 'exclude_verge_sacc_.*';
+tag_search_str = 'exclude_verge_sacc_.*_patch';
 patch_list = findobj(h.figure1,'-regexp', 'Tag', tag_search_str);
 if ~isempty(patch_list)
-	set(patch_list, 'Visible', 'off');
+% 	set(patch_list, 'Visible', 'off');
+	for p_cnt = 1:length(patch_list)
+		source.Tag = 'menuDelete';
+		menuPatch_Callback(source, [], patch_list(p_cnt))
+	end
 end
 return
 
@@ -3404,16 +3408,29 @@ anal_patches = findobj(h.axes_eye, '-regexp', 'Tag', 'analysis_.*_patch');
 % get rh & lh sacclists
 for s_cnt = 1:length(h.eye_data.rh.saccades)
 	if contains(h.eye_data.rh.saccades(s_cnt).paramtype, 'EDF')
-		rh_sacclist = h.eye_data.rh.saccades(s_cnt).sacclist;
+		rh_sacclist_all = h.eye_data.rh.saccades(s_cnt).sacclist;
 		break;
 	end
 end
 for s_cnt = 1:length(h.eye_data.lh.saccades)
 	if contains(h.eye_data.lh.saccades(s_cnt).paramtype, 'EDF')
-		lh_sacclist = h.eye_data.lh.saccades(s_cnt).sacclist;
+		lh_sacclist_all = h.eye_data.lh.saccades(s_cnt).sacclist;
 		break;
 	end
 end
+
+% remove saccades in sacclists outside of the range defined by
+% editExcludeSaccMin & editExcludeSaccMax
+sacc_min = str2double(h.editExcludeSaccMin.String);
+sacc_max = str2double(h.editExcludeSaccMax.String);
+sacc_msk = rh_sacclist_all.ampl >= sacc_min & rh_sacclist_all.ampl <= sacc_max;
+rh_sacclist.start = rh_sacclist_all.start(sacc_msk);
+rh_sacclist.end = rh_sacclist_all.end(sacc_msk);
+sacc_msk = lh_sacclist_all.ampl >= sacc_min & lh_sacclist_all.ampl <= sacc_max;
+lh_sacclist.start = lh_sacclist_all.start(sacc_msk);
+lh_sacclist.end = lh_sacclist_all.end(sacc_msk);
+
+
 % combine the rh & lh sacclists into a single sacclist, restricted to the
 % analyze patches if they exist
 sacclist.start = [];
@@ -4868,4 +4885,50 @@ if get(hObject,'Value')
 	exclude_saccades(handles)
 else
 	dont_exclude_saccades(handles)
+end
+
+
+
+function editExcludeSaccMin_Callback(hObject, eventdata, handles)
+% hObject    handle to editExcludeSaccMin (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of editExcludeSaccMin as text
+%        str2double(get(hObject,'String')) returns contents of editExcludeSaccMin as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function editExcludeSaccMin_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to editExcludeSaccMin (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function editExcludeSaccMax_Callback(hObject, eventdata, handles)
+% hObject    handle to editExcludeSaccMax (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of editExcludeSaccMax as text
+%        str2double(get(hObject,'String')) returns contents of editExcludeSaccMax as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function editExcludeSaccMax_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to editExcludeSaccMax (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
 end
