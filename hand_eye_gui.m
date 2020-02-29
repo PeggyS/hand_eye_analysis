@@ -3409,12 +3409,14 @@ anal_patches = findobj(h.axes_eye, '-regexp', 'Tag', 'analysis_.*_patch');
 for s_cnt = 1:length(h.eye_data.rh.saccades)
 	if contains(h.eye_data.rh.saccades(s_cnt).paramtype, 'EDF')
 		rh_sacclist_all = h.eye_data.rh.saccades(s_cnt).sacclist;
+		rv_sacclist_all = h.eye_data.rv.saccades(s_cnt).sacclist;
 		break;
 	end
 end
 for s_cnt = 1:length(h.eye_data.lh.saccades)
 	if contains(h.eye_data.lh.saccades(s_cnt).paramtype, 'EDF')
 		lh_sacclist_all = h.eye_data.lh.saccades(s_cnt).sacclist;
+		lv_sacclist_all = h.eye_data.lv.saccades(s_cnt).sacclist;
 		break;
 	end
 end
@@ -3423,13 +3425,35 @@ end
 % editExcludeSaccMin & editExcludeSaccMax
 sacc_min = str2double(h.editExcludeSaccMin.String);
 sacc_max = str2double(h.editExcludeSaccMax.String);
-sacc_msk = rh_sacclist_all.ampl >= sacc_min & rh_sacclist_all.ampl <= sacc_max;
+% compute saccade amplitudes from recalibrated eye_data using EDF_PARSER
+% saccade times
+rh_start_inds = round((rh_sacclist_all.start - start_ms) / 1000 * samp_freq);
+rh_end_inds = round((rh_sacclist_all.end - start_ms) / 1000 * samp_freq);
+rv_start_inds = round((rv_sacclist_all.start - start_ms) / 1000 * samp_freq);
+rv_end_inds = round((rv_sacclist_all.end - start_ms) / 1000 * samp_freq);
+
+rh_ampl = h.line_rh.YData(rh_end_inds) - h.line_rh.YData(rh_start_inds);
+rv_ampl = h.line_rv.YData(rv_end_inds) - h.line_rv.YData(rv_start_inds);
+
+r_ampl = (rh_ampl.^2 + rv_ampl.^2).^0.5;
+
+lh_start_inds = round((lh_sacclist_all.start - start_ms) / 1000 * samp_freq);
+lh_end_inds = round((lh_sacclist_all.end - start_ms) / 1000 * samp_freq);
+lv_start_inds = round((lv_sacclist_all.start - start_ms) / 1000 * samp_freq);
+lv_end_inds = round((lv_sacclist_all.end - start_ms) / 1000 * samp_freq);
+
+lh_ampl = h.line_lh.YData(lh_end_inds) - h.line_lh.YData(lh_start_inds);
+lv_ampl = h.line_lv.YData(lv_end_inds) - h.line_lv.YData(lv_start_inds);
+
+l_ampl = (lh_ampl.^2 + lv_ampl.^2).^0.5;
+
+sacc_msk = r_ampl >= sacc_min & r_ampl <= sacc_max;
 rh_sacclist.start = rh_sacclist_all.start(sacc_msk);
 rh_sacclist.end = rh_sacclist_all.end(sacc_msk);
-sacc_msk = lh_sacclist_all.ampl >= sacc_min & lh_sacclist_all.ampl <= sacc_max;
+
+sacc_msk = l_ampl >= sacc_min & l_ampl <= sacc_max;
 lh_sacclist.start = lh_sacclist_all.start(sacc_msk);
 lh_sacclist.end = lh_sacclist_all.end(sacc_msk);
-
 
 % combine the rh & lh sacclists into a single sacclist, restricted to the
 % analyze patches if they exist
@@ -3466,12 +3490,14 @@ for s_cnt = 1:length(lh_sacclist.start)
 			% lh sacc start in within a patch
 			% find a matching or overlapping rh saccade
 			rh_sacc_ind = find_overlapping_saccade(lh_sacclist.start(s_cnt), lh_sacclist.end(s_cnt), rh_sacclist);
-			% If a match/overlap with rh saccade found. It should already have been added to the list
-			% so we only need to add non-matching lh saccs
+			% If a match/overlap with rh saccade found. It should already
+			% have been added to the list,
+			% so we will add non-matching lh saccs 
 			if isempty(rh_sacc_ind)
 				% no match - just add the lh saccade
 				sacclist.start = [sacclist.start lh_sacclist.start(s_cnt)];
 				sacclist.end = [sacclist.end lh_sacclist.end(s_cnt)];
+
 			end
 		end
 	end
