@@ -1027,7 +1027,7 @@ handles.dataPatches = [handles.dataPatches, patch_id];
 
 h_patch = patch([xlims(1) xlims(1) xlims(2) xlims(2)], ...
 	[ylims(1) ylims(2) ylims(2) ylims(1)], p_color, 'Tag', [tag_str '_id#' num2str(patch_id) '_patch']);
-set(h_patch, 'FaceAlpha', 0.25, ...
+set(h_patch, 'FaceAlpha', 0.1, ...
 	'LineStyle', 'none')
 createPatchMenu(h_patch);
 tmp_before = uistack(h_patch, 'bottom');
@@ -1500,6 +1500,14 @@ ud.hMenuLock = uimenu(hcmenu, 'Label', 'Locked', 'Tag', 'menuLock', ...
 	'Callback', {@menuPatch_Callback, h_patch}, 'Checked', 'on');
 ud.hMenuDelete = uimenu(hcmenu, 'Label', 'Delete', 'Tag', 'menuDelete', ...
 	'Callback', {@menuPatch_Callback, h_patch});
+ud.hMenuSendToBottom = uimenu(hcmenu, 'Label', 'Send to Bottom Layer', 'Tag', 'menuSendToBottom', ...
+	'Callback', {@menuPatch_Callback, h_patch});
+if contains(h_patch.Tag, 'analysis')
+	ud.hMenuExcludeSaccades = uimenu(hcmenu, 'Label', 'Exclude Saccades for Vergence', 'Tag', 'menuExcludeSaccades', ...
+		'Callback', {@menuPatch_Callback, h_patch});
+	ud.hMenuExcludeSaccades = uimenu(hcmenu, 'Label', 'Do Not Exclude Saccades for Vergence', 'Tag', 'menuDontExcludeSaccades', ...
+		'Callback', {@menuPatch_Callback, h_patch});
+end
 set(h_patch, 'UIContextMenu', hcmenu, 'UserData', ud);
 
 function menuPatch_Callback(source, callbackdata, h_patch)
@@ -1530,6 +1538,14 @@ switch source.Tag
 		delete(h_patch.UserData.h_l_line)
 		delete(h_patch.UserData.h_r_line)
 		delete(h_all_patches)
+	case 'menuSendToBottom'
+		uistack(h_patch, 'bottom')
+	case 'menuExcludeSaccades'
+		handles = guidata(gcf);
+		create_excl_sacc_patches(handles, h_patch)
+	case 'menuDontExcludeSaccades'
+		handles = guidata(gcf);
+		delete_excl_sacc_patches(handles, h_patch)
 end
 
 % -------------------------------------------------------------
@@ -3372,38 +3388,52 @@ while ~isempty(in_blinks.start)
 end
 return
 
-% -------------------------------
-function exclude_saccades(h)
-tag_search_str = 'exclude_verge_sacc_.*';
-patch_list = findobj(h.figure1,'-regexp', 'Tag', tag_search_str);
-if isempty(patch_list)
-	create_excl_sacc_patches(h);
-else
-	set(patch_list, 'Visible', 'on');
-end
-return
+% % -------------------------------
+% function exclude_saccades(h)
+% tag_search_str = 'exclude_verge_sacc_.*';
+% patch_list = findobj(h.figure1,'-regexp', 'Tag', tag_search_str);
+% if isempty(patch_list)
+% 	create_excl_sacc_patches(h);
+% else
+% 	set(patch_list, 'Visible', 'on');
+% end
+% return
+% 
+% function dont_exclude_saccades(h)
+% tag_search_str = 'exclude_verge_sacc_.*_patch';
+% patch_list = findobj(h.figure1,'-regexp', 'Tag', tag_search_str);
+% if ~isempty(patch_list)
+% % 	set(patch_list, 'Visible', 'off');
+% 	for p_cnt = 1:length(patch_list)
+% 		source.Tag = 'menuDelete';
+% 		menuPatch_Callback(source, [], patch_list(p_cnt))
+% 	end
+% end
+% return
 
-function dont_exclude_saccades(h)
+function delete_excl_sacc_patches(h, h_analysis_patch)
 tag_search_str = 'exclude_verge_sacc_.*_patch';
 patch_list = findobj(h.figure1,'-regexp', 'Tag', tag_search_str);
 if ~isempty(patch_list)
-% 	set(patch_list, 'Visible', 'off');
 	for p_cnt = 1:length(patch_list)
-		source.Tag = 'menuDelete';
-		menuPatch_Callback(source, [], patch_list(p_cnt))
+		% if the verge_sacc patch is in the h_analysis_patch
+		if patch_list(p_cnt).Vertices(1,1) >= h_analysis_patch.Vertices(1,1) && ...
+				patch_list(p_cnt).Vertices(1,1) <= h_analysis_patch.Vertices(3,1)
+			source.Tag = 'menuDelete';
+			menuPatch_Callback(source, [], patch_list(p_cnt))
+		end
 	end
 end
 return
 
-function create_excl_sacc_patches(h)
+function create_excl_sacc_patches(h, h_analysis_patch)
 axes(h.axes_eye)
 ylims = h.axes_eye.YLim;
 start_ms = h.eye_data.start_times;
 samp_freq = h.eye_data.samp_freq;
 
-% if there are any analyze patches, confine excluded saccades to the
-% patches
-anal_patches = findobj(h.axes_eye, '-regexp', 'Tag', 'analysis_.*_patch');
+% confine excluded saccades to the analysis patch
+% anal_patches = findobj(h.axes_eye, '-regexp', 'Tag', 'analysis_.*_patch');
 
 % get rh & lh sacclists
 for s_cnt = 1:length(h.eye_data.rh.saccades)
@@ -3461,11 +3491,12 @@ sacclist.start = [];
 sacclist.end = [];
 % starting with rh saccades, look for matching/overlapping lh saccades
 for s_cnt = 1:length(rh_sacclist.start)
-	for p_cnt = 1:length(anal_patches)
+% 	for p_cnt = 1:length(anal_patches)
 		start_time = (rh_sacclist.start(s_cnt)-h.eye_data.start_times)/1000;
-		if start_time >=  anal_patches(p_cnt).Vertices(1,1) ...
-			&& start_time <= anal_patches(p_cnt).Vertices(3,1) 
-			% rh sacc start in within a patch
+% 		if start_time >=  anal_patches(p_cnt).Vertices(1,1) ...
+% 			&& start_time <= anal_patches(p_cnt).Vertices(3,1) 
+		if start_time >=  h_analysis_patch.Vertices(1,1) ...
+			&& start_time <= h_analysis_patch.Vertices(3,1)			% rh sacc start in within the patch
 			% find a matching or overlapping lh saccade
 			lh_sacc_ind = find_overlapping_saccade(rh_sacclist.start(s_cnt), rh_sacclist.end(s_cnt), lh_sacclist);
 			% combine into 1 sacc
@@ -3478,15 +3509,17 @@ for s_cnt = 1:length(rh_sacclist.start)
 				sacclist.end = [sacclist.end rh_sacclist.end(s_cnt)];
 			end
 		end
-	end
+% 	end
 end
 
 % repeat for lh saccades
 for s_cnt = 1:length(lh_sacclist.start)
-	for p_cnt = 1:length(anal_patches)
+% 	for p_cnt = 1:length(anal_patches)
 		start_time = (lh_sacclist.start(s_cnt)-h.eye_data.start_times)/1000;
-		if start_time >=  anal_patches(p_cnt).Vertices(1,1) ...
-			&& start_time <= anal_patches(p_cnt).Vertices(3,1) 
+% 		if start_time >=  anal_patches(p_cnt).Vertices(1,1) ...
+% 			&& start_time <= anal_patches(p_cnt).Vertices(3,1) 
+		if start_time >=  h_analysis_patch.Vertices(1,1) ...
+			&& start_time <= h_analysis_patch.Vertices(3,1) 
 			% lh sacc start in within a patch
 			% find a matching or overlapping rh saccade
 			rh_sacc_ind = find_overlapping_saccade(lh_sacclist.start(s_cnt), lh_sacclist.end(s_cnt), rh_sacclist);
@@ -3500,7 +3533,7 @@ for s_cnt = 1:length(lh_sacclist.start)
 
 			end
 		end
-	end
+% 	end
 end
 
 beg_t_vec = (sacclist.start-h.eye_data.start_times)/1000;
@@ -4901,17 +4934,17 @@ else
 end
 
 
-% --- Executes on button press in chkbx_exclude_saccades.
-function chkbx_exclude_saccades_Callback(hObject, eventdata, handles)
-% hObject    handle to chkbx_exclude_saccades (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-if get(hObject,'Value')
-	exclude_saccades(handles)
-else
-	dont_exclude_saccades(handles)
-end
+% % --- Executes on button press in chkbx_exclude_saccades.
+% function chkbx_exclude_saccades_Callback(hObject, eventdata, handles)
+% % hObject    handle to chkbx_exclude_saccades (see GCBO)
+% % eventdata  reserved - to be defined in a future version of MATLAB
+% % handles    structure with handles and user data (see GUIDATA)
+% 
+% if get(hObject,'Value')
+% 	exclude_saccades(handles)
+% else
+% 	dont_exclude_saccades(handles)
+% end
 
 
 
