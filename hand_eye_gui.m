@@ -1035,7 +1035,14 @@ tmp_before = uistack(h_patch, 'bottom');
 % so find all analyze patches and push them to the bottom
 h_anal_patches = findobj(gcf, '-regexp', 'Tag', 'analysis_.*_patch');
 if ~isempty(h_anal_patches)
-	tmp_after = uistack(h_anal_patches, 'bottom');
+	try
+		tmp_after = uistack(h_anal_patches, 'bottom');
+	catch ME
+		beep
+		beep
+		disp(ME)
+		save('uistack_error.mat')
+	end
 end
 
 % left side of patch
