@@ -86,7 +86,7 @@ end
 if ~isempty(handles.eye_data.lv.pos)
 	handles.line_lv = line(t, handles.eye_data.lv.pos, 'Tag', 'line_lv', 'Color', [1 0 0]);
 end
-ylabel('Gaze Pos (\circ)')
+ylabel('Eye Gaze Angle (\circ)')
 xlabel('Time (s)')
 
 % if there is a result.mat file try to read it and get the ipd
